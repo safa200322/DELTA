@@ -4,9 +4,12 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 
-// Import DB and models
+// Import Sequelize instance
 const sequelize = require('./src/config/database');
-require('./src/models/Accessory'); // Accessory model
+
+// Import models
+require('./src/models/Accessory');
+require('./src/models/Notification');
 
 // Middleware
 app.use(cors());
@@ -19,17 +22,19 @@ const vehicleRoutes = require('./src/routes/vehicleRoutes');
 const chauffeurRoutes = require('./src/routes/chauffeurRoutes');
 const searchRoutes = require('./src/routes/searchRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
-const accessoryRoutes = require('./src/routes/accessoryRoutes'); // ✅ New route
+const accessoryRoutes = require('./src/routes/accessoryRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
-// Use routes
+// Use Routes
 app.use('/auth', authRoutes);
 app.use('/vehicles', vehicleRoutes);
 app.use('/chauffeurs', chauffeurRoutes);
 app.use('/search', searchRoutes);
 app.use('/payments', paymentRoutes);
-app.use('/accessories', accessoryRoutes); // ✅ New route
+app.use('/accessories', accessoryRoutes);
+app.use('/notifications', notificationRoutes);
 
-// Static Files (if you have frontend/public)
+// Serve static frontend files (optional)
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Root route
@@ -40,14 +45,14 @@ app.get('/', (req, res) => {
 // Sync database and start server
 sequelize.sync()
   .then(() => {
-    console.log('Database synced successfully');
+    console.log('✅ Database synced');
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('Error syncing database:', err);
+    console.error('❌ Database sync failed:', err);
   });
 
 module.exports = app;
