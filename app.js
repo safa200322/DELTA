@@ -1,48 +1,53 @@
 const express = require('express');
-const bodyParser = require("body-parser"); // ✅ Import bodyParser
-const session = require("express-session"); 
-const vehicleRoutes = require("./src/routes/vehicleRoutes"); // ✅ Import vehicle routes
-require('dotenv').config(); // Load environment variables
-const searchRoutes = require("./src/routes/searchRoutes");
 const app = express();
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const path = require('path');
 
-app.use(express.json()); // Middleware for parsing JSON
-app.use(bodyParser.urlencoded({ extended: true })); // ✅ Enable URL-encoded data parsing
+// Import DB and models
+const sequelize = require('./src/config/database');
+require('./src/models/Accessory'); // Accessory model
 
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }));
 
+// Routes
+const authRoutes = require('./src/routes/authRoutes');
+const vehicleRoutes = require('./src/routes/vehicleRoutes');
+const chauffeurRoutes = require('./src/routes/chauffeurRoutes');
+const searchRoutes = require('./src/routes/searchRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes');
+const accessoryRoutes = require('./src/routes/accessoryRoutes'); // ✅ New route
 
+// Use routes
+app.use('/auth', authRoutes);
+app.use('/vehicles', vehicleRoutes);
+app.use('/chauffeurs', chauffeurRoutes);
+app.use('/search', searchRoutes);
+app.use('/payments', paymentRoutes);
+app.use('/accessories', accessoryRoutes); // ✅ New route
 
-app.use("/api", searchRoutes);
+// Static Files (if you have frontend/public)
+app.use(express.static(path.join(__dirname, 'public')));
 
-//app.use(passport.initialize());
-//app.use(passport.session());
-
-// ✅ Import routes
-app.use("/api/auth", require("./src/routes/authRoutes")); // ✅ Make sure this is there!
-// Load Routes
-app.use('/api/vehicles', vehicleRoutes);  // ✅ Mount under /api
-app.use("/api/vehicles", require("./src/routes/vehicleRoutes"));
-
-// ✅ Add a root route for "/"
+// Root route
 app.get('/', (req, res) => {
-    res.send('Welcome to the Vehicle Rental System API 🚀');
+  res.send('Welcome to the Vehicle Rental System API');
 });
 
+// Sync database and start server
+sequelize.sync()
+  .then(() => {
+    console.log('Database synced successfully');
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Error syncing database:', err);
+  });
 
-const authRoutes = require("./src/routes/authRoutes");
-app.use("/api/auth", authRoutes); // ✅ Mounts /admin-login under /api/auth
-
-app.use("/api/chauffeurs", require("./src/routes/chauffeurRoutes"));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
-
-exports.loginUser = (req, res) => {
-    res.json({ message: "Login route is working!" });
-};
-
-//console.log("GOOGLE_CLIENT_ID:", process.env.GOOGLE_CLIENT_ID);
-//console.log("GOOGLE_CLIENT_SECRET:", process.env.GOOGLE_CLIENT_SECRET);
-//console.log("GOOGLE_CALLBACK_URL:", process.env.GOOGLE_CALLBACK_URL);
+module.exports = app;
