@@ -19,43 +19,92 @@ exports.addChauffeur = async (req, res) => {
 
         // Insert into DB
         const query = `
-            INSERT INTO Chauffeur 
-            (Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, Availability, Status, Password)
-            VALUES (?, ?, ?, ?, ?, ?, ?, 'Available', 'Pending', ?)
-        `;
+        INSERT INTO Chauffeur 
+        (Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, Password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `;
 
         db.query(query, [Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, hashedPassword], (err, result) => {
             if (err) {
-                console.error("❌ DB Error:", err);
+                console.error(" DB Error:", err);
                 return res.status(500).json({ message: "Failed to add chauffeur", error: err });
             }
 
-            return res.status(201).json({ message: "✅ Chauffeur added successfully!", ChauffeurID: result.insertId });
+            return res.status(201).json({ message: "Chauffeur added successfully!", ChauffeurID: result.insertId });
         });
 
     } catch (err) {
-        console.error("❌ Error:", err.message);
+        console.error("Error:", err.message);
         return res.status(500).json({ error: err.message });
     }
 };
 
 
-// Approve or Reject Chauffeur
-exports.updateChauffeurStatus = (req, res) => {
-    const { id } = req.params;
-    const { status } = req.body;
+// Fetch chauffeurs waiting for approval
+exports.getPendingChauffeurs = (req, res) => {
+  const sql = "SELECT * FROM Chauffeur WHERE Status = 'Pending'";
 
-    if (!['Approved', 'Rejected'].includes(status)) {
-        return res.status(400).json({ message: "Status must be either 'Approved' or 'Rejected'" });
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('DB error while fetching pending chauffeurs:', err);
+      return res.status(500).json({ error: 'Something went wrong.' });
     }
 
-    const sql = "UPDATE Chauffeur SET Status = ? WHERE ChauffeurID = ?";
-    db.query(sql, [status, id], (err, result) => {
-        if (err) return res.status(500).json({ message: "Error updating status", error: err });
-        if (result.affectedRows === 0) return res.status(404).json({ message: "Chauffeur not found" });
-        res.status(200).json({ message: `Chauffeur ${status.toLowerCase()} successfully` });
-    });
+    res.json(rows);
+  });
 };
+
+// Approve a chauffeur by ID
+exports.approveChauffeur = (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing chauffeur ID' });
+  }
+
+  const sql = "UPDATE Chauffeur SET Status = 'Approved' WHERE ChauffeurID = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('DB error while approving chauffeur:', err);
+      return res.status(500).json({ error: 'Could not approve chauffeur.' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Chauffeur not found' });
+    }
+
+    res.json({ message: 'Chauffeur approved.' });
+  });
+};
+
+
+
+
+
+
+// Reject a chauffeur by ID
+exports.rejectChauffeur = (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing chauffeur ID' });
+  }
+
+  const sql = "UPDATE Chauffeur SET Status = 'Rejected' WHERE ChauffeurID = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('DB error while rejecting chauffeur:', err);
+      return res.status(500).json({ error: 'Could not reject chauffeur.' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Chauffeur not found' });
+    }
+
+    res.json({ message: 'Chauffeur rejected.' });
+  });
+};
+
 
 
 // Assign a chauffeur based on filters
@@ -112,10 +161,10 @@ exports.assignChauffeur = async (req, res) => {
 
         // Assign chauffeur and mark as unavailable
         await db.promise().query(
-            "UPDATE Reservation SET ChauffeurID = ? WHERE ReservationID = ?",
+            "UPDATE Reservation SET ChauffeurID = ?, LicenseID = NULL WHERE ReservationID = ?",
             [selectedChauffeur.ChauffeurID, reservationId]
-        );
-
+          );
+          
         await db.promise().query(
             "UPDATE Chauffeur SET Availability = 'Unavailable' WHERE ChauffeurID = ?",
             [selectedChauffeur.ChauffeurID]
@@ -130,7 +179,7 @@ exports.assignChauffeur = async (req, res) => {
         });
 
     } catch (err) {
-        console.error("❌ Error assigning chauffeur:", err);
+        console.error(" Error assigning chauffeur:", err);
         return res.status(500).json({ message: "Internal server error", error: err });
     }
 };
