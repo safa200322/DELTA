@@ -24,6 +24,8 @@ const searchRoutes = require('./src/routes/searchRoutes');
 const paymentRoutes = require('./src/routes/paymentRoutes');
 const accessoryRoutes = require('./src/routes/accessoryRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const reservationRoutes = require('./src/routes/reservationRoutes');
+
 
 // Use Routes
 app.use('/auth', authRoutes);
@@ -31,6 +33,7 @@ app.use('/vehicles', vehicleRoutes);
 app.use('/chauffeurs', chauffeurRoutes);
 app.use('/search', searchRoutes);
 app.use('/payments', paymentRoutes);
+app.use('/api', reservationRoutes);
 app.use('/accessories', accessoryRoutes);
 app.use('/notifications', notificationRoutes);
 
