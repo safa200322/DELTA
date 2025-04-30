@@ -4,58 +4,56 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
 
-// Import Sequelize instance
+// Sequelize DB setup
 const sequelize = require('./src/config/database');
 
-// Import models
+// Load all models
 require('./src/models/Accessory');
 require('./src/models/Notification');
+// Add more models here if needed (e.g., Reservation, User)
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// Import routes
 const authRoutes = require('./src/routes/authRoutes');
 const vehicleRoutes = require('./src/routes/vehicleRoutes');
 const chauffeurRoutes = require('./src/routes/chauffeurRoutes');
 const searchRoutes = require('./src/routes/searchRoutes');
-const paymentRoutes = require('./src/routes/paymentRoutes');
 const accessoryRoutes = require('./src/routes/accessoryRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
-const reservationRoutes = require('./src/routes/reservationRoutes');
+const paymentRoutes = require('./src/routes/paymentRoutes'); // ✅ NEW
 
-
-// Use Routes
+// Use routes
 app.use('/auth', authRoutes);
 app.use('/vehicles', vehicleRoutes);
 app.use('/chauffeurs', chauffeurRoutes);
 app.use('/search', searchRoutes);
-app.use('/payments', paymentRoutes);
-app.use('/api', reservationRoutes);
 app.use('/accessories', accessoryRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/payments', paymentRoutes); // ✅ NEW
 
-// Serve static frontend files (optional)
+// Serve static files (if needed)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Root route
+// Welcome route
 app.get('/', (req, res) => {
   res.send('Welcome to the Vehicle Rental System API');
 });
 
-// Sync database and start server
+// Start DB and server
 sequelize.sync()
   .then(() => {
     console.log('✅ Database synced');
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`🚀 Server running at http://localhost:${PORT}`);
     });
   })
   .catch((err) => {
-    console.error('❌ Database sync failed:', err);
+    console.error('❌ Failed to sync database:', err);
   });
 
 module.exports = app;
