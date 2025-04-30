@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const paymentController = require('../controllers/paymentController');
+const verifyToken = require('../middleware/verifyToken');
 
-// Define routes here
-router.get('/', (req, res) => {
-  res.send('Payment routes');
-});
+// Protected routes
+router.post('/success', verifyToken, paymentController.mockPaymentSuccess);
+router.post('/fail', verifyToken, paymentController.mockPaymentFail);
 
 module.exports = router;
