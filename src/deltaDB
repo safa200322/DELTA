@@ -161,6 +161,17 @@ CREATE TABLE Payment (
     FOREIGN KEY (ReservationID) REFERENCES Reservation(ReservationID)
 );
 
+CREATE TABLE Review(
+    reviewID INT AUTO_INCREMENT PRIMARY KEY,
+    userID INT,
+    Stars INT CHECK(Stars>=0 AND Stars<=5),
+    Sentence VARCHAR(2000),
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updateAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY(userID) REFERENCES User(UserID)
+
+);
+
 
 ALTER TABLE User MODIFY Password VARCHAR(255) NULL;
 -- Step 1: Insert into Vehicle Table
