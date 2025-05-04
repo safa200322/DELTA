@@ -87,3 +87,32 @@ exports.assignChauffeur = (req, res) => {
     });
   });
 };
+
+// Approve or reject a chauffeur application
+exports.updateChauffeurStatus = (req, res) => {
+  const { id } = req.params; // ChauffeurID
+  const { status } = req.body; // 'Approved' or 'Rejected'
+
+  if (!['Approved', 'Rejected'].includes(status)) {
+    return res.status(400).json({ message: "Invalid status. Must be 'Approved' or 'Rejected'." });
+  }
+
+  const updateQuery = "UPDATE Chauffeur SET Status = ? WHERE ChauffeurID = ?";
+  db.query(updateQuery, [status, id], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error updating status", error: err });
+    if (result.affectedRows === 0) return res.status(404).json({ message: "Chauffeur not found" });
+
+    const title = status === 'Approved' ? 'Application Approved' : 'Application Rejected';
+    const message = status === 'Approved'
+      ? 'Congratulations! Your chauffeur application has been approved.'
+      : 'Unfortunately, your chauffeur application was rejected.';
+
+    const notifyQuery = `
+      INSERT INTO Notification (UserID, Title, Message, Type, Status)
+      VALUES (?, ?, ?, 'Chauffeur', 'Unread')
+    `;
+    db.query(notifyQuery, [id, title, message]);
+
+    res.status(200).json({ message: `Chauffeur status updated to '${status}' and notification sent.` });
+  });
+};
