@@ -1,5 +1,6 @@
 const db = require('../db');
 
+// Create a reservation
 exports.createReservation = (req, res) => {
   const { VehicleID, StartDate, EndDate, PickupLocation, DropoffLocation, LicenseID } = req.body;
   const UserID = req.user.id; // Extracted from token
@@ -40,7 +41,6 @@ exports.createReservation = (req, res) => {
             });
           }
 
-          // Optional: Notify Admin (Assuming admin has UserID = 1)
           const notifyAdminQuery = `
             INSERT INTO Notification (UserID, Title, Message)
             VALUES (?, 'New Reservation', 'A new reservation has been made by user ID ${UserID}.')
@@ -52,7 +52,6 @@ exports.createReservation = (req, res) => {
               });
             }
 
-            // Commit final transaction
             db.commit((err) => {
               if (err) {
                 return db.rollback(() => {
@@ -65,6 +64,35 @@ exports.createReservation = (req, res) => {
           });
         });
       });
+    });
+  });
+};
+
+// Cancel a reservation
+exports.cancelReservation = (req, res) => {
+  const { id } = req.params; // ReservationID
+  const UserID = req.user.id; // Authenticated user
+
+  const checkQuery = "SELECT * FROM Reservation WHERE ReservationID = ? AND UserID = ?";
+  db.query(checkQuery, [id, UserID], (err, results) => {
+    if (err) return res.status(500).json({ message: "DB error", error: err });
+    if (results.length === 0) return res.status(404).json({ message: "Reservation not found or access denied" });
+
+    const vehicleId = results[0].VehicleID;
+
+    const deleteQuery = "DELETE FROM Reservation WHERE ReservationID = ?";
+    db.query(deleteQuery, [id], (err) => {
+      if (err) return res.status(500).json({ message: "Error canceling reservation", error: err });
+
+      db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
+
+      const notifyQuery = `
+        INSERT INTO Notification (UserID, Title, Message)
+        VALUES (?, 'Reservation Cancelled', 'Your reservation has been cancelled successfully.')
+      `;
+      db.query(notifyQuery, [UserID]);
+
+      res.status(200).json({ message: "Reservation cancelled and notification sent." });
     });
   });
 };
