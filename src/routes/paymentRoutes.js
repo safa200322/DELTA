@@ -1,10 +1,8 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const paymentController = require('../controllers/paymentController');
-const verifyToken = require('../middleware/verifyToken');
+const paymentController = require("../controllers/paymentController");
+const authenticateToken = require("../middleware/authMiddleware");
 
-// Protected routes
-router.post('/success', verifyToken, paymentController.mockPaymentSuccess);
-router.post('/fail', verifyToken, paymentController.mockPaymentFail);
+router.post("/pay", authenticateToken, paymentController.makePayment);
 
 module.exports = router;
