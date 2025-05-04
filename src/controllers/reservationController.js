@@ -24,8 +24,8 @@ exports.createReservation = (req, res) => {
         }
 
         const notifyUserQuery = `
-          INSERT INTO Notification (UserID, Title, Message)
-          VALUES (?, 'Reservation Created', 'Your reservation has been successfully created.')
+          INSERT INTO Notification (UserID, Title, Message, Type, Status)
+          VALUES (?, 'Reservation Created', 'Your reservation has been successfully created.', 'Reservation', 'Unread')
         `;
         db.query(notifyUserQuery, [UserID], (err) => {
           if (err) {
@@ -33,8 +33,8 @@ exports.createReservation = (req, res) => {
           }
 
           const notifyAdminQuery = `
-            INSERT INTO Notification (UserID, Title, Message)
-            VALUES (?, 'New Reservation', 'A new reservation has been made by user ID ${UserID}.')
+            INSERT INTO Notification (UserID, Title, Message, Type, Status)
+            VALUES (?, 'New Reservation', 'A new reservation has been made by user ID ${UserID}.', 'Reservation', 'Unread')
           `;
           db.query(notifyAdminQuery, [1], (err) => {
             if (err) {
@@ -74,8 +74,8 @@ exports.cancelReservation = (req, res) => {
       db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
 
       const notifyQuery = `
-        INSERT INTO Notification (UserID, Title, Message)
-        VALUES (?, 'Reservation Cancelled', 'Your reservation has been cancelled successfully.')
+        INSERT INTO Notification (UserID, Title, Message, Type, Status)
+        VALUES (?, 'Reservation Cancelled', 'Your reservation has been cancelled successfully.', 'Reservation', 'Unread')
       `;
       db.query(notifyQuery, [UserID]);
 
@@ -104,12 +104,42 @@ exports.updateReservation = (req, res) => {
       if (err) return res.status(500).json({ message: "Error updating reservation", error: err });
 
       const notifyQuery = `
-        INSERT INTO Notification (UserID, Title, Message)
-        VALUES (?, 'Reservation Updated', 'Your reservation has been updated.')
+        INSERT INTO Notification (UserID, Title, Message, Type, Status)
+        VALUES (?, 'Reservation Updated', 'Your reservation has been updated.', 'Reservation', 'Unread')
       `;
       db.query(notifyQuery, [UserID]);
 
       res.status(200).json({ message: "Reservation updated and notification sent." });
     });
+  });
+};
+
+// Complete a reservation
+exports.completeReservation = (req, res) => {
+  const { id } = req.params;
+  const UserID = req.user.id;
+
+  const findQuery = "SELECT * FROM Reservation WHERE ReservationID = ?";
+  db.query(findQuery, [id], (err, result) => {
+    if (err) return res.status(500).json({ message: "DB error", error: err });
+    if (result.length === 0) return res.status(404).json({ message: "Reservation not found" });
+
+    const reservation = result[0];
+
+    if (req.user.role !== 'admin' && reservation.UserID !== UserID) {
+      return res.status(403).json({ message: "You are not allowed to complete this reservation." });
+    }
+
+    const vehicleId = reservation.VehicleID;
+
+    db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
+
+    const notifyQuery = `
+      INSERT INTO Notification (UserID, Title, Message, Type, Status)
+      VALUES (?, 'Rental Completed', 'Your rental has been completed. Thank you for using our service.', 'Reservation', 'Unread')
+    `;
+    db.query(notifyQuery, [reservation.UserID]);
+
+    res.status(200).json({ message: "Reservation completed and notification sent." });
   });
 };
