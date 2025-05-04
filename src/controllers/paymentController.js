@@ -1,43 +1,29 @@
-const Notification = require('../models/Notification');
+const db = require("../db");
 
-// Simulate successful payment
-exports.mockPaymentSuccess = async (req, res) => {
-  try {
-    const userId = req.user.id;
+// Make a payment
+exports.makePayment = (req, res) => {
+  const { reservationId, amount } = req.body;
+  const userId = req.user.id;
 
-    // Simulate payment logic here (e.g., save to DB if needed)
-
-    // Send success notification
-    await Notification.create({
-      title: 'Payment Successful',
-      message: 'Your payment was received successfully. Thank you!',
-      type: 'Payment',
-      userId: userId
-    });
-
-    res.status(200).json({ message: 'Mock payment success triggered and notification sent.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to simulate payment success', error });
+  if (!reservationId || !amount) {
+    return res.status(400).json({ message: "Reservation ID and amount are required." });
   }
-};
 
-// Simulate failed payment
-exports.mockPaymentFail = async (req, res) => {
-  try {
-    const userId = req.user.id;
+  // Step 1: Insert payment
+  const insertQuery = `
+    INSERT INTO Payment (ReservationID, Amount, Status)
+    VALUES (?, ?, 'Successful')
+  `;
+  db.query(insertQuery, [reservationId, amount], (err, result) => {
+    if (err) return res.status(500).json({ message: "Payment failed", error: err });
 
-    // Simulate failure logic
+    // Step 2: Notify user
+    const notifyQuery = `
+      INSERT INTO Notification (UserID, Title, Message, Type, Status)
+      VALUES (?, 'Payment Successful', 'Your payment was completed successfully.', 'Payment', 'Unread')
+    `;
+    db.query(notifyQuery, [userId]);
 
-    // Send failure notification
-    await Notification.create({
-      title: 'Payment Failed',
-      message: 'Your payment attempt failed. Please try again.',
-      type: 'Payment',
-      userId: userId
-    });
-
-    res.status(200).json({ message: 'Mock payment failure triggered and notification sent.' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to simulate payment failure', error });
-  }
+    res.status(201).json({ message: "Payment processed and notification sent." });
+  });
 };
