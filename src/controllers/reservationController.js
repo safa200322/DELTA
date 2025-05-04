@@ -73,13 +73,19 @@ exports.cancelReservation = (req, res) => {
 
       db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
 
-      const notifyQuery = `
+      const notifyUserQuery = `
         INSERT INTO Notification (UserID, Title, Message, Type, Status)
         VALUES (?, 'Reservation Cancelled', 'Your reservation has been cancelled successfully.', 'Reservation', 'Unread')
       `;
-      db.query(notifyQuery, [UserID]);
+      db.query(notifyUserQuery, [UserID]);
 
-      res.status(200).json({ message: "Reservation cancelled and notification sent." });
+      const notifyAdminCancel = `
+        INSERT INTO Notification (UserID, Title, Message, Type, Status)
+        VALUES (?, 'Reservation Cancelled', 'User ID ${UserID} cancelled their reservation #${id}.', 'Reservation', 'Unread')
+      `;
+      db.query(notifyAdminCancel, [1]);
+
+      res.status(200).json({ message: "Reservation cancelled and notifications sent." });
     });
   });
 };
