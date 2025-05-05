@@ -120,9 +120,7 @@ CREATE TABLE Accessory (
     AccessoryID INT AUTO_INCREMENT PRIMARY KEY,
     Type VARCHAR(50) NOT NULL,
     Quantity INT NOT NULL,
-    Price FLOAT NOT NULL,
-    VehicleID INT,
-    FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) **
+    Price FLOAT NOT NULL
 );
 
 
