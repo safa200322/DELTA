@@ -1,5 +1,5 @@
 const Accessory = require('../models/Accessory');
-const Notification = require('../models/Notification'); // Ensure this is imported
+const Notification = require('../models/Notification');
 
 // Create a new accessory
 exports.createAccessory = async (req, res) => {
