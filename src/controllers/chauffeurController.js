@@ -1,118 +1,189 @@
 const db = require("../db");
-const Notification = require("../models/Notification");
 const bcrypt = require("bcryptjs");
 
-// Add a new chauffeur (registration)
+// Add Chauffeur (Admin Only)
 exports.addChauffeur = async (req, res) => {
-  try {
-    const {
-      Name, Gender, PhoneNumber, Email, Date_of_birth,
-      LicenseNumber, Location, Password
-    } = req.body;
+    try {
+        const {
+            Name, Gender, PhoneNumber, Email, Date_of_birth,
+            LicenseNumber, Location, Password
+        } = req.body;
 
-    if (!Name || !Gender || !PhoneNumber || !Email || !Date_of_birth || !LicenseNumber || !Location || !Password) {
-      return res.status(400).json({ error: "All fields are required." });
-    }
+        // Validate
+        if (!Name || !Gender || !PhoneNumber || !Email || !Date_of_birth || !LicenseNumber || !Location || !Password) {
+            return res.status(400).json({ error: "All fields are required." });
+        }
 
-    const hashedPassword = await bcrypt.hash(Password, 10);
+        // Hash password
+        const hashedPassword = await bcrypt.hash(Password, 10);
 
-    const query = `
-      INSERT INTO Chauffeur 
-      (Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, Password)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        // Insert into DB
+        const query = `
+        INSERT INTO Chauffeur 
+        (Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, Password)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
-    db.query(query, [Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, hashedPassword], async (err, result) => {
-      if (err) {
-        console.error("DB Error:", err);
-        return res.status(500).json({ message: "Failed to add chauffeur", error: err });
-      }
+        db.query(query, [Name, Gender, PhoneNumber, Email, Date_of_birth, LicenseNumber, Location, hashedPassword], (err, result) => {
+            if (err) {
+                console.error(" DB Error:", err);
+                return res.status(500).json({ message: "Failed to add chauffeur", error: err });
+            }
 
-      const newChauffeurId = result.insertId;
+            return res.status(201).json({ message: "Chauffeur added successfully!", ChauffeurID: result.insertId });
+        });
 
-      // Notify Admin
-      await Notification.create({
-        title: "New Chauffeur Application",
-        message: `${Name} has applied to be a chauffeur.`,
-        type: "Chauffeur",
-        userId: null
-      });
-
-      // Notify Chauffeur
-      await Notification.create({
-        title: "Chauffeur Application Received",
-        message: "You have been registered as a chauffeur. Please wait for admin approval.",
-        type: "Chauffeur",
-        userId: newChauffeurId
-      });
-
-      return res.status(201).json({ message: "Chauffeur added successfully!", ChauffeurID: newChauffeurId });
-    });
-
-  } catch (err) {
-    console.error("Error:", err.message);
-    return res.status(500).json({ error: err.message });
-  }
+    } catch (err) {
+        console.error("Error:", err.message);
+        return res.status(500).json({ error: err.message });
+    }
 };
 
-// Assign a chauffeur to a reservation
-exports.assignChauffeur = (req, res) => {
-  const { reservationId, chauffeurId } = req.body;
 
-  const checkChauffeurQuery = `
-    SELECT * FROM Chauffeur WHERE ChauffeurID = ? AND Status = 'Approved'
-  `;
-  db.query(checkChauffeurQuery, [chauffeurId], (err, chauffeurResult) => {
-    if (err) return res.status(500).json({ message: "DB error", error: err });
-    if (chauffeurResult.length === 0) {
-      return res.status(404).json({ message: "Chauffeur not found or not approved" });
+// Assign a chauffeur based on filters
+exports.assignChauffeur = async (req, res) => {
+    const reservationId = req.params.reservationId;
+
+    try {
+        // Get reservation details
+        const [reservationResult] = await db.promise().query(
+            "SELECT * FROM Reservation WHERE ReservationID = ?", [reservationId]
+        );
+        if (reservationResult.length === 0) {
+            return res.status(404).json({ message: "Reservation not found" });
+        }
+        const reservation = reservationResult[0];
+
+        // Get user details
+        const [userResult] = await db.promise().query(
+            "SELECT * FROM User WHERE UserID = ?", [reservation.UserID]
+        );
+        if (userResult.length === 0) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        const user = userResult[0];
+        const userGender = user.Gender;
+        const userBirth = new Date(user.Date_of_birth);
+
+        // Fetch available chauffeurs in the same pickup location and approved
+        const [chauffeurs] = await db.promise().query(
+            "SELECT * FROM Chauffeur WHERE Availability = 'Available' AND Location = ? AND Status = 'Approved'",
+            [reservation.PickupLocation]
+        );
+
+        if (chauffeurs.length === 0) {
+            return res.status(404).json({ message: "No available chauffeurs found" });
+        }
+
+        // Find the best match
+        const sorted = chauffeurs.sort((a, b) => {
+            const aAge = new Date().getFullYear() - new Date(a.Date_of_birth).getFullYear();
+            const bAge = new Date().getFullYear() - new Date(b.Date_of_birth).getFullYear();
+            const userAge = new Date().getFullYear() - userBirth.getFullYear();
+
+            const aMatch = a.Gender === userGender;
+            const bMatch = b.Gender === userGender;
+
+            if (aMatch && !bMatch) return -1;
+            if (!aMatch && bMatch) return 1;
+
+            return Math.abs(aAge - userAge) - Math.abs(bAge - userAge);
+        });
+
+        const selectedChauffeur = sorted[0];
+
+        // Assign chauffeur and mark as unavailable
+        await db.promise().query(
+            "UPDATE Reservation SET ChauffeurID = ?, LicenseID = NULL WHERE ReservationID = ?",
+            [selectedChauffeur.ChauffeurID, reservationId]
+          );
+          
+        await db.promise().query(
+            "UPDATE Chauffeur SET Availability = 'Unavailable' WHERE ChauffeurID = ?",
+            [selectedChauffeur.ChauffeurID]
+        );
+
+        return res.status(200).json({
+            message: "Chauffeur assigned successfully",
+            chauffeur: {
+                id: selectedChauffeur.ChauffeurID,
+                name: selectedChauffeur.Name
+            }
+        });
+
+    } catch (err) {
+        console.error(" Error assigning chauffeur:", err);
+        return res.status(500).json({ message: "Internal server error", error: err });
+    }
+};
+
+
+// Fetch chauffeurs waiting for approval
+exports.getPendingChauffeurs = (req, res) => {
+  const sql = "SELECT * FROM Chauffeur WHERE Status = 'Pending'";
+
+  db.query(sql, (err, rows) => {
+    if (err) {
+      console.error('DB error while fetching pending chauffeurs:', err);
+      return res.status(500).json({ error: 'Something went wrong.' });
     }
 
-    const updateReservationQuery = `
-      UPDATE Reservation SET ChauffeurID = ? WHERE ReservationID = ?
-    `;
-    db.query(updateReservationQuery, [chauffeurId, reservationId], (err, result) => {
-      if (err) return res.status(500).json({ message: "Error assigning chauffeur", error: err });
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Reservation not found" });
-      }
-
-      const notifyQuery = `
-        INSERT INTO Notification (UserID, Title, Message, Type, Status)
-        VALUES (?, 'Chauffeur Assignment', 'You have been assigned to a new reservation.', 'Chauffeur', 'Unread')
-      `;
-      db.query(notifyQuery, [chauffeurId]);
-
-      res.status(200).json({ message: "Chauffeur assigned and notification sent." });
-    });
+    res.json(rows);
   });
 };
 
-// Approve or reject a chauffeur application
-exports.updateChauffeurStatus = (req, res) => {
-  const { id } = req.params; // ChauffeurID
-  const { status } = req.body; // 'Approved' or 'Rejected'
 
-  if (!['Approved', 'Rejected'].includes(status)) {
-    return res.status(400).json({ message: "Invalid status. Must be 'Approved' or 'Rejected'." });
+
+
+
+
+// Approve a chauffeur by ID
+exports.approveChauffeur = (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing chauffeur ID' });
   }
 
-  const updateQuery = "UPDATE Chauffeur SET Status = ? WHERE ChauffeurID = ?";
-  db.query(updateQuery, [status, id], (err, result) => {
-    if (err) return res.status(500).json({ message: "Error updating status", error: err });
-    if (result.affectedRows === 0) return res.status(404).json({ message: "Chauffeur not found" });
+  const sql = "UPDATE Chauffeur SET Status = 'Approved' WHERE ChauffeurID = ?";
 
-    const title = status === 'Approved' ? 'Application Approved' : 'Application Rejected';
-    const message = status === 'Approved'
-      ? 'Congratulations! Your chauffeur application has been approved.'
-      : 'Unfortunately, your chauffeur application was rejected.';
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('DB error while approving chauffeur:', err);
+      return res.status(500).json({ error: 'Could not approve chauffeur.' });
+    }
 
-    const notifyQuery = `
-      INSERT INTO Notification (UserID, Title, Message, Type, Status)
-      VALUES (?, ?, ?, 'Chauffeur', 'Unread')
-    `;
-    db.query(notifyQuery, [id, title, message]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Chauffeur not found' });
+    }
 
-    res.status(200).json({ message: `Chauffeur status updated to '${status}' and notification sent.` });
+    res.json({ message: 'Chauffeur approved.' });
+  });
+};
+
+
+
+
+
+
+// Reject a chauffeur by ID
+exports.rejectChauffeur = (req, res) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ error: 'Missing chauffeur ID' });
+  }
+
+  const sql = "UPDATE Chauffeur SET Status = 'Rejected' WHERE ChauffeurID = ?";
+
+  db.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error('DB error while rejecting chauffeur:', err);
+      return res.status(500).json({ error: 'Could not reject chauffeur.' });
+    }
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Chauffeur not found' });
+    }
+
+    res.json({ message: 'Chauffeur rejected.' });
   });
 };
