@@ -1,35 +1,36 @@
 const express = require('express');
-const bodyParser = require("body-parser"); // Import bodyParser
-const session = require("express-session"); 
-const vehicleRoutes = require("./src/routes/vehicleRoutes"); //Import vehicle routes
-require('dotenv').config(); // Load environment variables
-const searchRoutes = require("./src/routes/searchRoutes");
-const authRoutes = require("./src/routes/authRoutes");
+const bodyParser = require("body-parser");
+const session = require("express-session");
+const dotenv = require("dotenv");
+dotenv.config();
 const app = express();
 
-app.use(express.json()); // Middleware for parsing JSON
-app.use(bodyParser.urlencoded({ extended: true })); //  Enable URL-encoded data parsing
-app.use("/api", searchRoutes);
-app.use("/api/auth", require("./src/routes/authRoutes")); //  Make sure this is there!
-app.use('/api/vehicles', vehicleRoutes);  //  Mount under /api
-app.use("/api/vehicles", require("./src/routes/vehicleRoutes"));
+// Middleware
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Add a root route for "/"
+// Route Imports
+const authRoutes = require("./src/routes/authRoutes");
+const vehicleRoutes = require("./src/routes/vehicleRoutes");
+const searchRoutes = require("./src/routes/searchRoutes");
+const chauffeurRoutes = require("./src/routes/chauffeurRoutes");
+const paymentRoutes = require("./src/routes/paymentRoutes");
+const reservationRoutes = require("./src/routes/reservationRoutes");
+
+// Routes
+app.use("/api", searchRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/chauffeurs", chauffeurRoutes);
+app.use("/api/payments", paymentRoutes);
+app.use("/api/reservations", reservationRoutes);
+
+// Root route
 app.get('/', (req, res) => {
     res.send('Welcome to the Vehicle Rental System API 🚀');
 });
-
-
-app.use("/api/auth", authRoutes); // ✅ Mounts /admin-login under /api/auth
-
-app.use("/api/chauffeurs", require("./src/routes/chauffeurRoutes"));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
-
-exports.loginUser = (req, res) => {
-    res.json({ message: "Login route is working!" });
-};
-
