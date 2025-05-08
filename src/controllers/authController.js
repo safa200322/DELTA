@@ -1,5 +1,5 @@
 
-const db = require('../db');  // ✅ Add this if missing
+const db = require('../db');  // 
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
@@ -15,7 +15,7 @@ exports.registerUser = async (req, res) => {
             return res.status(400).json({ error: "Name, Phone Number, and Email are required." });
         }
 
-        // ✅ If the user registers manually, ensure they provide a password
+        // registers
         if (!Password) {
             return res.status(400).json({ error: "Password is required for manual registration." });
         }
@@ -46,7 +46,7 @@ exports.registerUser = async (req, res) => {
         res.status(201).json({ message: "User registered successfully." });
 
     } catch (err) {
-        console.error("❌ Registration Error:", err.sqlMessage || err.message || err);
+        console.error("Registration Error:", err.sqlMessage || err.message || err);
         res.status(500).json({ message: "Error registering user", error: err.sqlMessage || err.message || err });
     }
 };
@@ -90,7 +90,7 @@ exports.loginUser = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('❌ Login Error:', err.message || err);
+        console.error(' Login Error:', err.message || err);
         res.status(500).json({ message: "Error logging in", error: err.message || err });
     }
 };
@@ -132,7 +132,7 @@ exports.adminLogin = async (req, res) => {
         });
 
     } catch (err) {
-        console.error('❌ Admin Login Error:', err.message || err);
+        console.error('Admin Login Error:', err.message || err);
         res.status(500).json({ message: "Error logging in", error: err.message || err });
     }
 };
