@@ -1,86 +1,51 @@
-const Accessory = require('../models/Accessory');
-const Notification = require('../models/Notification');
+const db = require('../db');
 
 // Create a new accessory
-exports.createAccessory = async (req, res) => {
-  try {
-    const { name, description, price, available } = req.body;
-    const accessory = await Accessory.create({ name, description, price, available });
+exports.createAccessory = (req, res) => {
+  const { Type, Quantity, Price } = req.body;
 
-    // Notify admin (userId = 1 assumed)
-    await Notification.create({
-      title: 'Accessory Added',
-      message: `New accessory '${name}' was added to the system.`,
-      type: 'Accessory',
-      userId: 1
+  if (!Type || !Quantity || !Price) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const query = 'INSERT INTO Accessory (Type, Quantity, Price) VALUES (?, ?, ?)';
+  db.query(query, [Type, Quantity, Price], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error adding accessory", error: err });
+    res.status(201).json({ message: "Accessory created", accessoryId: result.insertId });
+  });
+};
+
+// Get accessories for a vehicle (based on vehicle type)
+exports.getAccessoriesForVehicle = (req, res) => {
+  const vehicleId = req.params.vehicleId;
+
+  const getTypeQuery = 'SELECT Type FROM Vehicle WHERE VehicleID = ?';
+  db.query(getTypeQuery, [vehicleId], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error fetching vehicle type", error: err });
+    if (result.length === 0) return res.status(404).json({ message: "Vehicle not found" });
+
+    const vehicleType = result[0].Type;
+
+    const accessoryQuery = 'SELECT * FROM Accessory WHERE Type = ?';
+    db.query(accessoryQuery, [vehicleType], (err, accessories) => {
+      if (err) return res.status(500).json({ message: "Error fetching accessories", error: err });
+      res.status(200).json(accessories);
     });
-
-    res.status(201).json(accessory);
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating accessory', error });
-  }
-};
-
-// Get all accessories (public)
-exports.getAllAccessories = async (req, res) => {
-  try {
-    const accessories = await Accessory.findAll();
-    res.json(accessories);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching accessories', error });
-  }
-};
-
-// Update accessory
-exports.updateAccessory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const [updated] = await Accessory.update(req.body, { where: { id } });
-    if (updated) {
-      const updatedAccessory = await Accessory.findByPk(id);
-
-      // Notify admin
-      await Notification.create({
-        title: 'Accessory Updated',
-        message: `Accessory '${updatedAccessory.name}' has been updated.`,
-        type: 'Accessory',
-        userId: 1
-      });
-
-      res.json(updatedAccessory);
-    } else {
-      res.status(404).json({ message: 'Accessory not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating accessory', error });
-  }
+  });
 };
 
 // Delete accessory
-exports.deleteAccessory = async (req, res) => {
-  try {
-    const { id } = req.params;
+exports.deleteAccessory = (req, res) => {
+  const accessoryId = req.params.accessoryId;
 
-    // Optional: find accessory before deletion to get name
-    const accessoryToDelete = await Accessory.findByPk(id);
+  const query = 'DELETE FROM Accessory WHERE AccessoryID = ?';
+  db.query(query, [accessoryId], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error deleting accessory", error: err });
 
-    const deleted = await Accessory.destroy({ where: { id } });
-    if (deleted) {
-      // Notify admin
-      await Notification.create({
-        title: 'Accessory Deleted',
-        message: accessoryToDelete
-          ? `Accessory '${accessoryToDelete.name}' has been deleted.`
-          : `Accessory with ID ${id} has been deleted.`,
-        type: 'Accessory',
-        userId: 1
-      });
-
-      res.json({ message: 'Accessory deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Accessory not found' });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Accessory not found" });
     }
-  } catch (error) {
-    res.status(500).json({ message: 'Error deleting accessory', error });
-  }
+
+    res.status(200).json({ message: "Accessory deleted successfully" });
+  });
 };
