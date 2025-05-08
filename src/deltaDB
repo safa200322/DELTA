@@ -118,7 +118,7 @@ CREATE TABLE Maintenance (
 
 CREATE TABLE Accessory (
     AccessoryID INT AUTO_INCREMENT PRIMARY KEY,
-    Type VARCHAR(50) NOT NULL,
+    VehicleType VARCHAR(50) NOT NULL,
     Quantity INT NOT NULL,
     Price FLOAT NOT NULL
 );
