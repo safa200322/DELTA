@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const accessoryController = require('../controllers/accessoryController');
-const verifyToken = require('../middleware/verifyToken'); // Assuming you already have this
 
-// Public
-router.get('/', accessoryController.getAllAccessories);
+// Create a new accessory
+router.post('/', accessoryController.createAccessory);
 
-// Admin Only
-router.post('/', verifyToken, accessoryController.createAccessory);
-router.put('/:id', verifyToken, accessoryController.updateAccessory);
-router.delete('/:id', verifyToken, accessoryController.deleteAccessory);
+// Get accessories by vehicle ID (uses vehicle type internally)
+router.get('/:vehicleId', accessoryController.getAccessoriesForVehicle);
+
+// Delete an accessory by ID
+router.delete('/:accessoryId', accessoryController.deleteAccessory);
 
 module.exports = router;
