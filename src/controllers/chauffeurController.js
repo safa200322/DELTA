@@ -162,9 +162,6 @@ exports.approveChauffeur = (req, res) => {
 
 
 
-
-
-
 // Reject a chauffeur by ID
 exports.rejectChauffeur = (req, res) => {
   const { id } = req.params;
@@ -185,5 +182,70 @@ exports.rejectChauffeur = (req, res) => {
     }
 
     res.json({ message: 'Chauffeur rejected.' });
+  });
+};
+
+
+
+
+//to accept or reject the ride
+exports.respondToAssignment = (req, res) => {
+  const { reservationId } = req.params;
+  const { response } = req.body; // 'Accepted' or 'Rejected'
+
+  if (!['Accepted', 'Rejected'].includes(response)) {
+    return res.status(400).json({ message: "Invalid response. Must be 'Accepted' or 'Rejected'" });
+  }
+
+  const query = `
+    UPDATE Reservation
+    SET ResponseStatus = ?
+    WHERE ReservationID = ?
+  `;
+
+  db.query(query, [response, reservationId], (err, result) => {
+    if (err) return res.status(500).json({ message: "Error updating response", error: err });
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    // If rejected, make chauffeur available again
+    if (response === 'Rejected') {
+      const releaseQuery = `
+        UPDATE Chauffeur
+        SET Availability = 'Available'
+        WHERE ChauffeurID = (
+          SELECT ChauffeurID FROM Reservation WHERE ReservationID = ?
+        )
+      `;
+      db.query(releaseQuery, [reservationId], () => {});
+    }
+
+    res.status(200).json({ message: `Reservation ${response.toLowerCase()} successfully.` });
+  });
+};
+
+
+
+
+// list all reservations where this chauffeur was assigned but hasn't responded yet
+exports.getPendingAssignments = (req, res) => {
+  const { chauffeurId } = req.params;
+
+  const query = `
+    SELECT 
+      r.*,
+      u.Name AS RenterName,
+      u.PhoneNumber,
+      TIMESTAMPDIFF(HOUR, r.StartDate, r.EndDate) AS DurationHours
+    FROM Reservation r
+    JOIN User u ON r.UserID = u.UserID
+    WHERE r.ChauffeurID = ? AND r.ResponseStatus IS NULL
+  `;
+
+  db.query(query, [chauffeurId], (err, results) => {
+    if (err) return res.status(500).json({ message: "Error fetching assignments", error: err });
+    res.status(200).json(results);
   });
 };
