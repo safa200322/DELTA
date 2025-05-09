@@ -18,4 +18,11 @@ router.put('/:id/approve', adminAuth, chauffeurController.approveChauffeur);
 
 //Reject chauffeur
 router.put('/:id/reject', adminAuth, chauffeurController.rejectChauffeur);
+
+// list all reservations where this chauffeur was assigned but hasn't responded yet
+router.get('/assignments/:chauffeurId', chauffeurController.getPendingAssignments);
+
+//to accept or reject the ride
+router.post('/assignments/:reservationId/respond', chauffeurController.respondToAssignment);
+
 module.exports = router;
