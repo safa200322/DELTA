@@ -27,10 +27,10 @@ app.use("/api/reservations", reservationRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-    res.send('Welcome to the Vehicle Rental System API 🚀');
+    res.send('Welcome to the Vehicle Rental System API ');
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(` Server running on http://localhost:${PORT}`);
 });
