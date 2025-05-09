@@ -10,7 +10,7 @@ require('dotenv').config();
 
 
 
-// ✅ Get all vehicles
+//  Get all vehicles
 exports.getAllVehicles = (req, res) => {
     const isAdmin = req.user && req.user.role === 'admin';
 
@@ -38,7 +38,7 @@ exports.getAvailableVehicles = (req, res) => {
 
 
 
-// ✅ Get all cars
+//  Get all cars
 exports.getAllCars = (req, res) => {
     db.query("SELECT * FROM Vehicle v JOIN Car c ON v.VehicleID = c.VehicleID", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -46,7 +46,7 @@ exports.getAllCars = (req, res) => {
     });
 };
 
-// ✅ Get all boats
+//  Get all boats
 exports.getAllBoats = (req, res) => {
     db.query("SELECT * FROM Vehicle v JOIN boats b ON v.VehicleID = b.VehicleID", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -54,7 +54,7 @@ exports.getAllBoats = (req, res) => {
     });
 };
 
-// ✅ Get all bicycles
+//  Get all bicycles
 exports.getAllBicycles = (req, res) => {
     db.query("SELECT * FROM Vehicle v JOIN Bicycle b ON v.VehicleID = b.VehicleID", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -62,7 +62,7 @@ exports.getAllBicycles = (req, res) => {
     });
 };
 
-// ✅ Get all motorcycles
+//  Get all motorcycles
 exports.getAllMotorcycles = (req, res) => {
     db.query("SELECT * FROM Vehicle v JOIN Motorcycle m ON v.VehicleID = m.VehicleID", (err, results) => {
         if (err) return res.status(500).json({ error: err.message });
@@ -70,7 +70,7 @@ exports.getAllMotorcycles = (req, res) => {
     });
 };
 
-// ✅ Get vehicle by ID
+//  Get vehicle by ID
 exports.getVehicleById = (req, res) => {
     const { id } = req.params;
     db.query("SELECT * FROM Vehicle WHERE VehicleID = ?", [id], (err, result) => {
@@ -80,7 +80,7 @@ exports.getVehicleById = (req, res) => {
     });
 };
 
-// ✅ Add vehicle
+//  Add vehicle
 exports.addVehicle = (req, res) => {
     const { Type, Status, Location } = req.body;
 
@@ -98,33 +98,33 @@ exports.addVehicle = (req, res) => {
 };
 
 
-// ✅ Add Car
+//  Add Car
 exports.addCar = (req, res) => {
     const { Brand, Model, Year, FuelType, Seats, Location } = req.body;
   
-    // ✅ 1. Insert into Vehicle table first
+    // Insert into Vehicle table first
     const vehicleQuery = "INSERT INTO Vehicle (Type, Status, Location) VALUES (?, 'Available', ?)";
     db.query(vehicleQuery, ['Car', Location], (err, vehicleResult) => {
       if (err) {
         return res.status(500).json({ message: "Error creating vehicle record", error: err });
       }
   
-      const vehicleId = vehicleResult.insertId; // ✅ Get the generated VehicleID
+      const vehicleId = vehicleResult.insertId; // Get the generated VehicleID
   
-      // ✅ 2. Insert into Car table using the new VehicleID
+      // Insert into Car table using the new VehicleID
       const carQuery = "INSERT INTO Car (VehicleID, Brand, Model, Year, FuelType, Seats) VALUES (?, ?, ?, ?, ?, ?)";
       db.query(carQuery, [vehicleId, Brand, Model, Year, FuelType, Seats], (err, carResult) => {
         if (err) {
           return res.status(500).json({ message: "Error creating car record", error: err });
         }
   
-        res.status(201).json({ message: "✅ Car and vehicle added successfully", VehicleID: vehicleId });
+        res.status(201).json({ message: "Car and vehicle added successfully", VehicleID: vehicleId });
       });
     });
   };
   
   
-  // ✅ Add Boat
+  // Add Boat
   exports.addBoat = (req, res) => {
     const { Length, Capacity, EngineType, Location } = req.body;
 
@@ -143,7 +143,7 @@ exports.addCar = (req, res) => {
                     if (err2) return res.status(500).json({ message: "Error creating boat", error: err2 });
 
                     res.status(201).json({
-                        message: "✅ Boat added successfully",
+                        message: " Boat added successfully",
                         VehicleID: newVehicleID
                     });
                 });
@@ -169,7 +169,7 @@ exports.addBicycle = (req, res) => {
                     if (err2) return res.status(500).json({ message: "Error creating bicycle", error: err2 });
 
                     res.status(201).json({
-                        message: "✅ Bicycle added successfully",
+                        message: "Bicycle added successfully",
                         VehicleID: newVehicleID
                     });
                 });
@@ -194,7 +194,7 @@ exports.addMotorcycle = (req, res) => {
                     if (err2) return res.status(500).json({ message: "Error creating motorcycle", error: err2 });
 
                     res.status(201).json({
-                        message: "✅ Motorcycle added successfully",
+                        message: " Motorcycle added successfully",
                         VehicleID: newVehicleID
                     });
                 });
