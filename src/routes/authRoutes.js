@@ -1,22 +1,17 @@
 const express = require('express');
-const { registerUser, loginUser, adminLogin } = require('../controllers/authController');
+const {
+  registerUser,
+  loginUser,
+  adminLogin,
+  logoutUser
+} = require('../controllers/authController');
 
 const router = express.Router();
 
-
-
-
-// ✅ User Authentication Routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.post('/admin-login', adminLogin);
-
-// ✅ Logout Route (Fix: Use `req.session.destroy()`)
-router.get("/logout", (req, res) => {
-    req.session.destroy(err => {
-        if (err) return res.status(500).json({ message: "Logout failed" });
-        res.json({ message: "Logged out successfully" });
-    });
-});
+// RESTful User Routes
+router.post('/users', registerUser); // register
+router.post('/users/sessions', loginUser); // user login
+router.post('/admins/sessions', adminLogin); // admin login
+router.delete('/users/sessions', logoutUser); // logout
 
 module.exports = router;
