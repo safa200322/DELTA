@@ -165,3 +165,10 @@ exports.adminLogin = async (req, res) => {
     res.status(500).json({ err: "admin login crash" });
   }
 }
+
+exports.logoutUser = (req, res) => {
+  req.session.destroy(err => {
+    if (err) return res.status(500).json({ message: "Logout failed" });
+    res.json({ message: "Logged out successfully" });
+  });
+};
