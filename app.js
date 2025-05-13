@@ -8,6 +8,12 @@ const app = express();
 // Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'yourSecretHere',       // Change to a strong secret in production
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: false }       // Set to true only if using HTTPS
+}));
 
 // Route Imports
 const authRoutes = require("./src/routes/authRoutes");
