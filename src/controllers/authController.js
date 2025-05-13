@@ -1,138 +1,167 @@
-
-const db = require('../db');  // 
+const db = require('../db');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 
-// Register user
+
 exports.registerUser = async (req, res) => {
-    try {
-        const { Name, PhoneNumber, Email, Password } = req.body;
+  try {
+    const b = req.body
+    const name = b.name
+    const phone = b.phone
+    const email = b.email
+    const pass = b.password
+    const birthday = b.birthday
+    const nid = b.nationalId
+    const pp = b.passport
 
-        if (!Name || !PhoneNumber || !Email) {
-            return res.status(400).json({ error: "Name, Phone Number, and Email are required." });
-        }
-
-        // registers
-        if (!Password) {
-            return res.status(400).json({ error: "Password is required for manual registration." });
-        }
-
-        // Check if the user already exists
-        const existingUser = await new Promise((resolve, reject) => {
-            User.findUserByEmail(Email, (err, user) => {
-                if (err) reject(err);
-                resolve(user);
-            });
-        });
-
-        if (existingUser) {
-            return res.status(400).json({ message: "Email is already registered." });
-        }
-
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(Password, 10);
-
-        // Create the new user
-        await new Promise((resolve, reject) => {
-            User.createUser(Name, PhoneNumber, Email, hashedPassword, (err, result) => {
-                if (err) reject(err);
-                resolve(result);
-            });
-        });
-
-        res.status(201).json({ message: "User registered successfully." });
-
-    } catch (err) {
-        console.error("Registration Error:", err.sqlMessage || err.message || err);
-        res.status(500).json({ message: "Error registering user", error: err.sqlMessage || err.message || err });
+    if (!name || !phone || !pass || !birthday || !email) {
+      res.status(400).json({ err: 'missing stuff' })
+      return
     }
-};
 
+    const dob = new Date(birthday)
+    if (isNaN(dob)) {
+      res.status(400).json({ err: 'wring date format' })
+      return
+    }
 
-// Login user
+    const today = new Date()
+    let age = today.getFullYear() - dob.getFullYear()
+    if (dob.getMonth() > today.getMonth() || (dob.getMonth() === today.getMonth() && dob.getDate() > today.getDate())) {
+      age--
+    }
+
+    if (age < 22) {
+      res.status(400).json({ err: '22 minimum age' })
+      return
+    }
+
+    if ((!nid && !pp) || (nid && pp)) {
+      res.status(400).json({ err: 'pick one identification field only' })
+      return
+    }
+
+    let [rows] = await db.execute('SELECT * FROM User WHERE Email = ?', [email])
+    if (rows.length > 0) {
+      res.status(409).json({ err: 'email exists' })
+      return
+    }
+
+    const hashed = await bcrypt.hash(pass, 10)
+
+    await db.execute(
+      'INSERT INTO User (Name, PhoneNumber, Email, Password, Date_of_birth, NationalID, PassportNumber) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [name, phone, email, hashed, dob.toISOString().split('T')[0], nid || null, pp || null]
+    )
+
+    res.status(201).json({ success: true })
+
+  } catch (err) {
+    console.log('error reg:', err)
+    res.status(500).json({ err: 'smth went wrong serever prob' })
+  }
+}
+
 exports.loginUser = async (req, res) => {
-    try {
-        const { PhoneNumber, Password } = req.body;
+  try {
+    const phone = req.body.phonenumber
+    const pass = req.body.password
 
-        if (!PhoneNumber || !Password) {
-            return res.status(400).json({ error: "Phone number and password are required" });
-        }
-
-        // Fetch user using Promise instead of callback
-        const user = await new Promise((resolve, reject) => {
-            User.findUserByPhone(PhoneNumber, (err, result) => {
-                if (err) reject(err);
-                resolve(result);
-            });
-        });
-
-        // If no user is found, return an error
-        if (!user) {
-            return res.status(400).json({ error: "User not found" });
-        }
-
-        // Compare passwords
-        const isMatch = await bcrypt.compare(Password, user.Password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        // Generate JWT Token
-        const token = jwt.sign({ id: user.UserID, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-        res.status(200).json({ 
-            message: "Login successful", 
-            token, 
-            user: { id: user.UserID, name: user.Name, phone: user.PhoneNumber } 
-        });
-
-    } catch (err) {
-        console.error(' Login Error:', err.message || err);
-        res.status(500).json({ message: "Error logging in", error: err.message || err });
+    if (!phone || !pass) {
+      res.status(400).json({ err: "missing stuff" })
+      return
     }
-};
+    const [rows] = await db.execute('SELECT * FROM User WHERE PhoneNumber = ?', [phone])
+    const user = rows[0]
+
+    if (!user) {
+      console.log("login fail / user not found:", phone)
+      res.status(404).json({ err: "user gone" })
+      return
+    }
+    if (!user.Password) {
+        console.log('user.Password is missing:', user)
+        return res.status(500).json({ err: 'user data incomplete' })
+    }
+
+const same = await bcrypt.compare(pass, user.Password)
+
+
+
+    if (!same) {
+      res.status(401).json({ err: "no match" })
+      return
+    }
+
+    const token = jwt.sign({ id: user.UserID, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '2h' })
+
+    res.json({
+      msg: "ok login",
+      token,
+      user: {
+        id: user.UserID,
+        name: user.Name,
+        phone: user.phonenumber
+      }
+    })
+
+  } catch (e) {
+    console.log("err login:", e)
+    res.status(500).json({ err: "server fail" })
+  }
+}
+
 
 exports.adminLogin = async (req, res) => {
-    try {
-        const { PhoneNumber, Password } = req.body;
+  try {
+    const phone = req.body.phonenumber;
+    const pwd = req.body.password;
 
-        if (!PhoneNumber || !Password) {
-            return res.status(400).json({ error: "Phone number and password are required" });
-        }
-
-        // Find admin by phone number
-        const admin = await new Promise((resolve, reject) => {
-            db.query('SELECT * FROM Admin WHERE PhoneNumber = ?', [PhoneNumber], (err, result) => {
-                if (err) reject(err);
-                resolve(result[0]);
-            });
-        });
-
-        // If admin not found
-        if (!admin) {
-            return res.status(400).json({ error: "Admin not found" });
-        }
-
-        // Compare password
-        const isMatch = await bcrypt.compare(Password, admin.Password);
-        if (!isMatch) {
-            return res.status(401).json({ error: "Invalid credentials" });
-        }
-
-        // Generate JWT token
-        const token = jwt.sign({ id: admin.AdminID, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '2h' });
-
-        res.status(200).json({
-            message: "Admin login successful",
-            token,
-            admin: { id: admin.AdminID, name: admin.Name, phone: admin.PhoneNumber }
-        });
-
-    } catch (err) {
-        console.error('Admin Login Error:', err.message || err);
-        res.status(500).json({ message: "Error logging in", error: err.message || err });
+    if (!phone || !pwd) {
+      res.status(400).json({ err: "missing creds" });
+      return;
     }
-};
+
+    const [rows] = await db.query("SELECT * FROM Admin WHERE PhoneNumber = ?", [phone]);
+    const admin = rows[0];
+
+    if (!admin) {
+      res.status(400).json({ err: "no admin" });
+      return;
+    }
+
+    if (!admin.Password) {
+      res.status(500).json({ err: "admin data invalid" });
+      return;
+    }
+
+    const ok = await bcrypt.compare(pwd, admin.Password);
+    if (!ok) {
+      res.status(401).json({ err: "bad pwd" });
+      return;
+    }
+
+    const token = jwt.sign(
+      { id: admin.AdminID, role: 'admin' },
+      process.env.JWT_SECRET,
+      { expiresIn: '100h' }
+    );
+
+    res.status(200).json({
+      msg: "admin ok",
+      token,
+      admin: {
+        id: admin.AdminID,
+        name: admin.Name,
+        phone: admin.PhoneNumber
+      }
+    });
+
+  } catch (e) {
+    console.log("err admin login:", e);
+    res.status(500).json({ err: "admin login crash" });
+  }
+}
