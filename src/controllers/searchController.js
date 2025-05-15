@@ -1,9 +1,17 @@
 const db = require("../db");
 
-exports.searchVehicles = (req, res) => {
-  const { pickupLocation, startDate, endDate } = req.query;
+exports.searchVehicles = async (req, res) => {
+  const loc = req.query.pickupLocation
+  const from = req.query.startDate
+  const to = req.query.endDate
+  const type = req.query.type
 
-  const query = `
+  if (!loc || !from || !to) {
+    res.status(400).json({ err: 'missing data' })
+    return
+  }
+
+  let sql = `
     SELECT * FROM Vehicle 
     WHERE Location = ? 
     AND Status = 'Available'
@@ -11,10 +19,21 @@ exports.searchVehicles = (req, res) => {
       SELECT VehicleID FROM Reservation
       WHERE (? < EndDate AND ? > StartDate)
     )
-  `;
+  `
 
-  db.query(query, [pickupLocation, startDate, endDate], (err, results) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.status(200).json(results);
-  });
-};
+  const values = [loc, from, to];
+  
+  if (type) {
+    sql += ` AND Type = ?`;
+    values.push(type);
+  }
+
+
+  try {
+    const [rows] = await db.execute(sql, values)
+    res.json(rows)
+  } catch (err) {
+    console.log('err get :', err)
+    res.status(500).json({ err: 'server issue' })
+  }
+}
