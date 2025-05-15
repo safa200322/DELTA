@@ -2,9 +2,9 @@ const db = require('../db');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const userModel = require('../models/userModel');
+const adminModel = require('../models/adminModel');
 require('dotenv').config();
-
-
 
 exports.registerUser = async (req, res) => {
   try {
@@ -44,18 +44,22 @@ exports.registerUser = async (req, res) => {
       return
     }
 
-    let [rows] = await db.execute('SELECT * FROM User WHERE Email = ?', [email])
-    if (rows.length > 0) {
-      res.status(409).json({ err: 'email exists' })
-      return
+    const existingUser = await userModel.findByEmail(email);
+    if (existingUser) {
+      return res.status(409).json({ err: 'email exists' });
     }
 
     const hashed = await bcrypt.hash(pass, 10)
 
-    await db.execute(
-      'INSERT INTO User (Name, PhoneNumber, Email, Password, Date_of_birth, NationalID, PassportNumber) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [name, phone, email, hashed, dob.toISOString().split('T')[0], nid || null, pp || null]
-    )
+    await userModel.createUser({
+      name,
+      phone,
+      email,
+      hashedPassword: hashed,
+      dob: dob.toISOString().split('T')[0],
+      nid,
+      pp,
+    });
 
     res.status(201).json({ success: true })
 
@@ -74,8 +78,10 @@ exports.loginUser = async (req, res) => {
       res.status(400).json({ err: "missing stuff" })
       return
     }
-    const [rows] = await db.execute('SELECT * FROM User WHERE PhoneNumber = ?', [phone])
-    const user = rows[0]
+    const user = await userModel.findByPhone(phone);
+    if (!user || !user.Password) {
+      return res.status(404).json({ err: 'user not found' });
+    }
 
     if (!user) {
       console.log("login fail / user not found:", phone)
@@ -86,8 +92,7 @@ exports.loginUser = async (req, res) => {
         console.log('user.Password is missing:', user)
         return res.status(500).json({ err: 'user data incomplete' })
     }
-
-const same = await bcrypt.compare(pass, user.Password)
+    const same = await bcrypt.compare(pass, user.Password)
 
 
 
@@ -124,9 +129,11 @@ exports.adminLogin = async (req, res) => {
       res.status(400).json({ err: "missing creds" });
       return;
     }
-
-    const [rows] = await db.query("SELECT * FROM Admin WHERE PhoneNumber = ?", [phone]);
-    const admin = rows[0];
+    
+    const admin = await adminModel.findByPhone(phone);
+    if (!admin || !admin.Password) {
+      return res.status(400).json({ err: 'invalid admin' });
+    }
 
     if (!admin) {
       res.status(400).json({ err: "no admin" });
