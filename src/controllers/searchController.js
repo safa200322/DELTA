@@ -1,5 +1,7 @@
 const db = require("../db");
 
+const searchModel = require('../models/searchModel');
+
 exports.searchVehicles = async (req, res) => {
   const loc = req.query.pickupLocation
   const from = req.query.startDate
@@ -11,29 +13,12 @@ exports.searchVehicles = async (req, res) => {
     return
   }
 
-  let sql = `
-    SELECT * FROM Vehicle 
-    WHERE Location = ? 
-    AND Status = 'Available'
-    AND VehicleID NOT IN (
-      SELECT VehicleID FROM Reservation
-      WHERE (? < EndDate AND ? > StartDate)
-    )
-  `
-
-  const values = [loc, from, to];
-  
-  if (type) {
-    sql += ` AND Type = ?`;
-    values.push(type);
-  }
-
 
   try {
-    const [rows] = await db.execute(sql, values)
-    res.json(rows)
+    const rows = await searchModel.searchVehicles({loc, from, to, type});
+    res.json(rows);
   } catch (err) {
-    console.log('err get :', err)
-    res.status(500).json({ err: 'server issue' })
+    console.log('err get :', err);
+    res.status(500).json({ err: 'server issue' });
   }
 }
