@@ -22,6 +22,7 @@ const searchRoutes = require("./src/routes/searchRoutes");
 const chauffeurRoutes = require("./src/routes/chauffeurRoutes");
 const paymentRoutes = require("./src/routes/paymentRoutes");
 const reservationRoutes = require("./src/routes/reservationRoutes");
+const filterRoutes = require('./src/routes/filterRoutes');
 
 // Routes
 app.use("/api", searchRoutes);
@@ -30,6 +31,7 @@ app.use("/api/vehicles", vehicleRoutes);
 app.use("/api/chauffeurs", chauffeurRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reservations", reservationRoutes);
+app.use('/api/vehicles', filterRoutes);
 
 // Root route
 app.get('/', (req, res) => {
