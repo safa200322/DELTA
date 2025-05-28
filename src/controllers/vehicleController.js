@@ -7,14 +7,14 @@ const motorcycleModel = require('../models/motorcycleModel');
 exports.addCar = async (req, res) => {
   const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location } = req.body;
 
-  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location || !Transmission || !Color) {
+  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
     const [vehicleResult] = await vehicleModel.insertVehicle('Car', Location);
     const vehicleId = vehicleResult.insertId;
-S
+
     await carModel.insertCar(vehicleId, { Brand, Model, Year, FuelType, Seats, Color, Transmission });
 
     res.status(201).json({ message: "Car and vehicle added successfully", VehicleID: vehicleId });
@@ -66,9 +66,9 @@ exports.addBicycle = async (req, res) => {
 };
 
 exports.addMotorcycle = async (req, res) => {
-  const { Brand, Engine, Year, Type, Location } = req.body;
+  const { Brand, Engine, Year, Type, Location, color } = req.body;
 
-  if (!Brand || !Engine || !Year || !Type || !Location) {
+  if (!Brand || !Engine || !Year || !Type || !Location || !color) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
@@ -76,11 +76,11 @@ exports.addMotorcycle = async (req, res) => {
     const [vehicleResult] = await vehicleModel.insertVehicle('Motorcycle', Location);
     const vehicleId = vehicleResult.insertId;
 
-    await motorcycleModel.insertMotorcycle(vehicleId, { Brand, Engine, Year, Type });
+    await motorcycleModel.insertMotorcycle(vehicleId, { Brand, Engine, Year, Type, color });
 
-    res.status(201).json({ message: "Motorcycle and vehicle added successfully", VehicleID: vehicleId });
+    res.status(201).json({ message: " added sucessfully", VehicleID: vehicleId });
   } catch (err) {
-    console.error("Error adding motorcycle:", err);
+    console.error("error adding:", err);
     res.status(500).json({ message: "Server error", error: err });
   }
 };
