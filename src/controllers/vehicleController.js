@@ -7,14 +7,14 @@ const motorcycleModel = require('../models/motorcycleModel');
 exports.addCar = async (req, res) => {
   const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location } = req.body;
 
-  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location) {
+  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location || !Transmission || !Color) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
     const [vehicleResult] = await vehicleModel.insertVehicle('Car', Location);
     const vehicleId = vehicleResult.insertId;
-
+S
     await carModel.insertCar(vehicleId, { Brand, Model, Year, FuelType, Seats, Color, Transmission });
 
     res.status(201).json({ message: "Car and vehicle added successfully", VehicleID: vehicleId });
@@ -104,43 +104,3 @@ exports.rejectVehicle = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
-  
-
-  // src/controllers/vehicleController.js
-exports.updateVehicle = (req, res) => {
-    const { id } = req.params;
-    const { Status, Location } = req.body;
-
-    if (!Status || !Location) {
-        return res.status(400).json({ message: "Status and Location are required." });
-    }
-
-    const query = "UPDATE Vehicle SET Status = ?, Location = ? WHERE VehicleID = ?";
-    db.query(query, [Status, Location, id], (err, result) => {
-        if (err) return res.status(500).json({ message: "Error updating vehicle", error: err });
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ message: "Vehicle not found" });
-        }
-
-        res.status(200).json({ message: "Vehicle updated successfully" });
-    });
-};
-
-
-// src/controllers/vehicleController.js
-exports.deleteVehicle = (req, res) => {
-    const { id } = req.params;
-  
-    db.query("DELETE FROM Vehicle WHERE VehicleID = ?", [id], (err, result) => {
-      if (err) return res.status(500).json({ message: "Error deleting vehicle", error: err });
-  
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: "Vehicle not found" });
-      }
-  
-      res.status(200).json({ message: "Vehicle deleted successfully" });
-    });
-  };
-  
