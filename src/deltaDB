@@ -97,13 +97,12 @@ CREATE TABLE Motorcycle (
 );
 
 
-CREATE TABLE Rentee (
-    RenteeID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT UNIQUE,
-    VehicleID INT,
-    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE, **
-    FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID)
+CREATE TABLE VehicleOwner (
+    OwnerID INT AUTO_INCREMENT PRIMARY KEY,
+    TotalEarnings DECIMAL(12,2) DEFAULT 0.00,
+    Availability ENUM('Available', 'Unavailable') DEFAULT 'Available'
 );
+
 
 
 CREATE TABLE Maintenance (
@@ -135,6 +134,11 @@ CREATE TABLE Reservation (
     PickupLocation VARCHAR(100) NOT NULL,
     DropoffLocation VARCHAR(100) NOT NULL,
     AccessoryID INT,
+    TotalPrice DECIMAL(10,2),
+    CommissionRate DECIMAL(5,2),
+    CommissionAmount DECIMAL(10,2),
+    OwnerEarning DECIMAL(10,2),
+    PaidOut BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (UserID) REFERENCES User(UserID),
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID),
     FOREIGN KEY (ChauffeurID) REFERENCES Chauffeur(ChauffeurID),
