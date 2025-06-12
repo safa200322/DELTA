@@ -6,16 +6,15 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
-  secret: 'yourSecretHere',       // Change to a strong secret in production
+  secret: 'yourSecretHere',       
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }       // Set to true only if using HTTPS
+  cookie: { secure: false }       
 }));
-// Route Imports
+
 const authRoutes = require("./src/routes/authRoutes");
 const vehicleRoutes = require("./src/routes/vehicleRoutes");
 const searchRoutes = require("./src/routes/searchRoutes");
