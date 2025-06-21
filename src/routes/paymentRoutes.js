@@ -1,8 +1,9 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const paymentController = require("../controllers/paymentController");
-const authenticateToken = require("../middleware/authMiddleware");
 
-router.post("/pay", authenticateToken, paymentController.makePayment);
+// Define routes here
+router.get('/', (req, res) => {
+  res.send('Payment routes');
+});
 
 module.exports = router;

@@ -3,26 +3,17 @@ const router = express.Router();
 const chauffeurController = require("../controllers/chauffeurController");
 const adminAuth = require("../middleware/adminAuth"); //  protect route
 
-// Add new chauffeur (admin only)
-router.post("/", adminAuth, chauffeurController.addChauffeur);
+router.post("/chauffeurs", chauffeurController.addChauffeur);
 
-// Auto-assign chauffeur to a reservation
-router.post("/assign/:reservationId", adminAuth, chauffeurController.assignChauffeur);
+router.patch("/chauffeurs/approve/:id",adminAuth, chauffeurController.approveChauffeur);
+router.patch("/chauffeurs/reject/:id",adminAuth, chauffeurController.rejectChauffeur);
 
+router.patch("/assignments/respond/:reservationId", chauffeurController.respondToAssignment);
 
-//Get pending chauffeurs
-router.get('/pending', adminAuth, chauffeurController.getPendingChauffeurs);
+router.post("/assignments/assign/:reservationId", chauffeurController.assignChauffeur);
 
-//Approve chauffeur
-router.put('/:id/approve', adminAuth, chauffeurController.approveChauffeur);
-
-//Reject chauffeur
-router.put('/:id/reject', adminAuth, chauffeurController.rejectChauffeur);
-
-// list all reservations where this chauffeur was assigned but hasn't responded yet
-router.get('/assignments/:chauffeurId', chauffeurController.getPendingAssignments);
-
-//to accept or reject the ride
-router.post('/assignments/:reservationId/respond', chauffeurController.respondToAssignment);
+router.get("/chauffeurs/pending", chauffeurController.getPendingChauffeurs);
+router.get('/:chauffeurId/pending-assignments', chauffeurController.getPendingAssignments);
+router.get("/assignments/pending/:chauffeurId", chauffeurController.getPendingAssignments);
 
 module.exports = router;
