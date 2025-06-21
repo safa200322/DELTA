@@ -6,6 +6,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
+
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(session({
@@ -25,7 +26,7 @@ const filterRoutes = require('./src/routes/filterRoutes');
 const boatFilterRoutes = require('./src/routes/boatFilterRoutes');
 const bicycleFilterRoutes = require("./src/routes/bicycleFilterRoutes");
 const motorcycleFilterRoutes = require('./src/routes/motorcycleFilterRoutes');
-
+const vehicleOwnerRoutes = require('./src/routes/vehicleOwnerRoutes');
 
 app.use("/api", searchRoutes);
 app.use("/api/auth", authRoutes);
@@ -39,6 +40,7 @@ app.use('/api/vehicles', filterRoutes);
 app.use('/api/boats', boatFilterRoutes);
 app.use('/api/bicycles', bicycleFilterRoutes);
 app.use('/api/motorcycles', motorcycleFilterRoutes);
+app.use('/api/vehicle-owner', vehicleOwnerRoutes);
 
 
 app.get('/', (req, res) => {
