@@ -1,151 +1,101 @@
+// src/controllers/reservationController.js
+const ReservationModel = require('../models/reservationModel');
 const db = require('../db');
 
-// Create a reservation
-exports.createReservation = (req, res) => {
-  const { VehicleID, StartDate, EndDate, PickupLocation, DropoffLocation, LicenseID } = req.body;
-  const UserID = req.user.id;
+exports.createReservation = async (req, res) => {
+  try {
+    const reservationData = {
+      ...req.body,
+      UserID: req.user.id // from middleware (auth)
+    };
 
-  db.beginTransaction((err) => {
-    if (err) return res.status(500).json({ message: "Failed to start transaction", error: err });
+    const result = await ReservationModel.createReservation(reservationData);
 
-    const insertReservationQuery = `
-      INSERT INTO Reservation (UserID, VehicleID, LicenseID, StartDate, EndDate, PickupLocation, DropoffLocation)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    db.query(insertReservationQuery, [UserID, VehicleID, LicenseID, StartDate, EndDate, PickupLocation, DropoffLocation], (err, result) => {
-      if (err) {
-        return db.rollback(() => res.status(500).json({ message: "Failed to create reservation", error: err }));
-      }
+    await db.query(
+      "UPDATE Vehicle SET Status = 'Rented' WHERE VehicleID = ?",
+      [reservationData.VehicleID]
+    );
 
-      const updateVehicleQuery = "UPDATE Vehicle SET Status = 'Rented' WHERE VehicleID = ?";
-      db.query(updateVehicleQuery, [VehicleID], (err) => {
-        if (err) {
-          return db.rollback(() => res.status(500).json({ message: "Failed to update vehicle status", error: err }));
-        }
-
-        const notifyUserQuery = `
-          INSERT INTO Notification (UserID, Title, Message, Type, Status)
-          VALUES (?, 'Reservation Created', 'Your reservation has been successfully created.', 'Reservation', 'Unread')
-        `;
-        db.query(notifyUserQuery, [UserID], (err) => {
-          if (err) {
-            return db.rollback(() => res.status(500).json({ message: "Failed to create user notification", error: err }));
-          }
-
-          const notifyAdminQuery = `
-            INSERT INTO Notification (UserID, Title, Message, Type, Status)
-            VALUES (?, 'New Reservation', 'A new reservation has been made by user ID ${UserID}.', 'Reservation', 'Unread')
-          `;
-          db.query(notifyAdminQuery, [1], (err) => {
-            if (err) {
-              return db.rollback(() => res.status(500).json({ message: "Failed to create admin notification", error: err }));
-            }
-
-            db.commit((err) => {
-              if (err) {
-                return db.rollback(() => res.status(500).json({ message: "Failed to commit transaction", error: err }));
-              }
-
-              res.status(201).json({ message: "Reservation created, vehicle updated, and notifications sent." });
-            });
-          });
-        });
-      });
+    res.status(201).json({
+      message: 'Reservation created successfully',
+      reservationId: result.insertId
     });
-  });
+  } catch (error) {
+    console.error("❌ Error creating reservation:", error);
+    res.status(500).json({ error: 'Failed to create reservation', details: error.message });
+  }
 };
 
-// Cancel a reservation
-exports.cancelReservation = (req, res) => {
-  const { id } = req.params;
-  const UserID = req.user.id;
-
-  const checkQuery = "SELECT * FROM Reservation WHERE ReservationID = ? AND UserID = ?";
-  db.query(checkQuery, [id, UserID], (err, results) => {
-    if (err) return res.status(500).json({ message: "DB error", error: err });
-    if (results.length === 0) return res.status(404).json({ message: "Reservation not found or access denied" });
-
-    const vehicleId = results[0].VehicleID;
-
-    const deleteQuery = "DELETE FROM Reservation WHERE ReservationID = ?";
-    db.query(deleteQuery, [id], (err) => {
-      if (err) return res.status(500).json({ message: "Error canceling reservation", error: err });
-
-      db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
-
-      const notifyUserQuery = `
-        INSERT INTO Notification (UserID, Title, Message, Type, Status)
-        VALUES (?, 'Reservation Cancelled', 'Your reservation has been cancelled successfully.', 'Reservation', 'Unread')
-      `;
-      db.query(notifyUserQuery, [UserID]);
-
-      const notifyAdminCancel = `
-        INSERT INTO Notification (UserID, Title, Message, Type, Status)
-        VALUES (?, 'Reservation Cancelled', 'User ID ${UserID} cancelled their reservation #${id}.', 'Reservation', 'Unread')
-      `;
-      db.query(notifyAdminCancel, [1]);
-
-      res.status(200).json({ message: "Reservation cancelled and notifications sent." });
-    });
-  });
+exports.getUserReservations = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const reservations = await ReservationModel.getReservationsByUserId(userId);
+    res.json(reservations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch reservations', details: error.message });
+  }
 };
 
-// Update a reservation
-exports.updateReservation = (req, res) => {
-  const { id } = req.params;
-  const UserID = req.user.id;
-  const { StartDate, EndDate, PickupLocation, DropoffLocation } = req.body;
+exports.cancelUserReservation = async (req, res) => {
+  try {
+    const reservationId = parseInt(req.params.id);
+    const userId = req.user?.id;
 
-  const checkQuery = "SELECT * FROM Reservation WHERE ReservationID = ? AND UserID = ?";
-  db.query(checkQuery, [id, UserID], (err, results) => {
-    if (err) return res.status(500).json({ message: "DB error", error: err });
-    if (results.length === 0) return res.status(404).json({ message: "Reservation not found or access denied" });
-
-    const updateQuery = `
-      UPDATE Reservation
-      SET StartDate = ?, EndDate = ?, PickupLocation = ?, DropoffLocation = ?
-      WHERE ReservationID = ?
-    `;
-    db.query(updateQuery, [StartDate, EndDate, PickupLocation, DropoffLocation, id], (err) => {
-      if (err) return res.status(500).json({ message: "Error updating reservation", error: err });
-
-      const notifyQuery = `
-        INSERT INTO Notification (UserID, Title, Message, Type, Status)
-        VALUES (?, 'Reservation Updated', 'Your reservation has been updated.', 'Reservation', 'Unread')
-      `;
-      db.query(notifyQuery, [UserID]);
-
-      res.status(200).json({ message: "Reservation updated and notification sent." });
-    });
-  });
-};
-
-// Complete a reservation
-exports.completeReservation = (req, res) => {
-  const { id } = req.params;
-  const UserID = req.user.id;
-
-  const findQuery = "SELECT * FROM Reservation WHERE ReservationID = ?";
-  db.query(findQuery, [id], (err, result) => {
-    if (err) return res.status(500).json({ message: "DB error", error: err });
-    if (result.length === 0) return res.status(404).json({ message: "Reservation not found" });
-
-    const reservation = result[0];
-
-    if (req.user.role !== 'admin' && reservation.UserID !== UserID) {
-      return res.status(403).json({ message: "You are not allowed to complete this reservation." });
+    if (isNaN(reservationId) || !userId) {
+      return res.status(400).json({ error: 'Invalid reservation ID or unauthenticated user' });
     }
 
-    const vehicleId = reservation.VehicleID;
+    const result = await ReservationModel.cancelReservationByUser(reservationId, userId);
 
-    db.query("UPDATE Vehicle SET Status = 'Available' WHERE VehicleID = ?", [vehicleId]);
+    if (result.affectedRows === 0) {
+      return res.status(403).json({ error: 'Unauthorized or reservation not found' });
+    }
 
-    const notifyQuery = `
-      INSERT INTO Notification (UserID, Title, Message, Type, Status)
-      VALUES (?, 'Rental Completed', 'Your rental has been completed. Thank you for using our service.', 'Reservation', 'Unread')
-    `;
-    db.query(notifyQuery, [reservation.UserID]);
+    res.json({ message: 'Reservation cancelled successfully' });
+  } catch (error) {
+    console.error("❌ Error cancelling reservation:", error);
+    res.status(500).json({ error: 'Failed to cancel reservation', details: error.message });
+  }
+};
 
-    res.status(200).json({ message: "Reservation completed and notification sent." });
-  });
+
+
+
+exports.getAllReservations = async (req, res) => {
+  try {
+    const reservations = await ReservationModel.getAllReservations();
+    res.json(reservations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch all reservations', details: error.message });
+  }
+};
+
+exports.getReservationById = async (req, res) => {
+  try {
+    const reservationId = req.params.id;
+    const reservation = await ReservationModel.getReservationById(reservationId);
+
+    if (!reservation) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+
+    res.json(reservation);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch reservation', details: error.message });
+  }
+};
+
+exports.deleteReservation = async (req, res) => {
+  try {
+    const reservationId = req.params.id;
+    const result = await ReservationModel.deleteReservation(reservationId);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Reservation not found' });
+    }
+
+    res.json({ message: 'Reservation deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete reservation', details: error.message });
+  }
 };
