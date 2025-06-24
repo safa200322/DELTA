@@ -1,3 +1,4 @@
+
 CREATE DATABASE VehicleRentalDB;
 USE VehicleRentalDB;
 
@@ -22,31 +23,27 @@ CREATE TABLE Admin (
     AdminID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     PhoneNumber VARCHAR(15) NOT NULL UNIQUE,
-  
-  Email VARCHAR(150) NOT NULL UNIQUE,
+    Email VARCHAR(150) NOT NULL UNIQUE,
     Password VARCHAR(255) NOT NULL
 );
+
+
 CREATE TABLE Chauffeur (
     ChauffeurID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
-    Gender ENUM('Male', 'Female') NOT NULL, 
     PhoneNumber VARCHAR(15) NOT NULL UNIQUE,
     Email VARCHAR(150) NOT NULL UNIQUE,
     Date_of_birth DATE NOT NULL,
     LicenseNumber VARCHAR(50) NOT NULL UNIQUE,
     Availability ENUM('Available', 'Unavailable') NOT NULL DEFAULT 'Available',
     Location VARCHAR(100) NOT NULL,
-    Status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending',
-    VehicleID INT NULL,  -- Assigned vehicle (NULL if not assigned yet)
-    FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE SET NULL
-);
+    Status ENUM('Pending', 'Approved', 'Rejected') NOT NULL DEFAULT 'Pending'
+   );
 
 
 CREATE TABLE Locations (
     LocationID INT AUTO_INCREMENT PRIMARY KEY,
-    City VARCHAR(100) NOT NULL,
-    District VARCHAR(100),
-    PlaceName VARCHAR(150)  -- Optional (e.g., "Ercan Airport")
+    City VARCHAR(100) NOT NULL
 );
 
 
@@ -55,7 +52,7 @@ CREATE TABLE Vehicle (
     Type ENUM('Car', 'boats', 'Bicycle', 'Motorcycle') NOT NULL,
     Status ENUM('Available', 'Rented', 'Maintenance') NOT NULL DEFAULT 'Available',
     Location VARCHAR(100) NOT NULL,
-    Price INT NOT NULL **
+    Price INT NOT NULL
 );
 
 
@@ -65,17 +62,18 @@ CREATE TABLE Car (
     Model VARCHAR(50) NOT NULL,
     Year INT NOT NULL,
     FuelType ENUM('Petrol', 'Diesel', 'Electric', 'Hybrid') NOT NULL,
+    Transmission ENUM('Manual', 'Automatic'),
     Seats INT NOT NULL,
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE CASCADE
 );
 
 
-
-CREATE TABLE Boats (
+CREATE TABLE boats (
     VehicleID INT PRIMARY KEY,
-    Length FLOAT NOT NULL,  
     Capacity INT NOT NULL,  
     EngineType ENUM('Inboard', 'Outboard', 'Sail') NOT NULL,
+    Brand VARCHAR(100) NOT NULL,
+    BoatType VARCHAR(50) NOT NULL,
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE CASCADE
 );
 
@@ -90,8 +88,9 @@ CREATE TABLE Bicycle (
 CREATE TABLE Motorcycle (
     VehicleID INT PRIMARY KEY,
     Brand VARCHAR(50) NOT NULL,
-    EngineCC INT NOT NULL,  
+    Engine INT NOT NULL,  
     Year INT NOT NULL,
+    color VARCHAR(10) NOT NULL,
     Type ENUM('Sport', 'Cruiser', 'Touring', 'Standard') NOT NULL,
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE CASCADE
 );
@@ -99,10 +98,16 @@ CREATE TABLE Motorcycle (
 
 CREATE TABLE VehicleOwner (
     OwnerID INT AUTO_INCREMENT PRIMARY KEY,
+    FullName VARCHAR(100) NOT NULL,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL, -- store hashed passwords only!
+    PhoneNumber VARCHAR(20),
+    NationalID VARCHAR(30), -- optional for verification
+    ProfileImage VARCHAR(255), -- optional
+    Availability ENUM('Available', 'Unavailable') DEFAULT 'Available',
     TotalEarnings DECIMAL(12,2) DEFAULT 0.00,
-    Availability ENUM('Available', 'Unavailable') DEFAULT 'Available'
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
 
 
 CREATE TABLE Maintenance (
@@ -134,11 +139,6 @@ CREATE TABLE Reservation (
     PickupLocation VARCHAR(100) NOT NULL,
     DropoffLocation VARCHAR(100) NOT NULL,
     AccessoryID INT,
-    TotalPrice DECIMAL(10,2),
-    CommissionRate DECIMAL(5,2),
-    CommissionAmount DECIMAL(10,2),
-    OwnerEarning DECIMAL(10,2),
-    PaidOut BOOLEAN DEFAULT FALSE,
     FOREIGN KEY (UserID) REFERENCES User(UserID),
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID),
     FOREIGN KEY (ChauffeurID) REFERENCES Chauffeur(ChauffeurID),
@@ -180,11 +180,3 @@ CREATE TABLE Review(
 );
 
 
-ALTER TABLE User MODIFY Password VARCHAR(255) NULL;
--- Step 1: Insert into Vehicle Table
-INSERT INTO Vehicle (Type, Status, Location) 
-VALUES ('Car', 'Rented', 'Downtojwn Garage');
-
--- Step 2: Insert into Car Table (Using LAST_INSERT_ID to get the auto-generated VehicleID)
-INSERT INTO Car (VehicleID, Brand, Model, Year, FuelType, Seats) 
-VALUES (LAST_INSERT_ID(), 'Toykota', 'Corolla', 2022, 'Petrol', 5);
