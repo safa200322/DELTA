@@ -13,7 +13,6 @@ import {
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
 import CarItem from "../components/UI/CarItem";
-import carData from "../assets/data/carData";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
 
@@ -36,7 +35,7 @@ const fakePriceRange = [0, 1000];
 const CarListing = () => {
   const [sortOption, setSortOption] = useState("Select");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sortedCars, setSortedCars] = useState(carData);
+  const [sortedCars, setSortedCars] = useState([]); // Start with empty array
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // State to hold selected filter values (currently not used for filtering logic)
@@ -48,17 +47,29 @@ const CarListing = () => {
   const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Initialize with max price value
 
   useEffect(() => {
-    console.log("carData in CarListing:", carData); // Debug log to check data
-    // Initialize sorted cars with the full data on mount
-    setSortedCars(carData);
-  }, []); // Empty dependency array means this runs once on mount
+    // Fetch car data from backend
+    const fetchCars = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/vehicles");
+        if (response.ok) {
+          const data = await response.json();
+          setSortedCars(data);
+        } else {
+          setSortedCars([]);
+        }
+      } catch (error) {
+        setSortedCars([]);
+      }
+    };
+    fetchCars();
+  }, []); // Fetch once on mount
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
 
   const handleSort = (option) => {
     setSortOption(option);
-    let sorted = [...carData]; // Start sorting from the original data
+    let sorted = [...sortedCars]; // Sort from the current sortedCars state
     if (option === "Low to High") {
       sorted.sort(
         (a, b) =>
