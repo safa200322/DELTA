@@ -1,0 +1,2 @@
+ALTER TABLE Chauffeur
+ADD COLUMN Password VARCHAR(255) NOT NULL AFTER Status;

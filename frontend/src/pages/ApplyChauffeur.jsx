@@ -1,41 +1,54 @@
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import { Form, FormGroup, Label, Input, Button, Alert } from "reactstrap";
 import "../styles/apply-chauffeur.css";
-import { DataContext } from "./DataContext";
 import { Link } from "react-router-dom";
 
 const ApplyChauffeur = () => {
-  const { addChauffeur } = useContext(DataContext);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    license: "",
-    gender: "",
-    phoneNumber: "",
-    dateOfBirth: "",
-    location: "",
+    Name: "",
+    Email: "",
+    LicenseNumber: "",
+    Gender: "",
+    PhoneNumber: "",
+    Date_of_birth: "",
+    Location: "",
+    Status: "Pending",
+    Password: "",
   });
   const [submitted, setSubmitted] = useState(false);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addChauffeur({
-      id: Date.now(),
-      ...formData,
-      status: "Pending",
-    });
-    setSubmitted(true);
-    setFormData({
-      name: "",
-      email: "",
-      license: "",
-      gender: "",
-      phoneNumber: "",
-      dateOfBirth: "",
-      location: "",
-    });
+    try {
+      const response = await fetch("http://localhost:5000/api/chauffeurs/chauffeurs/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        setSubmitted(true);
+        setFormData({
+          Name: "",
+          Email: "",
+          LicenseNumber: "",
+          Gender: "",
+          PhoneNumber: "",
+          Date_of_birth: "",
+          Location: "",
+          Status: "Pending",
+          Password: "",
+        });
+      } else {
+        alert("Failed to submit application. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting application:", error);
+      alert("An error occurred. Please try again later.");
+    }
   };
 
   return (
@@ -54,28 +67,28 @@ const ApplyChauffeur = () => {
           ) : (
             <Form onSubmit={handleSubmit}>
               <FormGroup>
-                <Label for="name">Full Name</Label>
-                <Input type="text" name="name" value={formData.name} onChange={handleChange} required />
+                <Label for="Name">Full Name</Label>
+                <Input type="text" name="Name" value={formData.Name} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label for="email">Email</Label>
-                <Input type="email" name="email" value={formData.email} onChange={handleChange} required />
+                <Label for="Email">Email</Label>
+                <Input type="email" name="Email" value={formData.Email} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label for="phoneNumber">Phone Number</Label>
-                <Input type="tel" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} required />
+                <Label for="PhoneNumber">Phone Number</Label>
+                <Input type="tel" name="PhoneNumber" value={formData.PhoneNumber} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label for="dateOfBirth">Date of Birth</Label>
-                <Input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required />
+                <Label for="Date_of_birth">Date of Birth</Label>
+                <Input type="date" name="Date_of_birth" value={formData.Date_of_birth} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label for="gender">Gender</Label>
-                <Input type="select" name="gender" value={formData.gender} onChange={handleChange} required>
+                <Label for="Gender">Gender</Label>
+                <Input type="select" name="Gender" value={formData.Gender} onChange={handleChange} required>
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
@@ -83,13 +96,18 @@ const ApplyChauffeur = () => {
               </FormGroup>
 
               <FormGroup>
-                <Label for="license">Driver's License Number</Label>
-                <Input type="text" name="license" value={formData.license} onChange={handleChange} required />
+                <Label for="LicenseNumber">Driver's License Number</Label>
+                <Input type="text" name="LicenseNumber" value={formData.LicenseNumber} onChange={handleChange} required />
               </FormGroup>
 
               <FormGroup>
-                <Label for="location">Current Location</Label>
-                <Input type="text" name="location" value={formData.location} onChange={handleChange} required />
+                <Label for="Location">Current Location</Label>
+                <Input type="text" name="Location" value={formData.Location} onChange={handleChange} required />
+              </FormGroup>
+
+              <FormGroup>
+                <Label for="Password">Password</Label>
+                <Input type="password" name="Password" value={formData.Password} onChange={handleChange} required />
               </FormGroup>
 
               <Button type="submit" color="primary" className="w-100 mt-3">
