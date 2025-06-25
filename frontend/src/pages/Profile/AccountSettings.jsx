@@ -35,18 +35,18 @@ const AccountSettings = () => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           navigate('/login');
           return;
         }
-        
+
         const response = await fetch('http://localhost:5000/api/auth/users/profile', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             localStorage.removeItem('token');
@@ -55,7 +55,7 @@ const AccountSettings = () => {
           }
           throw new Error('Failed to fetch profile data');
         }
-        
+
         const userData = await response.json();
         setUser(prevUser => ({
           ...prevUser,
@@ -71,7 +71,7 @@ const AccountSettings = () => {
         setLoading(false);
       }
     };
-    
+
     fetchUserProfile();
   }, [navigate]);
 
@@ -84,7 +84,7 @@ const AccountSettings = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:5000/api/auth/users/profile', {
         method: 'PUT',
         headers: {
@@ -97,9 +97,9 @@ const AccountSettings = () => {
           phone: user.phone
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setMessage("Profile updated successfully!");
         setMessageType("success");
@@ -116,22 +116,22 @@ const AccountSettings = () => {
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
-    
+
     if (user.newPassword !== user.confirmPassword) {
       setMessage("New passwords do not match!");
       setMessageType("danger");
       return;
     }
-    
+
     if (user.newPassword.length < 6) {
       setMessage("New password must be at least 6 characters!");
       setMessageType("danger");
       return;
     }
-    
+
     try {
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('http://localhost:5000/api/auth/users/password', {
         method: 'PUT',
         headers: {
@@ -143,9 +143,9 @@ const AccountSettings = () => {
           newPassword: user.newPassword
         })
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         setMessage("Password changed successfully!");
         setMessageType("success");
@@ -174,14 +174,14 @@ const AccountSettings = () => {
     ) {
       try {
         const token = localStorage.getItem('token');
-        
+
         const response = await fetch('http://localhost:5000/api/auth/users/profile', {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (response.ok) {
           localStorage.removeItem('token');
           alert("Account deleted successfully!");
@@ -221,7 +221,7 @@ const AccountSettings = () => {
           </NavItem>
           <NavItem>
             <NavLink
-              to="/profile/MyRentalst"
+              to="/profile/MyRentals"
               className="nav-link"
               activeClassName="active"
             >

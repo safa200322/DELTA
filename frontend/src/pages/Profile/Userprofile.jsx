@@ -13,7 +13,7 @@ const ProfileOverview = () => {
     profilePic: "http://localhost:5000/uploads/profile-pictures/default.svg",
     isVerified: false,
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditingPicture, setIsEditingPicture] = useState(false);
@@ -22,14 +22,14 @@ const ProfileOverview = () => {
     if (!isoString || isoString === "Not provided") {
       return "Not provided";
     }
-    
+
     const date = new Date(isoString);
     const day = date.getUTCDate();
     const monthIndex = date.getUTCMonth();
     const year = date.getUTCFullYear();
 
     const months = [
-      "January", "February", "March", "April", "May", "June", 
+      "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December"
     ];
     const month = months[monthIndex];
@@ -37,13 +37,13 @@ const ProfileOverview = () => {
     const getOrdinalSuffix = (d) => {
       if (d > 3 && d < 21) return 'th';
       switch (d % 10) {
-        case 1:  return "st";
-        case 2:  return "nd";
-        case 3:  return "rd";
+        case 1: return "st";
+        case 2: return "nd";
+        case 3: return "rd";
         default: return "th";
       }
     };
-  
+
     return `${day}${getOrdinalSuffix(day)} ${month} ${year}`;
   };
 
@@ -51,19 +51,19 @@ const ProfileOverview = () => {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           // Redirect to login if no token exists
           navigate('/login');
           return;
         }
-        
+
         const response = await fetch('http://localhost:5000/api/auth/users/profile', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
         });
-        
+
         if (!response.ok) {
           if (response.status === 401 || response.status === 403) {
             // Token expired or invalid
@@ -73,7 +73,7 @@ const ProfileOverview = () => {
           }
           throw new Error('Failed to fetch profile data');
         }
-        
+
         const userData = await response.json();
         setUser({
           name: userData.fullName || userData.username || "User",
@@ -90,7 +90,7 @@ const ProfileOverview = () => {
         setLoading(false);
       }
     };
-    
+
     fetchUserProfile();
   }, [navigate]);
 
@@ -128,7 +128,7 @@ const ProfileOverview = () => {
   if (loading) {
     return <div className="loading-spinner">Loading profile...</div>;
   }
-  
+
   if (error) {
     return <div className="error-message">Error: {error}</div>;
   }
@@ -205,11 +205,11 @@ const ProfileOverview = () => {
               {isEditingPicture && (
                 <div className="profile-picture-section split-panel-upload">
                   <h4>Update Profile Picture</h4>
-                  <ProfilePictureUpload 
-                    currentProfilePic={user.profilePic} 
-                    onSuccess={handleProfilePictureSuccess} 
+                  <ProfilePictureUpload
+                    currentProfilePic={user.profilePic}
+                    onSuccess={handleProfilePictureSuccess}
                   />
-                  <button 
+                  <button
                     className="cancel-button"
                     onClick={() => setIsEditingPicture(false)}
                   >
@@ -217,7 +217,7 @@ const ProfileOverview = () => {
                   </button>
                 </div>
               )}
-              
+
               {/* Profile Overview Section - Split Panel Design */}
               <div className="split-panel-profile-card">
                 <div className="split-panel-left">
@@ -227,7 +227,7 @@ const ProfileOverview = () => {
                       alt="Profile"
                       className="split-panel-profile-pic"
                     />
-                    <button 
+                    <button
                       className="split-panel-change-btn"
                       onClick={() => setIsEditingPicture(true)}
                     >

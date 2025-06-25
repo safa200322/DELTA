@@ -21,10 +21,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 app.use(session({
-  secret: 'yourSecretHere',       
+  secret: 'yourSecretHere',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }       
+  cookie: { secure: false }
 }));
 
 const authRoutes = require("./src/routes/authRoutes");
@@ -55,7 +55,7 @@ app.use('/api/vehicle-owner', vehicleOwnerRoutes);
 
 
 app.get('/', (req, res) => {
-    res.send('Welcome to the Vehicle Rental System API ');
+  res.send('Welcome to the Vehicle Rental System API ');
 });
 
 
@@ -66,6 +66,6 @@ const runMigrations = require('./src/db/runMigrations');
   // Start the app after migrations
   const PORT = process.env.PORT || 5000;
   app.listen(PORT, () => {
-      console.log(` Server running on http://localhost:${PORT}`);
+    console.log(` Server running on http://localhost:${PORT}`);
   });
 })();
