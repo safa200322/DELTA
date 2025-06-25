@@ -6,6 +6,7 @@ const ReservationModel = {
     const {
       UserID,
       VehicleID,
+      LicenseID,
       ChauffeurID,
       StartDate,
       EndDate,
@@ -16,7 +17,7 @@ const ReservationModel = {
 
     const query = `
       INSERT INTO Reservation (
-        UserID, VehicleID, LicenseID, ChauffeurID,
+        UserID, VehicleID, ChauffeurID,
         StartDate, EndDate, PickupLocation, DropoffLocation, AccessoryID
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
