@@ -15,6 +15,7 @@ import CommonSection from "../components/UI/CommonSection";
 import CarItem from "../components/UI/CarItem";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
+import { useLocation } from "react-router-dom";
 
 // --- FAKE DATA FOR FILTERING OPTIONS ---
 const fakeBrands = ["Toyota", "Honda", "Ford", "BMW", "Mercedes-Benz", "Audi"];
@@ -37,6 +38,7 @@ const CarListing = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sortedCars, setSortedCars] = useState([]); // Start with empty array
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const location = useLocation();
 
   // State to hold selected filter values (currently not used for filtering logic)
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -47,10 +49,14 @@ const CarListing = () => {
   const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Initialize with max price value
 
   useEffect(() => {
-    // Fetch car data from backend
+    // Fetch car data from backend, using query params if present
     const fetchCars = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/vehicles");
+        let url = "http://localhost:5000/api/vehicles";
+        if (location.search) {
+          url += location.search;
+        }
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           setSortedCars(data);
@@ -62,7 +68,7 @@ const CarListing = () => {
       }
     };
     fetchCars();
-  }, []); // Fetch once on mount
+  }, [location.search]); // Refetch when search params change
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
