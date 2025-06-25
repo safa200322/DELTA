@@ -1,4 +1,3 @@
-
 const express = require('express');
 const bodyParser = require("body-parser");
 const session = require("express-session");
@@ -6,6 +5,7 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
+console.log(`DB Password: ${process.env.DB_PASSWORD}`); // Debugging line to check if the password is loaded correctly
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -47,7 +47,14 @@ app.get('/', (req, res) => {
     res.send('Welcome to the Vehicle Rental System API ');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(` Server running on http://localhost:${PORT}`);
-});
+
+const runMigrations = require('./src/db/runMigrations');
+
+(async () => {
+  await runMigrations();
+  // Start the app after migrations
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+      console.log(` Server running on http://localhost:${PORT}`);
+  });
+})();

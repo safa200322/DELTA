@@ -1,8 +1,4 @@
-
-CREATE DATABASE VehicleRentalDB;
-USE VehicleRentalDB;
-
-CREATE TABLE User (
+CREATE TABLE IF NOT EXISTS User (
     UserID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     PhoneNumber VARCHAR(15) NOT NULL UNIQUE, 
@@ -10,16 +6,11 @@ CREATE TABLE User (
     Date_of_birth DATE,
     Password VARCHAR(255) NOT NULL,
     NationalID VARCHAR(20) UNIQUE, 
-    PassportNumber VARCHAR(20) UNIQUE, 
-    -- Constraint to enforce at least one of NationalID or PassportNumber must be provided
-    CHECK (
-        (NationalID IS NOT NULL AND PassportNumber IS NULL) OR 
-        (PassportNumber IS NOT NULL AND NationalID IS NULL)
-    )
+    PassportNumber VARCHAR(20) UNIQUE
 );
 
 
-CREATE TABLE Admin (
+CREATE TABLE IF NOT EXISTS Admin (
     AdminID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     PhoneNumber VARCHAR(15) NOT NULL UNIQUE,
@@ -28,7 +19,7 @@ CREATE TABLE Admin (
 );
 
 
-CREATE TABLE Chauffeur (
+CREATE TABLE IF NOT EXISTS Chauffeur (
     ChauffeurID INT AUTO_INCREMENT PRIMARY KEY,
     Name VARCHAR(100) NOT NULL,
     PhoneNumber VARCHAR(15) NOT NULL UNIQUE,
@@ -42,7 +33,7 @@ CREATE TABLE Chauffeur (
 
 
 
-CREATE TABLE Vehicle (
+CREATE TABLE IF NOT EXISTS Vehicle (
     VehicleID INT AUTO_INCREMENT PRIMARY KEY,
     Type ENUM('Car', 'boats', 'Bicycle', 'Motorcycle') NOT NULL,
     Status ENUM('Available', 'Rented', 'Maintenance') NOT NULL DEFAULT 'Available',
@@ -51,7 +42,7 @@ CREATE TABLE Vehicle (
 );
 
 
-CREATE TABLE Car (
+CREATE TABLE IF NOT EXISTS Car (
     VehicleID INT PRIMARY KEY,
     Brand VARCHAR(50) NOT NULL,
     Model VARCHAR(50) NOT NULL,
@@ -63,7 +54,7 @@ CREATE TABLE Car (
 );
 
 
-CREATE TABLE boats (
+CREATE TABLE IF NOT EXISTS boats (
     VehicleID INT PRIMARY KEY,
     Capacity INT NOT NULL,  
     EngineType ENUM('Inboard', 'Outboard', 'Sail') NOT NULL,
@@ -73,14 +64,14 @@ CREATE TABLE boats (
 );
 
 
-CREATE TABLE Bicycle (
+CREATE TABLE IF NOT EXISTS Bicycle (
     VehicleID INT PRIMARY KEY,
     Type ENUM('Road', 'Mountain', 'Hybrid', 'Electric') NOT NULL,
     Gears INT NOT NULL,
     FOREIGN KEY (VehicleID) REFERENCES Vehicle(VehicleID) ON DELETE CASCADE
 );
 
-CREATE TABLE Motorcycle (
+CREATE TABLE IF NOT EXISTS Motorcycle (
     VehicleID INT PRIMARY KEY,
     Brand VARCHAR(50) NOT NULL,
     Engine INT NOT NULL,  
@@ -91,7 +82,7 @@ CREATE TABLE Motorcycle (
 );
 
 
-CREATE TABLE VehicleOwner (
+CREATE TABLE IF NOT EXISTS VehicleOwner (
     OwnerID INT AUTO_INCREMENT PRIMARY KEY,
     FullName VARCHAR(100) NOT NULL,
     Email VARCHAR(100) NOT NULL UNIQUE,
@@ -105,7 +96,7 @@ CREATE TABLE VehicleOwner (
 );
 
 
-CREATE TABLE Maintenance (
+CREATE TABLE IF NOT EXISTS Maintenance (
     MaintenanceID INT AUTO_INCREMENT PRIMARY KEY,
     VehicleID INT,
     maintenance_info VARCHAR(500),
@@ -115,7 +106,7 @@ CREATE TABLE Maintenance (
 );
 
 
-CREATE TABLE Accessory (
+CREATE TABLE IF NOT EXISTS Accessory (
     AccessoryID INT AUTO_INCREMENT PRIMARY KEY,
     VehicleType VARCHAR(50) NOT NULL,
     Quantity INT NOT NULL,
@@ -123,7 +114,7 @@ CREATE TABLE Accessory (
 );
 
 
-CREATE TABLE Reservation (
+CREATE TABLE IF NOT EXISTS Reservation (
     ReservationID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     VehicleID INT,
@@ -145,7 +136,7 @@ CREATE TABLE Reservation (
 );
 
 
-CREATE TABLE Notification (
+CREATE TABLE IF NOT EXISTS Notification (
     NotificationID INT AUTO_INCREMENT PRIMARY KEY,
     UserID INT,
     Type VARCHAR(50) NOT NULL,
@@ -155,7 +146,7 @@ CREATE TABLE Notification (
 );
 
 
-CREATE TABLE Payment (
+CREATE TABLE IF NOT EXISTS Payment (
     PaymentID INT AUTO_INCREMENT PRIMARY KEY,
     ReservationID INT,
     Amount FLOAT NOT NULL,
@@ -163,7 +154,7 @@ CREATE TABLE Payment (
     FOREIGN KEY (ReservationID) REFERENCES Reservation(ReservationID)
 );
 
-CREATE TABLE Review(
+CREATE TABLE IF NOT EXISTS Review(
     reviewID INT AUTO_INCREMENT PRIMARY KEY,
     userID INT,
     Stars INT CHECK(Stars>=0 AND Stars<=5),
@@ -172,6 +163,13 @@ CREATE TABLE Review(
     updateAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY(userID) REFERENCES User(UserID)
 
+);
+
+-- Track applied migrations
+CREATE TABLE IF NOT EXISTS Migrations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    filename VARCHAR(255) NOT NULL UNIQUE,
+    applied_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 
