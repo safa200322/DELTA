@@ -7,12 +7,12 @@ const VehicleOwnerSignUp = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    passwordHash: "",
+    FullName: "",
+    Email: "",
+    Password: "",
     confirmPassword: "",
-    phoneNumber: "",
-    nationalID: "",
+    PhoneNumber: "",
+    NationalID: "",
   });
 
   const handleChange = (e) => {
@@ -24,30 +24,33 @@ const VehicleOwnerSignUp = () => {
     e.preventDefault();
 
     // Validate passwords match
-    if (formData.passwordHash !== formData.confirmPassword) {
+    if (formData.Password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
 
+    // Prepare data for backend (exclude confirmPassword)
+    const { confirmPassword, ...submitData } = formData;
+
     try {
-      const response = await fetch("http://localhost:5000/api/auth/vehicle-owners", {
+      const response = await fetch("http://localhost:5000/api/vehicle-owner/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
 
       if (response.ok) {
         // Auto-login after successful registration
-        const loginResponse = await fetch("http://localhost:5000/api/auth/vehicle-owners/sessions", {
+        const loginResponse = await fetch("http://localhost:5000/api/vehicle-owner/login", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            email: formData.email,
-            password: formData.passwordHash
+            Email: formData.Email,
+            Password: formData.Password
           }),
         });
 
@@ -80,52 +83,52 @@ const VehicleOwnerSignUp = () => {
           <h2>Create Vehicle Owner Account</h2>
 
           <form onSubmit={handleSubmit}>
-            <label htmlFor="fullName">Full Name</label>
+            <label htmlFor="FullName">Full Name</label>
             <input
               type="text"
-              id="fullName"
+              id="FullName"
               placeholder="Enter your full name"
-              value={formData.fullName}
+              value={formData.FullName}
               onChange={handleChange}
               required
             />
 
-            <label htmlFor="email">Email</label>
+            <label htmlFor="Email">Email</label>
             <input
               type="email"
-              id="email"
+              id="Email"
               placeholder="Enter your email"
-              value={formData.email}
+              value={formData.Email}
               onChange={handleChange}
               required
             />
 
-            <label htmlFor="phoneNumber">Phone Number</label>
+            <label htmlFor="PhoneNumber">Phone Number</label>
             <input
               type="tel"
-              id="phoneNumber"
+              id="PhoneNumber"
               placeholder="Enter your phone number"
-              value={formData.phoneNumber}
+              value={formData.PhoneNumber}
               onChange={handleChange}
               required
             />
 
-            <label htmlFor="nationalID">National ID</label>
+            <label htmlFor="NationalID">National ID</label>
             <input
               type="text"
-              id="nationalID"
+              id="NationalID"
               placeholder="Enter your National ID"
-              value={formData.nationalID}
+              value={formData.NationalID}
               onChange={handleChange}
               required
             />
 
-            <label htmlFor="passwordHash">Password</label>
+            <label htmlFor="Password">Password</label>
             <input
               type="password"
-              id="passwordHash"
+              id="Password"
               placeholder="Choose a password"
-              value={formData.passwordHash}
+              value={formData.Password}
               onChange={handleChange}
               required
             />
