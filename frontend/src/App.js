@@ -22,7 +22,7 @@ import MotorListing from "./pages/MotorListing";
 import ScooterDetails from "./pages/ScooterDetails";
 import Contact from "./pages/Contact";
 import Signup from "./pages/signup";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import PaymentPage from "./pages/PaymentScreen";
 import NotFound from "./pages/NotFound";
 import TimelineCard from "./pages/TimeLineCard";
