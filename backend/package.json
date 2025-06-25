@@ -21,9 +21,15 @@
     "jsonwebtoken": "^9.0.2",
     "mysql": "^2.18.1",
     "mysql2": "^3.12.0",
+<<<<<<< HEAD
     "nodemon": "^3.1.10",
+=======
+>>>>>>> 371bedc3aa5796e7fea7e8c21fc99989e52384a5
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.13.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }
