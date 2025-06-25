@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import "../styles/signup.css";
 import { FaUserPlus } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const VehicleOwnerSignUp = () => {
   const navigate = useNavigate();
@@ -149,10 +149,10 @@ const VehicleOwnerSignUp = () => {
           </form>
 
           <p className="login-text">
-            Already have a vehicle owner account? <a href="/vehicle-owner/login">Login here</a>
+            Already have a vehicle owner account? <Link to="/vehicle-owner-login">Login here</Link>
           </p>
           <p className="login-text">
-            Want to create a regular user account? <a href="/signup">Sign up as User</a>
+            Want to create a regular user account? <Link to="/signup">Sign up as User</Link>
           </p>
         </div>
       </div>
