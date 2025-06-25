@@ -5,7 +5,6 @@ const dotenv = require("dotenv");
 dotenv.config();
 const app = express();
 
-console.log(`DB Password: ${process.env.DB_PASSWORD}`); // Debugging line to check if the password is loaded correctly
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));

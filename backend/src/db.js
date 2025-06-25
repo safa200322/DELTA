@@ -3,8 +3,6 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-console.log(`DB Password: ${process.env.DB_PASSWORD}`); // Debugging line to check if the password is loaded correctly
-
 const db =  mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,

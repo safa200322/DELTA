@@ -3,7 +3,7 @@ const vehicleController = require("../controllers/vehicleController");
 const adminAuth = require("../middleware/adminAuth"); 
 const authenticateToken = require('../middleware/authMiddleware');
 const router = express.Router();
-
+const authvehicleowner = require('../middleware/vehicleOwnerAuth');
 //router.post("/", adminAuth, vehicleController.addVehicle);
 
 
@@ -15,10 +15,10 @@ const router = express.Router();
 //router.get("/available", vehicleController.getAvailableVehicles);
 //router.get("/:id", vehicleController.getVehicleById);
 
-router.post("/cars", vehicleController.addCar);
-router.post("/boats", vehicleController.addBoat);
-router.post("/bicycles", vehicleController.addBicycle);
-router.post("/motorcycles", vehicleController.addMotorcycle);
+router.post("/cars", authvehicleowner,vehicleController.addCar);
+router.post("/boats", authvehicleowner,vehicleController.addBoat);
+router.post("/bicycles", authvehicleowner,vehicleController.addBicycle);
+router.post("/motorcycles", authvehicleowner, vehicleController.addMotorcycle);
 
 
 router.patch('/:id/approve', adminAuth, vehicleController.approveVehicle);
