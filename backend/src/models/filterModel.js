@@ -9,6 +9,11 @@ async function getFilteredVehicles(filters) {
   `;
   const values = [];
 
+  if (filters.vehicleId) {
+    query += ` AND Vehicle.VehicleID = ?`;
+    values.push(filters.vehicleId);
+  }
+
   if (filters.brand) {
     query += ` AND Car.Brand = ?`;
     values.push(filters.brand);
