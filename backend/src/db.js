@@ -1,9 +1,12 @@
 const mysql = require('mysql2/promise');
 const dotenv = require('dotenv');
+const path = require('path');
 
-dotenv.config();
+// Force dotenv to use the .env in the project root
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-console.log(`DB Password: ${process.env.DB_PASSWORD}`); // Debugging line to check if the password is loaded correctly
+console.log('Database connection details:');
+console.log(process.env.DB_HOST, process.env.DB_USER, process.env.DB_PASSWORD, process.env.DB_NAME);
 
 const db =  mysql.createPool({
     host: process.env.DB_HOST,

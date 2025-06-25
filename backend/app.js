@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const dotenv = require("dotenv");
 const cors = require("cors"); // Added CORS
+const db = require('./src/db'); // Ensure this is the correct path to your db.js file
 
 dotenv.config();
 const app = express();

@@ -1,8 +1,10 @@
 const db = require('../db');
 
 exports.findByEmail = async (email) => {
+  console.log("Calling db");
   const [rows] = await db.execute('SELECT * FROM User WHERE Email = ?', [email]);
   return rows[0];
+
 };
 
 exports.findByPhone = async (phone) => {
