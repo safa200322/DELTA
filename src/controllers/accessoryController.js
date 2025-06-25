@@ -1,6 +1,6 @@
 const db = require('../db');
 
-// Create a new accessory
+// ✅ Create a new accessory
 exports.createAccessory = (req, res) => {
   const { Type, Quantity, Price } = req.body;
 
@@ -15,7 +15,7 @@ exports.createAccessory = (req, res) => {
   });
 };
 
-// Get accessories for a vehicle (based on vehicle type)
+// ✅ Get accessories for a vehicle (based on vehicle type)
 exports.getAccessoriesForVehicle = (req, res) => {
   const vehicleId = req.params.vehicleId;
 
@@ -34,7 +34,7 @@ exports.getAccessoriesForVehicle = (req, res) => {
   });
 };
 
-// Delete accessory
+// ✅ Delete accessory
 exports.deleteAccessory = (req, res) => {
   const accessoryId = req.params.accessoryId;
 

@@ -52,7 +52,7 @@ exports.loginChauffeur = async (req, res) => {
 
     // Generate JWT token
     const payload = { ChauffeurID: chauffeur.ChauffeurID, Name: chauffeur.Name };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '2h' });
 
     res.json({
       message: 'Chauffeur logged in successfully',
@@ -69,39 +69,28 @@ exports.assignChauffeur = async (req, res) => {
   const reservationId = req.params.reservationId;
 
   try {
-    // Validate reservation
-    const reservationResult = await chauffeurModel.getReservationById(reservationId);
-    if (reservationResult.length === 0) {
+    const reservation = await chauffeurModel.getReservationById(reservationId);
+    if (reservation.length === 0) {
       return res.status(404).json({ message: "Reservation not found" });
     }
-    const reservation = reservationResult[0];
 
-    // Find chauffeurs
-    const chauffeurs = await chauffeurModel.getAvailableApprovedChauffeursByLocation(reservation.PickupLocation);
+    const reservationData = reservation[0];
+
+    const chauffeurs = await chauffeurModel.getAvailableApprovedChauffeursByLocation(reservationData.PickupLocation);
     if (chauffeurs.length === 0) {
       return res.status(404).json({ message: "No available chauffeurs found" });
     }
 
-    // Sort chauffeurs by proximity to the user's age
-    const userBirthYear = new Date(reservation.UserDate_of_birth).getFullYear(); // Assuming you have access to the user's DOB
-    const sorted = chauffeurs.sort((a, b) => {
-      const currentYear = new Date().getFullYear();
-      const aAge = currentYear - new Date(a.Date_of_birth).getFullYear();
-      const bAge = currentYear - new Date(b.Date_of_birth).getFullYear();
-      const userAge = currentYear - userBirthYear;
-      return Math.abs(aAge - userAge) - Math.abs(bAge - userAge);
-    });
+    const selectedChauffeur = chauffeurs[0]; // or use age-proximity logic
 
-    const selectedChauffeur = sorted[0];
+    // 1. Insert into ChauffeurAssignment table
+    await chauffeurModel.createChauffeurAssignment(reservationId, selectedChauffeur.ChauffeurID);
 
-    // Set the chauffeur's status to 'Pending' for this reservation
+    // 2. Mark chauffeur as pending
     await chauffeurModel.setChauffeurAvailability(selectedChauffeur.ChauffeurID, "Pending");
 
-    // Optionally link the chauffeur to the reservation (update ResponseStatus to 'Pending')
-    await chauffeurModel.updateReservationResponseStatus(reservationId, "Pending");
-
     return res.status(200).json({
-      message: "Chauffeur request sent. Awaiting chauffeur's response.",
+      message: "Chauffeur request sent. Awaiting response.",
       chauffeur: {
         id: selectedChauffeur.ChauffeurID,
         name: selectedChauffeur.Name
@@ -109,9 +98,10 @@ exports.assignChauffeur = async (req, res) => {
     });
   } catch (err) {
     console.error("Error assigning chauffeur:", err);
-    return res.status(500).json({ message: "Internal server error", error: err });
+    return res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
+
 
 
 exports.getPendingChauffeurs = async (req, res) => {
@@ -144,17 +134,22 @@ exports.approveChauffeur = async (req, res) => {
       return res.status(400).json({ error: 'Chauffeur is already approved' });
     }
 
+    // Update status to Approved
     const result = await chauffeurModel.updateChauffeurStatus(id, 'Approved');
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Chauffeur not found' });
     }
-    
-    res.json({ message: 'Chauffeur approved.' });
+
+    // NEW: Set availability to Available
+    await chauffeurModel.setChauffeurAvailability(id, 'Available');
+
+    res.json({ message: 'Chauffeur approved and availability set to Available.' });
   } catch (err) {
     console.error(`Error while approving chauffeur ID ${id}:`, err.message);
     res.status(500).json({ error: 'Could not approve chauffeur.' });
   }
 };
+
 
 exports.rejectChauffeur = async (req, res) => {
   const { id } = req.params;
@@ -185,41 +180,48 @@ exports.rejectChauffeur = async (req, res) => {
 
 exports.respondToAssignment = async (req, res) => {
   const reservationId = req.params.reservationId;
-  const { response } = req.body;
+  const { response, chauffeurId } = req.body; // chauffeurId must be sent from frontend
 
   if (!response || !["Accepted", "Rejected"].includes(response)) {
     return res.status(400).json({ message: "Response must be either 'Accepted' or 'Rejected'." });
   }
 
   try {
-    const [reservation] = await chauffeurModel.getReservationById(reservationId);
-    if (reservation.length === 0) {
-      return res.status(404).json({ message: "Reservation not found." });
+    // Get the assignment row
+    const assignment = await chauffeurModel.getAssignmentByReservationAndChauffeur(reservationId, chauffeurId);
+    if (!assignment || assignment.length === 0) {
+      return res.status(404).json({ message: "Assignment not found." });
     }
 
-    // Check if reservation is already responded to
-    if (reservation[0].ResponseStatus !== 'Pending') {
-      return res.status(400).json({ message: 'This assignment has already been responded to.' });
+    // Check if already responded
+    if (assignment[0].Status !== 'Pending') {
+      return res.status(400).json({ message: "This assignment has already been responded to." });
     }
 
-    const chauffeurId = reservation[0].ChauffeurID;
-
-    // Update reservation response status
-    await chauffeurModel.respondToAssignment(response, reservationId);
+    // Update assignment status
+    await chauffeurModel.updateAssignmentStatus(reservationId, chauffeurId, response);
 
     if (response === "Accepted") {
+      // Update chauffeur availability
       await chauffeurModel.setChauffeurAvailability(chauffeurId, "Unavailable");
+
+      // Update reservation with chauffeur ID and status
+      await chauffeurModel.updateReservationWithChauffeur(reservationId, chauffeurId, "Accepted");
+
     } else if (response === "Rejected") {
       await chauffeurModel.setChauffeurAvailability(chauffeurId, "Available");
-      await chauffeurModel.releaseChauffeurByReservation(reservationId);
+      await chauffeurModel.updateReservationStatusOnly(reservationId, "Rejected");
     }
 
-    return res.status(200).json({ message: "Response updated successfully" });
+    return res.status(200).json({ message: `Assignment ${response.toLowerCase()} successfully.` });
+
   } catch (err) {
     console.error(`Error while responding to reservation ${reservationId}:`, err.message);
     return res.status(500).json({ message: "Internal server error", error: err.message });
   }
 };
+
+
 
 
 exports.getPendingAssignments = async (req, res) => {
