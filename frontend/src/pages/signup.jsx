@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import "../styles/signup.css";
 import { FaUserPlus } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullName: "",
     username: "",
@@ -31,7 +34,30 @@ const SignUpPage = () => {
       });
 
       if (response.ok) {
-        alert("Account created successfully!");
+        // Instead of storing user data directly, we'll proceed to login
+        const loginResponse = await fetch("http://localhost:5000/api/auth/users/sessions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            phonenumber: formData.phone, 
+            password: formData.password 
+          }),
+        });
+        
+        if (loginResponse.ok) {
+          const data = await loginResponse.json();
+          // Store the JWT token
+          localStorage.setItem('token', data.token);
+          alert("Account created successfully!");
+          // Redirect to profile page
+          navigate('/profile/ProfileOverview');
+        } else {
+          // Handle login failure after successful registration
+          alert("Account created. Please login to continue.");
+          navigate('/login');
+        }
       } else {
         alert("Failed to create account. Please try again.");
       }

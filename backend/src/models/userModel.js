@@ -12,6 +12,11 @@ exports.findByPhone = async (phone) => {
   return rows[0];
 };
 
+exports.findById = async (userId) => {
+  const [rows] = await db.execute('SELECT * FROM User WHERE UserID = ?', [userId]);
+  return rows[0];
+};
+
 exports.createUser = async ({ name, phone, email, hashedPassword, dob, nid, pp }) => {
   return db.execute(
     'INSERT INTO User (Name, PhoneNumber, Email, Password, Date_of_birth, NationalID, PassportNumber) VALUES (?, ?, ?, ?, ?, ?, ?)',

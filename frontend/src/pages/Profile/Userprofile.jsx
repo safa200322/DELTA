@@ -1,16 +1,75 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
 import "../../styles/user-profile.css";
 
 const ProfileOverview = () => {
-  const user = {
-    name: "Umut Umutcuk",
-    email: "umutcuk@gmail.com",
-    phone: "+90 500 000 0000",
+  const navigate = useNavigate();
+  const [user, setUser] = useState({
+    name: "Loading...",
+    email: "Loading...",
+    phone: "Loading...",
     profilePic: "https://i.pravatar.cc/150?img=3",
-    isVerified: true,
-  };
+    isVerified: false,
+  });
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          // Redirect to login if no token exists
+          navigate('/login');
+          return;
+        }
+        
+        const response = await fetch('http://localhost:5000/api/auth/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            // Token expired or invalid
+            localStorage.removeItem('token');
+            navigate('/login');
+            return;
+          }
+          throw new Error('Failed to fetch profile data');
+        }
+        
+        const userData = await response.json();
+        setUser({
+          name: userData.fullName || userData.username || "User",
+          email: userData.email || "Not provided",
+          phone: userData.phone || "Not provided",
+          profilePic: userData.profilePic || "https://i.pravatar.cc/150?img=3",
+          isVerified: !!userData.isVerified,
+          birthday: userData.birthday || "Not provided"
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [navigate]);
+
+  if (loading) {
+    return <div className="loading-spinner">Loading profile...</div>;
+  }
+  
+  if (error) {
+    return <div className="error-message">Error: {error}</div>;
+  }
 
   return (
     <div className="user-profile-page">
@@ -95,6 +154,11 @@ const ProfileOverview = () => {
                   <p className="enhanced-profile-detail">
                     <strong>Phone:</strong> {user.phone}
                   </p>
+                  {user.birthday && (
+                    <p className="enhanced-profile-detail">
+                      <strong>Birthday:</strong> {user.birthday}
+                    </p>
+                  )}
                   <p className="enhanced-profile-detail">
                     <strong>Verification:</strong>{" "}
                     {user.isVerified ? (
