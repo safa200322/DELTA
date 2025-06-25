@@ -16,32 +16,46 @@ const pricingBicycle = new BicyclePricingEngine();
 
 
 exports.addCar = async (req, res) => {
-  const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location, vehiclepic  } = req.body;
+  const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location, vehiclepic } = req.body;
+  // Use id from JWT as ownerId
+  const ownerId = req.user && (req.user.ownerID || req.user.id);
+  console.log("Adding car with data:", ownerId);
 
-  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location || !vehiclepic) {
-    return res.status(400).json({ message: "smth is missing" });
+  // Collect missing fields
+  const missingFields = [];
+  if (!Brand) missingFields.push('Brand');
+  if (!Model) missingFields.push('Model');
+  if (!Year) missingFields.push('Year');
+  if (!FuelType) missingFields.push('FuelType');
+  if (!Seats) missingFields.push('Seats');
+  if (!Location) missingFields.push('Location');
+  if (!ownerId) missingFields.push('ownerId');
+
+  if (missingFields.length > 0) {
+    return res.status(400).json({ message: `Missing required fields: ${missingFields.join(', ')}` });
   }
 
   try {
     const carData = { Brand, Model, Year, FuelType, Seats };
     const calculatedPrice = pricingEngine.calculatePrice(carData, Location);
 
-    const [vehicleResult] = await vehicleModel.insertVehicle('Car', Location, calculatedPrice);
+    const [vehicleResult] = await vehicleModel.insertVehicle('Car', Location, calculatedPrice, ownerId, vehiclepic);
     const vehicleId = vehicleResult.insertId;
 
     await carModel.insertCar(vehicleId, { Brand, Model, Year, FuelType, Seats, Color, Transmission });
 
     res.status(201).json({
-      message: "the car is added",
+      message: "The car is added",
       VehicleID: vehicleId,
       calculatedPrice
     });
 
   } catch (err) {
-    console.error("can't add the car :", err);
-    res.status(500).json({ message: "server error", error: err.message });
+    console.error("Can't add the car:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
+
 
 
 

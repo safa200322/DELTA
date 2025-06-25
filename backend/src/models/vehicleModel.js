@@ -1,9 +1,13 @@
 const db = require('../db');
 
-exports.insertVehicle = async (Type, location, price, vehiclepic) => {
-  const sql = `INSERT INTO Vehicle (Type, Location, Price, vehiclepic) VALUES (?, ?, ?, ? )`;
-  return db.query(sql, [Type, location, price, vehiclepic]);
+exports.insertVehicle = async (type, location, price, ownerId, vehiclepic = null) => {
+  const query = `
+    INSERT INTO Vehicle (Type, Status, Location, Price, vehiclepic, ownerID)
+    VALUES (?, 'Available', ?, ?, ?, ?)
+  `;
+  return db.query(query, [type, location, price, vehiclepic, ownerId]);
 };
+
 
 
 exports.updateVehicleStatus = (vehicleID, status) => {
