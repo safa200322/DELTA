@@ -16,9 +16,9 @@ const pricingBicycle = new BicyclePricingEngine();
 
 
 exports.addCar = async (req, res) => {
-  const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location } = req.body;
+  const { Brand, Model, Year, FuelType, Seats, Color, Transmission, Location, vehiclepic  } = req.body;
 
-  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location) {
+  if (!Brand || !Model || !Year || !FuelType || !Seats || !Location || !vehiclepic) {
     return res.status(400).json({ message: "smth is missing" });
   }
 

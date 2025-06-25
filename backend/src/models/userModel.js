@@ -12,9 +12,21 @@ exports.findByPhone = async (phone) => {
   return rows[0];
 };
 
-exports.createUser = async ({ name, phone, email, hashedPassword, dob, nid, pp }) => {
+exports.findById = async (userId) => {
+  const [rows] = await db.execute('SELECT * FROM User WHERE UserID = ?', [userId]);
+  return rows[0];
+};
+
+exports.createUser = async ({ name, phone, email, hashedPassword, dob, nid, pp, profilePictureUrl }) => {
   return db.execute(
-    'INSERT INTO User (Name, PhoneNumber, Email, Password, Date_of_birth, NationalID, PassportNumber) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    [name, phone, email, hashedPassword, dob, nid || null, pp || null]
+    'INSERT INTO User (Name, PhoneNumber, Email, Password, Date_of_birth, NationalID, PassportNumber, ProfilePictureUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [name, phone, email, hashedPassword, dob, nid || null, pp || null, profilePictureUrl || null]
+  );
+};
+
+exports.updateProfilePicture = async (userId, profilePictureUrl) => {
+  return db.execute(
+    'UPDATE User SET ProfilePictureUrl = ? WHERE UserID = ?',
+    [profilePictureUrl, userId]
   );
 };

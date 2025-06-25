@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaSignInAlt } from "react-icons/fa";
 import "../styles/login.css";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -25,7 +26,12 @@ const Login = () => {
         body: JSON.stringify({ phonenumber: formData.phone, password: formData.password }),
       });
       if (response.ok) {
+        const data = await response.json();
+        // Store the JWT token in localStorage
+        localStorage.setItem('token', data.token);
         alert("Login successful!");
+        // Redirect to profile page
+        navigate('/profile/ProfileOverview');
       } else {
         alert("Login failed. Please check your credentials.");
       }

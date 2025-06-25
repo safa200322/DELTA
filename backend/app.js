@@ -16,6 +16,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Serve static files from the public directory
+app.use(express.static('public'));
+
 app.use(session({
   secret: 'yourSecretHere',       
   resave: false,

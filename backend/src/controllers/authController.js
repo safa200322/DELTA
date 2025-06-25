@@ -100,7 +100,8 @@ exports.loginUser = async (req, res) => {
       user: {
         id: user.UserID,
         name: user.Name,
-        phone: user.phonenumber
+        phone: user.phonenumber,
+        profilePictureUrl: user.ProfilePictureUrl
       }
     })
 
@@ -169,4 +170,67 @@ exports.logoutUser = (req, res) => {
     if (err) return res.status(500).json({ message: "Logout failed" });
     res.json({ message: "Logged out successfully" });
   });
+};
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    // req.user is set by the authenticateToken middleware
+    const userId = req.user.id;
+    
+    if (!userId) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+    
+    const user = await userModel.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Set default profile picture URL if none exists
+    const profilePictureUrl = user.ProfilePictureUrl || 
+      `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;
+    
+    // Return user data without sensitive information
+    res.status(200).json({
+      id: user.UserID,
+      fullName: user.Name,
+      username: user.Username || user.Name,
+      email: user.Email,
+      phone: user.PhoneNumber,
+      birthday: user.Date_of_birth,
+      profilePictureUrl: profilePictureUrl,
+      isVerified: !!user.isVerified
+    });
+    
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.updateProfilePicture = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    if (!req.file) {
+      return res.status(400).json({ error: "No file uploaded" });
+    }
+    
+    // Create the URL for the uploaded file
+    const baseUrl = `${req.protocol}://${req.get('host')}`;
+    const profilePictureUrl = `${baseUrl}/uploads/profile-pictures/${req.file.filename}`;
+    
+    // Update the user's profile picture URL in the database
+    await userModel.updateProfilePicture(userId, profilePictureUrl);
+    
+    res.status(200).json({
+      success: true,
+      message: "Profile picture updated successfully",
+      profilePictureUrl: profilePictureUrl
+    });
+  } catch (error) {
+    console.error("Error updating profile picture:", error);
+    res.status(500).json({ error: "Server error" });
+  }
 };
