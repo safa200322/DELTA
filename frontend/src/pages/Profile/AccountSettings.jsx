@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Container,
   Row,
@@ -11,52 +11,198 @@ import {
   Label,
   Input,
   Button,
+  Alert,
 } from "reactstrap";
 import "../../styles/user-profile.css";
 
 const AccountSettings = () => {
+  const navigate = useNavigate();
   const [user, setUser] = useState({
-    name: "Umut Umutcuk",
-    email: "umutcuk@gmail.com",
-    phone: "+90 500 000 0000",
+    name: "",
+    email: "",
+    phone: "",
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
 
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
+  const [messageType, setMessageType] = useState("");
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+          navigate('/login');
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/api/auth/users/profile', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem('token');
+            navigate('/login');
+            return;
+          }
+          throw new Error('Failed to fetch profile data');
+        }
+
+        const userData = await response.json();
+        setUser(prevUser => ({
+          ...prevUser,
+          name: userData.fullName || userData.username || "",
+          email: userData.email || "",
+          phone: userData.phone || "",
+        }));
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setMessage("Failed to load profile data");
+        setMessageType("danger");
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [navigate]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePasswordChange = (e) => {
+  const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    if (user.newPassword === user.confirmPassword && user.newPassword) {
-      alert("Password changed successfully!");
-      setUser((prev) => ({
-        ...prev,
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      }));
-    } else {
-      alert("Passwords do not match or are empty!");
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('http://localhost:5000/api/auth/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          fullName: user.name,
+          email: user.email,
+          phone: user.phone
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Profile updated successfully!");
+        setMessageType("success");
+      } else {
+        setMessage(data.error || "Failed to update profile");
+        setMessageType("danger");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      setMessage("Failed to update profile");
+      setMessageType("danger");
     }
   };
 
-  const handleDeleteAccount = () => {
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+
+    if (user.newPassword !== user.confirmPassword) {
+      setMessage("New passwords do not match!");
+      setMessageType("danger");
+      return;
+    }
+
+    if (user.newPassword.length < 6) {
+      setMessage("New password must be at least 6 characters!");
+      setMessageType("danger");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+
+      const response = await fetch('http://localhost:5000/api/auth/users/password', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: user.currentPassword,
+          newPassword: user.newPassword
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Password changed successfully!");
+        setMessageType("success");
+        setUser((prev) => ({
+          ...prev,
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        }));
+      } else {
+        setMessage(data.error || "Failed to change password");
+        setMessageType("danger");
+      }
+    } catch (error) {
+      console.error("Error changing password:", error);
+      setMessage("Failed to change password");
+      setMessageType("danger");
+    }
+  };
+
+  const handleDeleteAccount = async () => {
     if (
       window.confirm(
         "Are you sure you want to delete your account? This action cannot be undone."
       )
     ) {
-      alert("Account deleted successfully!");
+      try {
+        const token = localStorage.getItem('token');
+
+        const response = await fetch('http://localhost:5000/api/auth/users/profile', {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          localStorage.removeItem('token');
+          alert("Account deleted successfully!");
+          navigate('/');
+        } else {
+          const data = await response.json();
+          setMessage(data.error || "Failed to delete account");
+          setMessageType("danger");
+        }
+      } catch (error) {
+        console.error("Error deleting account:", error);
+        setMessage("Failed to delete account");
+        setMessageType("danger");
+      }
       setShowDeleteConfirm(false);
-      // Add deletion logic here
     }
   };
+
+  if (loading) {
+    return <div className="loading-spinner">Loading...</div>;
+  }
 
   return (
     <div className="user-profile-page">
@@ -75,7 +221,7 @@ const AccountSettings = () => {
           </NavItem>
           <NavItem>
             <NavLink
-              to="/profile/MyRentalst"
+              to="/profile/MyRentals"
               className="nav-link"
               activeClassName="active"
             >
@@ -129,39 +275,53 @@ const AccountSettings = () => {
               <div className="settings-section">
                 <h3 className="section-title">Account Settings</h3>
 
+                {message && (
+                  <Alert color={messageType} className="mb-3">
+                    {message}
+                  </Alert>
+                )}
+
                 {/* Personal Info */}
                 <div className="settings-card">
                   <h4 className="settings-subtitle">Personal Info</h4>
-                  <FormGroup>
-                    <Label for="name">Name</Label>
-                    <Input
-                      type="text"
-                      name="name"
-                      id="name"
-                      value={user.name}
-                      onChange={handleChange}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="email">Email</Label>
-                    <Input
-                      type="email"
-                      name="email"
-                      id="email"
-                      value={user.email}
-                      onChange={handleChange}
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label for="phone">Phone</Label>
-                    <Input
-                      type="tel"
-                      name="phone"
-                      id="phone"
-                      value={user.phone}
-                      onChange={handleChange}
-                    />
-                  </FormGroup>
+                  <Form onSubmit={handleProfileUpdate}>
+                    <FormGroup>
+                      <Label for="name">Name</Label>
+                      <Input
+                        type="text"
+                        name="name"
+                        id="name"
+                        value={user.name}
+                        onChange={handleChange}
+                        required
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label for="email">Email</Label>
+                      <Input
+                        type="email"
+                        name="email"
+                        id="email"
+                        value={user.email}
+                        onChange={handleChange}
+                        required
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label for="phone">Phone</Label>
+                      <Input
+                        type="tel"
+                        name="phone"
+                        id="phone"
+                        value={user.phone}
+                        onChange={handleChange}
+                        required
+                      />
+                    </FormGroup>
+                    <Button color="primary" type="submit">
+                      Update Profile
+                    </Button>
+                  </Form>
                 </div>
 
                 {/* Password & Security */}
@@ -176,6 +336,7 @@ const AccountSettings = () => {
                         id="currentPassword"
                         value={user.currentPassword}
                         onChange={handleChange}
+                        required
                       />
                     </FormGroup>
                     <FormGroup>
@@ -186,6 +347,8 @@ const AccountSettings = () => {
                         id="newPassword"
                         value={user.newPassword}
                         onChange={handleChange}
+                        required
+                        minLength="6"
                       />
                     </FormGroup>
                     <FormGroup>
@@ -196,6 +359,8 @@ const AccountSettings = () => {
                         id="confirmPassword"
                         value={user.confirmPassword}
                         onChange={handleChange}
+                        required
+                        minLength="6"
                       />
                     </FormGroup>
                     <Button color="primary" type="submit">

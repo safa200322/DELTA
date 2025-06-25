@@ -12,7 +12,7 @@ const ProfilePictureUpload = ({ currentProfilePic, onSuccess }) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      
+
       // Create a preview
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -24,7 +24,7 @@ const ProfilePictureUpload = ({ currentProfilePic, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!file) {
       setError('Please select an image file');
       return;
@@ -56,16 +56,16 @@ const ProfilePictureUpload = ({ currentProfilePic, onSuccess }) => {
       }
 
       const data = await response.json();
-      
+
       // Call the success callback with the new URL
       if (onSuccess) {
         onSuccess(data.profilePictureUrl);
       }
-      
+
       // Clear the form
       setFile(null);
       setPreviewUrl(null);
-      
+
     } catch (error) {
       setError(error.message);
       console.error('Error uploading profile picture:', error);
@@ -77,9 +77,9 @@ const ProfilePictureUpload = ({ currentProfilePic, onSuccess }) => {
   return (
     <div className="profile-picture-upload">
       <div className="current-profile-container">
-        <img 
-          src={previewUrl || currentProfilePic} 
-          alt="Profile" 
+        <img
+          src={previewUrl || currentProfilePic}
+          alt="Profile"
           className="current-profile-pic"
         />
       </div>
@@ -103,8 +103,8 @@ const ProfilePictureUpload = ({ currentProfilePic, onSuccess }) => {
 
         {error && <div className="error-message">{error}</div>}
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           className="upload-button"
           disabled={!file || loading}
         >

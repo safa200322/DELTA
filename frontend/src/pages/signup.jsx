@@ -40,12 +40,12 @@ const SignUpPage = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ 
-            phonenumber: formData.phone, 
-            password: formData.password 
+          body: JSON.stringify({
+            phonenumber: formData.phone,
+            password: formData.password
           }),
         });
-        
+
         if (loginResponse.ok) {
           const data = await loginResponse.json();
           // Store the JWT token

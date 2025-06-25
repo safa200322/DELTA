@@ -62,6 +62,7 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
+
     const phone = req.body.phonenumber
     const pass = req.body.password
 
@@ -80,8 +81,8 @@ exports.loginUser = async (req, res) => {
       return
     }
     if (!user.Password) {
-        console.log('user.Password is missing:', user)
-        return res.status(500).json({ err: 'user data incomplete' })
+      console.log('user.Password is missing:', user)
+      return res.status(500).json({ err: 'user data incomplete' })
     }
     const same = await bcrypt.compare(pass, user.Password)
 
@@ -121,7 +122,7 @@ exports.adminLogin = async (req, res) => {
       res.status(400).json({ err: "missing creds" });
       return;
     }
-    
+
     const admin = await adminModel.findByPhone(phone);
     if (!admin || !admin.Password) {
       return res.status(400).json({ err: 'invalid admin' });
@@ -176,21 +177,21 @@ exports.getUserProfile = async (req, res) => {
   try {
     // req.user is set by the authenticateToken middleware
     const userId = req.user.id;
-    
+
     if (!userId) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
-    
+
     const user = await userModel.findById(userId);
-    
+
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-    
+
     // Set default profile picture URL if none exists
-    const profilePictureUrl = user.ProfilePictureUrl || 
+    const profilePictureUrl = user.ProfilePictureUrl ||
       `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;
-    
+
     // Return user data without sensitive information
     res.status(200).json({
       id: user.UserID,
@@ -202,7 +203,7 @@ exports.getUserProfile = async (req, res) => {
       profilePictureUrl: profilePictureUrl,
       isVerified: !!user.isVerified
     });
-    
+
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({ error: "Server error" });
@@ -212,18 +213,18 @@ exports.getUserProfile = async (req, res) => {
 exports.updateProfilePicture = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
     }
-    
+
     // Create the URL for the uploaded file
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const profilePictureUrl = `${baseUrl}/uploads/profile-pictures/${req.file.filename}`;
-    
+
     // Update the user's profile picture URL in the database
     await userModel.updateProfilePicture(userId, profilePictureUrl);
-    
+
     res.status(200).json({
       success: true,
       message: "Profile picture updated successfully",
@@ -231,6 +232,96 @@ exports.updateProfilePicture = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating profile picture:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { fullName, email, phone } = req.body;
+
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Check if email is already used by another user
+    const existingUser = await userModel.findByEmail(email);
+    if (existingUser && existingUser.UserID !== userId) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
+
+    // Update user profile
+    await userModel.updateUserProfile(userId, {
+      name: fullName,
+      email: email,
+      phone: phone
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully"
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+
+    // Get current user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.Password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password in database
+    await userModel.updatePassword(userId, hashedNewPassword);
+
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Delete user account
+    await userModel.deleteUser(userId);
+
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting account:", error);
     res.status(500).json({ error: "Server error" });
   }
 };

@@ -30,3 +30,24 @@ exports.updateProfilePicture = async (userId, profilePictureUrl) => {
     [profilePictureUrl, userId]
   );
 };
+
+exports.updateUserProfile = async (userId, { name, email, phone }) => {
+  return db.execute(
+    'UPDATE User SET Name = ?, Email = ?, PhoneNumber = ? WHERE UserID = ?',
+    [name, email, phone, userId]
+  );
+};
+
+exports.updatePassword = async (userId, hashedPassword) => {
+  return db.execute(
+    'UPDATE User SET Password = ? WHERE UserID = ?',
+    [hashedPassword, userId]
+  );
+};
+
+exports.deleteUser = async (userId) => {
+  return db.execute(
+    'DELETE FROM User WHERE UserID = ?',
+    [userId]
+  );
+};

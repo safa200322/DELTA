@@ -40,8 +40,7 @@ const MyReviews = () => {
   const handleRemove = (id) => {
     if (
       window.confirm(
-        `Are you sure you want to remove the review for ${
-          reviews.find((r) => r.id === id).vehicle
+        `Are you sure you want to remove the review for ${reviews.find((r) => r.id === id).vehicle
         }?`
       )
     ) {
@@ -67,7 +66,7 @@ const MyReviews = () => {
           </NavItem>
           <NavItem>
             <NavLink
-              to="/profile/MyRentalst"
+              to="/profile/MyRentals"
               className="nav-link"
               activeClassName="active"
             >

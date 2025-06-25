@@ -51,7 +51,7 @@ const NotificationsProfile = () => {
           </NavItem>
           <NavItem>
             <NavLink
-              to="/profile/MyRentalst"
+              to="/profile/MyRentals"
               className="nav-link"
               activeClassName="active"
             >
