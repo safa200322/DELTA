@@ -10,7 +10,8 @@ const CarItem = ({ item, type }) => {
   console.debug("[CarItem] vehiclepic src:", item.vehiclepic, "for", item.carName || item.model);
 
   const handleBook = (carName, model) => {
-    navigate(`/cars/${carName || model}`);
+    const itemName = carName || model || item.Model || item.carName;
+    navigate(`/cars/${itemName}`);
   };
 
   return (
@@ -21,7 +22,15 @@ const CarItem = ({ item, type }) => {
           <span className="car-type-badge">{type.toUpperCase()}</span>
         </div>
         <div className="car__item-content">
-          <h4 className="car__item-title">{item.carName || item.model}</h4>
+          <h4 className="car__item-title">{item.carName || item.model || item.Model}</h4>
+          <div className="car__item-brand-model">
+            <span className="brand-text">
+              <i className="ri-car-line"></i> {item.brand || item.Brand}
+            </span>
+            <span className="model-text">
+              <i className="ri-roadster-line"></i> {item.model || item.Model}
+            </span>
+          </div>
           <div className="car__item-features">
             <span className="feature-item">
               <i className="ri-checkbox-circle-line"></i> Free Cancellation
@@ -46,10 +55,9 @@ const CarItem = ({ item, type }) => {
             <span className="rating-text">Excellent ({item.reviews || "188"} reviews)</span>
           </div>
           <div className="car__item-price">
-            <span className="original-price">${item.originalPrice || "250"}</span>
-            <span className="current-price">${item.price}/day</span>
+            <span className="current-price">${typeof item.Price === 'number' ? item.Price : (typeof item.price === 'number' ? item.price : parseInt(item.Price || item.price || 0))}/day</span>
           </div>
-          <button className="car__item-btn book-btn" onClick={() => handleBook(item.carName, item.model)}>
+          <button className="car__item-btn book-btn" onClick={() => handleBook(item.carName || item.Model, item.model || item.Model)}>
             Book
           </button>
         </div>
