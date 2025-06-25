@@ -6,6 +6,9 @@ import "../../styles/car-item.css";
 const CarItem = ({ item, type }) => {
   const navigate = useNavigate();
 
+  // Debug: log the image link for each car item
+  console.debug("[CarItem] vehiclepic src:", item.vehiclepic, "for", item.carName || item.model);
+
   const handleBook = (carName, model) => {
     navigate(`/cars/${carName || model}`);
   };
@@ -14,7 +17,7 @@ const CarItem = ({ item, type }) => {
     <Col lg="12" className="mb-4">
       <div className="car__item">
         <div className="car__item-img">
-          <img src={item.imgUrl} alt={item.model} className="w-100" />
+          <img src={item.vehiclepic} alt={item.model} className="w-100" />
           <span className="car-type-badge">{type.toUpperCase()}</span>
         </div>
         <div className="car__item-content">
