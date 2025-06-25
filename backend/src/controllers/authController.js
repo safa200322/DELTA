@@ -170,3 +170,35 @@ exports.logoutUser = (req, res) => {
     res.json({ message: "Logged out successfully" });
   });
 };
+
+exports.getUserProfile = async (req, res) => {
+  try {
+    // req.user is set by the authenticateToken middleware
+    const userId = req.user.id;
+    
+    if (!userId) {
+      return res.status(400).json({ error: "Invalid user ID" });
+    }
+    
+    const user = await userModel.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Return user data without sensitive information
+    res.status(200).json({
+      id: user.UserID,
+      fullName: user.Name,
+      username: user.Username || user.Name,
+      email: user.Email,
+      phone: user.PhoneNumber,
+      birthday: user.Date_of_birth,
+      isVerified: !!user.isVerified
+    });
+    
+  } catch (error) {
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
