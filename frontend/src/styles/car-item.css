@@ -17,7 +17,8 @@
   box-shadow: var(--box-shadow);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
-  max-width: 450px; /* Increased from 300px to make cards wider */
+  max-width: 450px;
+  /* Increased from 300px to make cards wider */
   margin: 0 auto;
 }
 
@@ -78,14 +79,16 @@
   color: var(--muted-text);
 }
 
-.brand-text, .model-text {
+.brand-text,
+.model-text {
   display: flex;
   align-items: center;
   gap: 0.3rem;
   font-weight: 500;
 }
 
-.brand-text i, .model-text i {
+.brand-text i,
+.model-text i {
   color: var(--primary-color);
   font-size: 1rem;
 }

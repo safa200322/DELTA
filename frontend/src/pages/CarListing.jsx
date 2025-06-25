@@ -15,7 +15,7 @@ import CommonSection from "../components/UI/CommonSection";
 import CarItem from "../components/UI/CarItem";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 // --- FAKE DATA FOR FILTERING OPTIONS ---
 const fakeBrands = ["Toyota", "Honda", "Ford", "BMW", "Mercedes-Benz", "Audi"];
@@ -39,6 +39,7 @@ const CarListing = () => {
   const [sortedCars, setSortedCars] = useState([]); // Start with empty array
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
   // State to hold selected filter values (currently not used for filtering logic)
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -47,6 +48,19 @@ const CarListing = () => {
   const [selectedColor, setSelectedColor] = useState("");
   const [selectedSeats, setSelectedSeats] = useState(fakeSeatOptions[0]); // Initialize with min seat value
   const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Initialize with max price value
+
+  // Extract pickup/dropoff datetimes from URL params and store in localStorage
+  useEffect(() => {
+    const departDate = searchParams.get("depart");
+    const returnDate = searchParams.get("return");
+
+    if (departDate) {
+      localStorage.setItem("pickupDateTime", departDate);
+    }
+    if (returnDate) {
+      localStorage.setItem("dropoffDateTime", returnDate);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     // Fetch car data from backend, using query params if present
@@ -282,11 +296,12 @@ const CarListing = () => {
                     <p className="no-cars-text">No cars available.</p>
                   </Col>
                 ) : (
-                  sortedCars.map((item) => (
-                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                      {/* Ensure your CarItem component is using the new classes and structure */}
-                      <CarItem item={item} type={item.type || "car"} />{" "}
-                      {/* Pass item.type or a default */}
+                  sortedCars.map((item, index) => (
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.VehicleID || item.id || item.ID || index}>
+                      <CarItem
+                        item={item}
+                        type={item.type || "car"}
+                      />
                     </Col>
                   ))
                 )}

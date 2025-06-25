@@ -9,9 +9,23 @@ const CarItem = ({ item, type }) => {
   // Debug: log the image link for each car item
   console.debug("[CarItem] vehiclepic src:", item.vehiclepic, "for", item.carName || item.model);
 
-  const handleBook = (carName, model) => {
-    const itemName = carName || model || item.Model || item.carName;
-    navigate(`/cars/${itemName}`);
+  const handleBook = () => {
+    const carId = item.VehicleID;
+    const state = {};
+
+    // Get datetime values from localStorage
+    const pickupDateTime = localStorage.getItem("pickupDateTime");
+    const dropoffDateTime = localStorage.getItem("dropoffDateTime");
+
+    if (pickupDateTime) state.pickupDateTime = pickupDateTime;
+    if (dropoffDateTime) state.dropoffDateTime = dropoffDateTime;
+
+    // Log what's being passed to navigation
+    console.debug("[CarItem] Navigation state:", state);
+
+    if (carId) {
+      navigate(`/cars/${carId}`, { state });
+    }
   };
 
   return (
@@ -57,7 +71,11 @@ const CarItem = ({ item, type }) => {
           <div className="car__item-price">
             <span className="current-price">${typeof item.Price === 'number' ? item.Price : (typeof item.price === 'number' ? item.price : parseInt(item.Price || item.price || 0))}/day</span>
           </div>
-          <button className="car__item-btn book-btn" onClick={() => handleBook(item.carName || item.Model, item.model || item.Model)}>
+          <button
+            className="car__item-btn book-btn"
+            onClick={handleBook}
+            disabled={!item.VehicleID}
+          >
             Book
           </button>
         </div>
