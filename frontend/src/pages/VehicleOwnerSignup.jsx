@@ -13,10 +13,6 @@ const VehicleOwnerSignUp = () => {
     confirmPassword: "",
     phoneNumber: "",
     nationalID: "",
-    profileImage: "",
-    availability: "",
-    totalEarnings: "",
-    createdAt: "",
   });
 
   const handleChange = (e) => {
@@ -140,48 +136,6 @@ const VehicleOwnerSignUp = () => {
               id="confirmPassword"
               placeholder="Confirm your password"
               value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-
-            <label htmlFor="profileImage">Profile Image URL (Optional)</label>
-            <input
-              type="url"
-              id="profileImage"
-              placeholder="Enter profile image URL"
-              value={formData.profileImage}
-              onChange={handleChange}
-            />
-
-            <label htmlFor="availability">Availability</label>
-            <select
-              id="availability"
-              value={formData.availability}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select availability</option>
-              <option value="Available">Available</option>
-              <option value="Unavailable">Unavailable</option>
-              <option value="Busy">Busy</option>
-            </select>
-
-            <label htmlFor="totalEarnings">Initial Total Earnings (Optional)</label>
-            <input
-              type="number"
-              id="totalEarnings"
-              placeholder="Enter initial total earnings (default: 0)"
-              value={formData.totalEarnings}
-              onChange={handleChange}
-              min="0"
-              step="0.01"
-            />
-
-            <label htmlFor="createdAt">Registration Date</label>
-            <input
-              type="date"
-              id="createdAt"
-              value={formData.createdAt}
               onChange={handleChange}
               required
             />
