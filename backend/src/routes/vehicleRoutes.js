@@ -25,7 +25,9 @@ router.patch('/:id/approve', adminAuth, vehicleController.approveVehicle);
 router.patch('/:id/reject', adminAuth,vehicleController.rejectVehicle);
 
 //router.put("/:id", adminAuth, vehicleController.updateVehicle);
-//router.delete("/:id", adminAuth, vehicleController.deleteVehicle);
+router.delete("/admindeletevehicle/:id", adminAuth, vehicleController.deleteVehicle);
+router.delete("/vehicleownerdeletion/:id", authvehicleowner, vehicleController.deleteVehicle);
+
 
 
 
