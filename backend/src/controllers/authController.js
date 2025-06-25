@@ -9,13 +9,11 @@ require('dotenv').config();
 exports.registerUser = async (req, res) => {
   try {
     const b = req.body
-    const name = b.name
+    const name = b.fullName
     const phone = b.phone
     const email = b.email
     const pass = b.password
     const birthday = b.birthday
-    const nid = b.nationalId
-    const pp = b.passport
 
     if (!name || !phone || !pass || !birthday || !email) {
       res.status(400).json({ err: 'missing stuff' })
@@ -39,11 +37,6 @@ exports.registerUser = async (req, res) => {
       return
     }
 
-    if ((!nid && !pp) || (nid && pp)) {
-      res.status(400).json({ err: 'pick one identification field only' })
-      return
-    }
-
     const existingUser = await userModel.findByEmail(email);
     if (existingUser) {
       return res.status(409).json({ err: 'email exists' });
@@ -57,8 +50,6 @@ exports.registerUser = async (req, res) => {
       email,
       hashedPassword: hashed,
       dob: dob.toISOString().split('T')[0],
-      nid,
-      pp,
     });
 
     res.status(201).json({ success: true })

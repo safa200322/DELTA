@@ -1,11 +1,17 @@
-
 const express = require('express');
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const dotenv = require("dotenv");
+const cors = require("cors"); // Added CORS
+
 dotenv.config();
 const app = express();
 
+// Allow CORS from http://localhost:3000
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true
+}));
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
