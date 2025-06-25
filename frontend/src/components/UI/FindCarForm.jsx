@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, FormGroup, Input, Button, Row, Col, Label } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
 const FindCarForm = () => {
   const [formData, setFormData] = useState({
@@ -15,6 +16,8 @@ const FindCarForm = () => {
     Location: "",
   });
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -23,7 +26,7 @@ const FindCarForm = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     // Build query string from formData
     const params = new URLSearchParams();
@@ -34,23 +37,14 @@ const FindCarForm = () => {
         params.append(key, value);
       }
     });
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/vehicles?${params.toString()}`,
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (response.ok) {
-        // Optionally handle success (e.g., show results, navigate, etc.)
-        console.log("Search submitted successfully");
-      } else {
-        alert("Search failed.");
-      }
-    } catch (error) {
-      alert("An error occurred.");
-    }
+    const url = `/cars?${params.toString()}`;
+    console.debug(
+      "[FindCarForm] Navigating to:",
+      url,
+      "with formData:",
+      formData
+    );
+    navigate(url);
   };
 
   return (

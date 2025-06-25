@@ -13,9 +13,9 @@ import {
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
 import CarItem from "../components/UI/CarItem";
-import carData from "../assets/data/carData";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
+import { useLocation } from "react-router-dom";
 
 // --- FAKE DATA FOR FILTERING OPTIONS ---
 const fakeBrands = ["Toyota", "Honda", "Ford", "BMW", "Mercedes-Benz", "Audi"];
@@ -36,8 +36,9 @@ const fakePriceRange = [0, 1000];
 const CarListing = () => {
   const [sortOption, setSortOption] = useState("Select");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sortedCars, setSortedCars] = useState(carData);
+  const [sortedCars, setSortedCars] = useState([]); // Start with empty array
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const location = useLocation();
 
   // State to hold selected filter values (currently not used for filtering logic)
   const [selectedBrand, setSelectedBrand] = useState("");
@@ -48,17 +49,33 @@ const CarListing = () => {
   const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Initialize with max price value
 
   useEffect(() => {
-    console.log("carData in CarListing:", carData); // Debug log to check data
-    // Initialize sorted cars with the full data on mount
-    setSortedCars(carData);
-  }, []); // Empty dependency array means this runs once on mount
+    // Fetch car data from backend, using query params if present
+    const fetchCars = async () => {
+      try {
+        let url = "http://localhost:5000/api/vehicles";
+        if (location.search) {
+          url += location.search;
+        }
+        const response = await fetch(url);
+        if (response.ok) {
+          const data = await response.json();
+          setSortedCars(data);
+        } else {
+          setSortedCars([]);
+        }
+      } catch (error) {
+        setSortedCars([]);
+      }
+    };
+    fetchCars();
+  }, [location.search]); // Refetch when search params change
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
 
   const handleSort = (option) => {
     setSortOption(option);
-    let sorted = [...carData]; // Start sorting from the original data
+    let sorted = [...sortedCars]; // Sort from the current sortedCars state
     if (option === "Low to High") {
       sorted.sort(
         (a, b) =>

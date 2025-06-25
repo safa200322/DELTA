@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Form, FormGroup, Input, Button, Row, Col, Label } from "reactstrap";
+import { useNavigate } from "react-router-dom";
 
 const FindCarForm = () => {
   const [formData, setFormData] = useState({
@@ -13,7 +14,9 @@ const FindCarForm = () => {
     driverAge25to70: false,
     differentDropoff: false,
     Location: "",
+    vehicleType: "Car",
   });
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -23,23 +26,22 @@ const FindCarForm = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:5000/api/vehicles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      if (response.ok) {
-        // Optionally handle success (e.g., show results, navigate, etc.)
-        console.log("Search submitted successfully");
-      } else {
-        alert("Search failed.");
+    // Build query string from formData
+    const params = new URLSearchParams();
+    Object.entries(formData).forEach(([key, value]) => {
+      // Only include non-empty and true values
+      if (
+        (typeof value === "string" && value.trim() !== "") ||
+        (typeof value === "boolean" && value)
+      ) {
+        params.append(key, value);
       }
-    } catch (error) {
-      alert("An error occurred.");
-    }
+    });
+    const url = `/cars?${params.toString()}`;
+    console.debug("[FindCarForm] Navigating to:", url, "with formData:", formData);
+    navigate(url); // Changed from /car-listing to /cars
   };
 
   return (
