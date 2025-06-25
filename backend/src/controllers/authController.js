@@ -234,3 +234,93 @@ exports.updateProfilePicture = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+exports.updateUserProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { fullName, email, phone } = req.body;
+    
+    if (!fullName || !email || !phone) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    // Check if email is already used by another user
+    const existingUser = await userModel.findByEmail(email);
+    if (existingUser && existingUser.UserID !== userId) {
+      return res.status(409).json({ error: "Email already in use" });
+    }
+    
+    // Update user profile
+    await userModel.updateUserProfile(userId, {
+      name: fullName,
+      email: email,
+      phone: phone
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully"
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+    
+    if (newPassword.length < 6) {
+      return res.status(400).json({ error: "New password must be at least 6 characters" });
+    }
+    
+    // Get current user
+    const user = await userModel.findById(userId);
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    // Verify current password
+    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.Password);
+    if (!isCurrentPasswordValid) {
+      return res.status(401).json({ error: "Current password is incorrect" });
+    }
+    
+    // Hash new password
+    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+    
+    // Update password in database
+    await userModel.updatePassword(userId, hashedNewPassword);
+    
+    res.status(200).json({
+      success: true,
+      message: "Password changed successfully"
+    });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+exports.deleteAccount = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Delete user account
+    await userModel.deleteUser(userId);
+    
+    res.status(200).json({
+      success: true,
+      message: "Account deleted successfully"
+    });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
