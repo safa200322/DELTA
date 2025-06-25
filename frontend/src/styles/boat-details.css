@@ -1,0 +1,207 @@
+/* src/styles/boat-details.css */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+:root {
+  --sky-blue: #0770e3; /* Skyscanner primary */
+  --sunrise-orange: #ff5733; /* Warm accent */
+  --neutral-dark: #333333; /* Text */
+  --neutral-light: #ffffff; /* Backgrounds */
+  --shadow-color: rgba(0, 0, 0, 0.2); /* Shadows */
+}
+
+.vehicle-details-section {
+  font-family: "Inter", sans-serif;
+  background: var(--neutral-light);
+}
+
+/* Step Indicator */
+.step-indicator {
+  text-align: center;
+}
+
+.progress-bar-container {
+  background: #e9ecef;
+  height: 4px;
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.progress-bar {
+  background: var(--sky-blue);
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.steps {
+  display: flex;
+  justify-content: space-between;
+}
+
+.step-item {
+  text-align: center;
+  flex: 1;
+}
+
+.step-circle {
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border-radius: 50%;
+  background: #e9ecef;
+  color: var(--neutral-dark);
+  margin: 0 auto 10px;
+  font-weight: 600;
+}
+
+.step-item.active .step-circle {
+  background: var(--sky-blue);
+  color: var(--neutral-light);
+}
+
+.step-label {
+  font-size: 0.9rem;
+  color: var(--neutral-dark);
+}
+
+.step-item.active .step-label {
+  font-weight: 600;
+}
+
+/* Details Box */
+.details-box {
+  background: var(--neutral-light);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--shadow-color); /* Skyscanner-like shadow */
+  transition: transform 0.3s ease;
+}
+
+.details-box:hover {
+  transform: translateY(-5px); /* Hover lift */
+}
+
+.vehicle-image {
+  width: 150px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Typography */
+h4,
+h5,
+h6 {
+  color: var(--neutral-dark);
+  font-weight: 700;
+}
+
+h4 {
+  font-size: 1.8rem;
+}
+
+h5 {
+  font-size: 1.4rem;
+}
+
+h6 {
+  font-size: 1.2rem;
+}
+
+.text-primary {
+  color: var(--sky-blue) !important; /* Override Bootstrap */
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.text-warning {
+  color: var(--sunrise-orange) !important; /* Skyscanner warm accent */
+}
+
+/* Icons and Features */
+.additional-detail,
+.features {
+  font-size: 0.95rem;
+}
+
+.additional-detail i,
+.features i {
+  font-size: 1.2rem;
+}
+
+.supplier-logo {
+  width: 100px;
+  height: auto;
+}
+
+/* Buttons */
+.go-to-payment-button {
+  background: var(--sky-blue);
+  border-color: var(--sky-blue);
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 600;
+  box-shadow: 0 4px 8px var(--shadow-color);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.go-to-payment-button:hover {
+  background: #005bb5; /* Darker blue */
+  border-color: #005bb5;
+  transform: translateY(-2px);
+}
+
+/* Booking Form and Payment Method */
+.booking-info,
+.payment__info {
+  background: var(--neutral-light);
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.booking-info h5,
+.payment__info h5 {
+  color: var(--neutral-dark);
+  font-weight: 700;
+  font-size: 1.4rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .vehicle-image {
+    width: 120px;
+  }
+
+  h4 {
+    font-size: 1.5rem;
+  }
+
+  h5 {
+    font-size: 1.2rem;
+  }
+
+  .go-to-payment-button {
+    padding: 8px 16px;
+    font-size: 0.95rem;
+  }
+
+  .steps {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-circle {
+    margin: 0;
+  }
+
+  .step-label {
+    font-size: 1rem;
+  }
+}

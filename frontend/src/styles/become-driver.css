@@ -1,0 +1,77 @@
+.become__driver {
+  background: linear-gradient(135deg, #1e3c72, #2a5298);
+  padding: 60px 0;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.become__driver-img img {
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.become__driver-img:hover img {
+  transform: scale(1.05);
+}
+
+.become__driver-title {
+  color: #ffffff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.become__driver-btn {
+  background-color: #ffffff;
+  color: #1e3c72;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.become__driver-btn:hover {
+  background-color: #e0e7ff;
+  transform: translateY(-2px);
+}
+
+/* Ensure form styles don't conflict with Tailwind */
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+form label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  display: block;
+}
+
+form input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  transition: border-color 0.3s ease;
+}
+
+form input:focus {
+  border-color: #3b82f6;
+  outline: none;
+}
+
+form button {
+  background-color: #3b82f6;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #2563eb;
+}

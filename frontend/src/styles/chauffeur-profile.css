@@ -1,0 +1,129 @@
+.chauffeur-profile {
+  padding-top: 80px;
+  min-height: 100vh;
+  background: #f5f7fa;
+}
+
+.sidebar {
+  background: #005566;
+  color: #fff;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 250px;
+  padding-top: 20px;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 15px;
+  margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+  font-size: 1.5rem;
+  margin: 0;
+  color: #fff;
+}
+
+.sidebar-toggle {
+  cursor: pointer;
+  font-size: 1.5rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding-left: 0 !important;
+  margin-bottom: 0;
+  list-style: none;
+}
+
+.nav-link {
+  color: #fff;
+  padding: 12px 15px; /* Uniform padding */
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Consistent gap between icon and text */
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s;
+  justify-content: flex-start !important;
+  text-align: left !important;
+  margin-bottom: 8px; /* Added margin to increase vertical spacing */
+  width: 100%; /* Ensure full width for alignment */
+}
+
+.nav-link i {
+  font-size: 1.2rem;
+  min-width: 20px; /* Ensure icons have a consistent width */
+  text-align: center; /* Center the icon within its space */
+}
+
+.nav-link:hover {
+  background: #007bff;
+  color: #fff;
+}
+
+.nav-link.active {
+  background: #007bff;
+  font-weight: 600;
+}
+
+.content-area {
+  margin-left: 250px;
+  padding: 20px;
+}
+
+.profile-section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.profile-picture img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+@media (max-width: 767px) {
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    display: none;
+  }
+
+  .sidebar-open {
+    display: block !important;
+  }
+
+  .content-area {
+    margin-left: 0;
+  }
+
+  .sidebar-nav {
+    padding-left: 0 !important;
+  }
+
+  .nav-link {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    margin-bottom: 8px; /* Maintain spacing in mobile view */
+  }
+}

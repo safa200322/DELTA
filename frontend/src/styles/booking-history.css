@@ -1,0 +1,93 @@
+.content-area {
+  margin-left: 250px;
+  padding: 30px;
+  background: linear-gradient(135deg, #e6f0fa, #f8f9fc);
+  min-height: calc(100vh - 80px);
+}
+
+.profile-section {
+  max-width: 800px;
+  margin: 0 auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 25px rgba(0, 85, 102, 0.1);
+  padding: 20px;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-section h2 {
+  font-size: 1.8rem;
+  color: #007bff;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #4dabf7;
+  padding-bottom: 10px;
+}
+
+.nav-tabs {
+  border-bottom: 1px solid #e0e7f0;
+  margin-bottom: 20px;
+}
+
+.nav-link {
+  color: #333;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px 6px 0 0;
+  transition: background 0.3s, color 0.3s;
+}
+
+.nav-link.active {
+  background: #007bff;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tab-content {
+  padding: 15px;
+}
+
+.tab-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.tab-content li {
+  background: #f0f4f8;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  color: #333;
+  transition: background 0.3s;
+}
+
+.tab-content li:hover {
+  background: #e0e7f0;
+}
+
+@media (max-width: 767px) {
+  .content-area {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .profile-section {
+    padding: 10px;
+  }
+
+  .nav-link {
+    padding: 8px 15px;
+  }
+}

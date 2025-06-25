@@ -1,0 +1,233 @@
+/* CSS Variables for Consistent Theming */
+:root {
+  --primary-color: #4e73df;
+  --secondary-color: #74788d;
+  --success-color: #34c38f;
+  --background-color: #f8f9fc;
+  --card-background: #ffffff;
+  --text-color: #2c3e50;
+  --muted-text: #74788d;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Car Listing Section */
+.car-listing-section {
+  background: var(--background-color);
+  padding: 3rem 0;
+}
+
+/* Sort and Filter Controls */
+.car-listing-controls {
+  background: var(--card-background);
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.sort-section,
+.filter-section {
+  flex: 1;
+  min-width: 200px;
+}
+
+.sort-label,
+.filter-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.sort-label i {
+  font-size: 1.2rem;
+  color: var(--primary-color);
+}
+
+.sort-dropdown,
+.filter-dropdown {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 20px;
+  border: 1px solid #e0e0e0;
+  background: #f5f7fa;
+  color: var(--text-color);
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+}
+
+.sort-dropdown:hover,
+.filter-dropdown:hover {
+  background: #e9ecef;
+  border-color: var(--primary-color);
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: var(--box-shadow);
+}
+
+.no-cars-text {
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--muted-text);
+  margin: 2rem 0;
+}
+
+/* Filter Panel (Static Design) */
+.filter-panel {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1rem;
+}
+
+.filter-panel-content {
+  padding: 1rem;
+}
+
+.filter-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1.5rem;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text-color);
+  margin-bottom: 0.5rem;
+}
+
+.price-range-inputs,
+.seats-range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.price-slider,
+.seats-slider {
+  width: 100%;
+  appearance: none;
+  height: 8px;
+  background: #e0e0e0;
+  outline: none;
+  border-radius: 4px;
+  opacity: 0.6;
+}
+
+.price-slider:disabled,
+.seats-slider:disabled {
+  cursor: not-allowed;
+}
+
+.price-range-value,
+.seats-range-value {
+  font-size: 0.9rem;
+  color: var(--muted-text);
+  margin-top: 0.3rem;
+}
+
+.price-input,
+.seats-input {
+  width: 100%;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #f5f7fa;
+  color: var(--muted-text);
+}
+
+.price-range-separator {
+  font-size: 1rem;
+  color: var(--muted-text);
+}
+
+.reset-filters-btn {
+  width: 100%;
+  padding: 0.7rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  background: var(--secondary-color);
+  border-radius: var(--border-radius);
+  opacity: 0.6;
+}
+
+.filter-toggle-mobile {
+  display: none;
+}
+
+.filter-toggle-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .car-listing-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sort-section,
+  .filter-section {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  .sort-dropdown,
+  .filter-dropdown {
+    width: 100%;
+    font-size: 0.8rem;
+  }
+
+  .filter-panel {
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .filter-toggle-mobile {
+    display: block;
+  }
+
+  .filter-panel-content {
+    padding: 0.5rem;
+  }
+
+  .filter-title {
+    font-size: 1.2rem;
+  }
+
+  .filter-group {
+    margin-bottom: 1rem;
+  }
+
+  .filter-label {
+    font-size: 0.9rem;
+  }
+
+  .price-slider,
+  .seats-slider {
+    height: 6px;
+  }
+
+  .price-range-value,
+  .seats-range-value {
+    font-size: 0.8rem;
+  }
+
+  .reset-filters-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+}

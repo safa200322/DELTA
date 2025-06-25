@@ -1,0 +1,63 @@
+/* Styles for the container holding the chauffeur cards */
+.chauffeur-cards-container {
+  display: grid; /* Use CSS Grid for the layout */
+  /* Define grid columns: 1 column by default, 2 on medium, 3 on large */
+  grid-template-columns: 1fr; /* 1 column on small screens */
+  gap: 20px; /* Gap between cards */
+  padding: 0; /* Remove default padding */
+  margin: 0; /* Remove default margin */
+}
+
+/* Responsive grid columns */
+@media (min-width: 768px) {
+  /* Medium devices and up */
+  .chauffeur-cards-container {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+}
+
+@media (min-width: 992px) {
+  /* Large devices and up */
+  .chauffeur-cards-container {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+  }
+}
+
+/* Styles for individual chauffeur cards */
+.chauffeur-card {
+  border: 1px solid #dee2e6; /* Bootstrap's default border color */
+  border-radius: 0.25rem; /* Bootstrap's default border radius */
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* Subtle shadow */
+  display: flex; /* Use flexbox for content inside the card */
+  flex-direction: column; /* Stack content vertically */
+  justify-content: space-between; /* Space out content vertically */
+  height: 100%; /* Ensure cards in a row have equal height */
+}
+
+/* Styles for the card body - leveraging Bootstrap's card-body padding */
+.chauffeur-card .card-body {
+  /* Bootstrap's .card-body class already provides padding */
+  display: flex; /* Use flexbox inside body */
+  flex-direction: column; /* Stack items vertically */
+  justify-content: space-between; /* Space out sections */
+  height: 100%; /* Fill card height */
+}
+
+/* Styles for the details section within the card */
+.chauffeur-card .card-details {
+  /* No specific styles needed here, leveraging Bootstrap margins */
+}
+
+/* Styles for the status badge - leveraging Bootstrap badge styles */
+.chauffeur-card .badge {
+  /* Bootstrap's .badge and .bg-* classes handle the styling */
+  padding: 0.35em 0.65em; /* Adjust padding for badge size */
+  border-radius: 0.25rem; /* Match card border radius */
+  font-size: 0.8rem; /* Adjust font size */
+  font-weight: bold;
+}
+
+/* Styles for the actions section (buttons) */
+.chauffeur-card .card-actions {
+  /* No specific styles needed, leveraging Bootstrap flex and button styles */
+}

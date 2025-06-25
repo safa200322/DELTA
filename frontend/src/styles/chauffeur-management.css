@@ -1,0 +1,151 @@
+/* Chauffeur Management Specific Styles */
+
+/* Main Content Title */
+.chauffeur-management-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+/* Add New Chauffeur Button */
+.add-chauffeur-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #4e73df;
+  border: none;
+  color: #fff;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.add-chauffeur-btn:hover {
+  background-color: #3858b3;
+}
+
+/* Search Input */
+.search-input {
+  width: 300px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #ced4da;
+  outline: none;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.search-input::placeholder {
+  color: #74788d;
+}
+
+/* Export Button */
+.export-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.export-btn span {
+  margin-right: 5px;
+}
+
+.export-btn:hover {
+  background-color: #f5f7fa;
+}
+
+/* Stats Card */
+.stats-card .card-body {
+  padding: 10px 15px !important;
+}
+
+.stats-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.stats-label {
+  font-size: 0.8rem;
+  color: #74788d;
+  text-transform: uppercase;
+}
+
+/* Chauffeur Table */
+.chauffeur-table {
+  font-size: 0.9rem;
+}
+
+.chauffeur-table th,
+.chauffeur-table td {
+  padding: 10px 15px;
+  vertical-align: middle;
+}
+
+.chauffeur-table th {
+  background-color: #f5f7fa;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 1px solid #dee2e6 !important;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+
+.chauffeur-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Status Badge */
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-transform: capitalize;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .chauffeur-management-title {
+    font-size: 1.2rem;
+  }
+
+  .add-chauffeur-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .search-input {
+    width: 200px;
+    font-size: 0.8rem;
+  }
+
+  .export-btn {
+    padding: 4px 8px;
+    font-size: 0.8rem;
+  }
+
+  .stats-value {
+    font-size: 1rem;
+  }
+
+  .stats-label {
+    font-size: 0.7rem;
+  }
+
+  .chauffeur-table th,
+  .chauffeur-table td {
+    padding: 8px 10px;
+    font-size: 0.8rem;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 0.7rem;
+  }
+}

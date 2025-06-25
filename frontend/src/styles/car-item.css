@@ -1,0 +1,262 @@
+/* CSS Variables for Consistent Theming */
+:root {
+  --primary-color: #007bff;
+  --success-color: #28a745;
+  --background-color: #f8f9fc;
+  --card-background: #ffffff;
+  --text-color: #2c3e50;
+  --muted-text: #6c757d;
+  --border-radius: 12px;
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+/* Car Item Card */
+.car__item {
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  max-width: 450px; /* Increased from 300px to make cards wider */
+  margin: 0 auto;
+}
+
+.car__item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Car Image and Badge */
+.car__item-img {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.car__item-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+}
+
+.car-type-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0.3rem 0.7rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-color);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Car Content */
+.car__item-content {
+  padding: 1.5rem;
+  text-align: center;
+}
+
+/* Car Title */
+.car__item-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+/* Features */
+.car__item-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.feature-item i {
+  color: var(--success-color);
+  font-size: 1rem;
+}
+
+/* Car Details (Icons for Transmission, Speed, GPS) */
+.car__item-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.detail-item i {
+  color: var(--success-color);
+  font-size: 1rem;
+}
+
+/* Rating */
+.car__item-rating {
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
+
+.rating-value {
+  font-weight: 700;
+  color: var(--text-color);
+  margin-right: 0.3rem;
+}
+
+.rating-text {
+  font-size: 0.85rem;
+}
+
+/* Price */
+.car__item-price {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: var(--muted-text);
+  font-size: 1rem;
+  margin-right: 0.5rem;
+}
+
+.current-price {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+/* Book Button */
+.car__item-btn {
+  width: 100%;
+  padding: 0.7rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.car__item-btn:hover {
+  background: #0056b3;
+  transform: translateY(-2px);
+}
+
+.car__item-btn a {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 992px) {
+  .car__item {
+    max-width: 300px;
+  }
+
+  .car__item-img {
+    height: 150px;
+  }
+
+  .car__item-title {
+    font-size: 1.1rem;
+  }
+
+  .car__item-price {
+    font-size: 1.1rem;
+  }
+
+  .original-price {
+    font-size: 0.9rem;
+  }
+
+  .car__item-btn {
+    font-size: 0.9rem;
+    padding: 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .car__item {
+    max-width: 250px;
+  }
+
+  .car__item-img {
+    height: 120px;
+  }
+
+  .car__item-title {
+    font-size: 1rem;
+  }
+
+  .car__item-price {
+    font-size: 1rem;
+  }
+
+  .original-price {
+    font-size: 0.8rem;
+  }
+
+  .car__item-btn {
+    font-size: 0.8rem;
+    padding: 0.5rem;
+  }
+
+  .car__item-features,
+  .car__item-details {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .car__item {
+    max-width: 100%;
+  }
+
+  .car__item-content {
+    padding: 1rem;
+  }
+
+  .car__item-img {
+    height: 100px;
+  }
+
+  .car__item-title {
+    font-size: 0.9rem;
+  }
+
+  .car__item-price {
+    font-size: 0.9rem;
+  }
+
+  .original-price {
+    font-size: 0.7rem;
+  }
+
+  .car__item-btn {
+    font-size: 0.7rem;
+    padding: 0.4rem;
+  }
+}
