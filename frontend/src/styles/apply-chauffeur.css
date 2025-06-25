@@ -1,0 +1,98 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Segoe+UI:wght@400;600&display=swap");
+
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  font-family: "Segoe UI", sans-serif;
+  background: url("../assets/all-images/slider-img/home-bg.jpg") center/cover no-repeat;
+  position: relative;
+  z-index: 1;
+  overflow: auto;
+}
+
+.auth-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  z-index: 0;
+}
+
+.outer-box {
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.form-box {
+  background-color: rgba(255, 255, 255, 0.88);
+  padding: 3rem 3.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  width: 100%;
+  max-width: 500px;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.form-box h2 {
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  color: #1e3a8a;
+  margin-bottom: 2rem;
+  font-size: 2.3rem;
+  letter-spacing: 0.5px;
+}
+
+.right-pane {
+  background-color: rgba(255, 255, 255, 0.88);
+  padding: 3rem 3.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 0, 0.2); /* Altın çerçeve efekti */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  width: 100%;
+  max-width: 600px;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+label {
+  font-weight: 600;
+  color: #374151;
+}
+
+input,
+select {
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 1.05rem;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+button {
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+.switch-text a {
+  color: #1e3a8a;
+  font-weight: 500;
+  text-decoration: none;
+}

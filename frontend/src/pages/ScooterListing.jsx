@@ -15,23 +15,18 @@ import CommonSection from "../components/UI/CommonSection";
 // No ScooterItem or scooterData needed for this motor listing page
 // import ScooterItem from "../components/UI/ScooterItem";
 // import scooterData from "../assets/data/scooterData";
-import motorData from "../assets/data/motorData"; // Using your motor data
 import Footer from "../components/Footer/Footer";
 import MotorItem from "../components/UI/MotorItem"; // Using your MotorItem component
 
 // Import the same CSS file used for car listing design
 import "../styles/car-listing.css";
+import scooterData from "../assets/data/scooterData";
+import ScooterItem from "../components/UI/ScooterItem";
 
 // --- FAKE DATA FOR FILTERING OPTIONS (Used ONLY for populating the design elements) ---
 // This data is used to show options in the UI, but does not affect the listed motors
 const fakeBrands = ["Honda", "Yamaha", "Kawasaki", "Suzuki", "Harley-Davidson"];
-const fakeTypes = [
-  "Sportbike",
-  "Cruiser",
-  "Naked Bike",
-  "Adventure",
-  "Scooter",
-];
+const fakeTypes = ["Sportbike", "Cruiser", "Naked Bike", "Adventure", "Scooter"];
 const fakeEngineSizes = ["125cc", "300cc", "600cc", "1000cc+", "Electric"];
 const fakePriceRange = [0, 500]; // Example price range for motors ($/day)
 const fakeSeatOptions = [1, 2]; // Motors typically have 1 or 2 seats
@@ -45,7 +40,7 @@ const CarListing = () => {
   const [sortOption, setSortOption] = useState("Select"); // To display the selected text in the sort dropdown
   const [dropdownOpen, setDropdownOpen] = useState(false); // To toggle the sort dropdown's open/close state
   // Using sortedMotors state for the list as in your second code block, initialized with motorData
-  const [sortedMotors, setSortedMotors] = useState(motorData || []);
+  const [sortedMotors, setSortedMotors] = useState(scooterData || []);
   const [isFilterOpen, setIsFilterOpen] = useState(false); // To toggle the mobile filter panel's open/close state
 
   // State for filter selections (interactive but NOT used for filtering logic)
@@ -60,12 +55,12 @@ const CarListing = () => {
 
   // useEffect to initialize motors on mount (as in your second code block)
   useEffect(() => {
-    console.log("motorData in CarListing:", motorData);
-    if (!motorData || !Array.isArray(motorData)) {
-      console.error("motorData is invalid or empty:", motorData);
+    console.log("motorData in CarListing:", scooterData);
+    if (!scooterData || !Array.isArray(scooterData)) {
+      console.error("motorData is invalid or empty:", scooterData);
       setSortedMotors([]); // Set to empty array if data is bad
     } else {
-      setSortedMotors(motorData); // Initialize with the motor data
+      setSortedMotors(scooterData); // Initialize with the motor data
     }
   }, []); // Empty dependency array, runs once on mount
 
@@ -89,8 +84,7 @@ const CarListing = () => {
   const handleEngineSizeChange = (e) => setSelectedEngineSize(e.target.value);
   const handlePriceChange = (e) => setSelectedPrice(parseInt(e.target.value));
   const handleSeatsChange = (e) => setSelectedSeats(parseInt(e.target.value));
-  const handleTransmissionChange = (e) =>
-    setSelectedTransmission(e.target.value);
+  const handleTransmissionChange = (e) => setSelectedTransmission(e.target.value);
   const handleColorChange = (e) => setSelectedColor(e.target.value);
 
   // Placeholder handler for Reset Filters button (Design only - just reset state)
@@ -134,28 +128,17 @@ const CarListing = () => {
                     </DropdownToggle>
                     <DropdownMenu>
                       {/* Dropdown items - onClick just changes the displayed text state */}
-                      <DropdownItem onClick={() => handleSort("Select")}>
-                        Select
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("Low to High")}>
-                        Low to High
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("High to Low")}>
-                        High to Low
-                      </DropdownItem>
+                      <DropdownItem onClick={() => handleSort("Select")}>Select</DropdownItem>
+                      <DropdownItem onClick={() => handleSort("Low to High")}>Low to High</DropdownItem>
+                      <DropdownItem onClick={() => handleSort("High to Low")}>High to Low</DropdownItem>
                     </DropdownMenu>
                   </Dropdown>
                 </div>
 
                 {/* Filter Toggle Button (Visible on small screens, visually opens/closes filter panel) */}
                 <div className="filter-toggle-mobile d-lg-none">
-                  <Button
-                    color="primary"
-                    onClick={toggleFilterPanel}
-                    className="filter-toggle-btn"
-                  >
-                    {isFilterOpen ? "Hide Filters" : "Show Filters"}{" "}
-                    {/* Button text changes visually */}
+                  <Button color="primary" onClick={toggleFilterPanel} className="filter-toggle-btn">
+                    {isFilterOpen ? "Hide Filters" : "Show Filters"} {/* Button text changes visually */}
                   </Button>
                 </div>
               </div>
@@ -186,8 +169,7 @@ const CarListing = () => {
                       onChange={handleBrandChange} // Updates state on change
                       disabled // Explicitly disabled as per "no functionality"
                     >
-                      <option value="">Select Brand</option>{" "}
-                      {/* Static default option */}
+                      <option value="">Select Brand</option> {/* Static default option */}
                       {/* Options populated visually from fake data */}
                       {fakeBrands.map((brand, index) => (
                         <option key={index} value={brand.toLowerCase()}>
@@ -206,8 +188,7 @@ const CarListing = () => {
                       onChange={handleTypeChange} // Updates state on change
                       disabled // Disabled
                     >
-                      <option value="">Select Type</option>{" "}
-                      {/* Static default option */}
+                      <option value="">Select Type</option> {/* Static default option */}
                       {/* Options populated visually */}
                       {fakeTypes.map((type, index) => (
                         <option key={index} value={type.toLowerCase()}>
@@ -226,8 +207,7 @@ const CarListing = () => {
                       onChange={handleEngineSizeChange} // Updates state on change
                       disabled // Disabled
                     >
-                      <option value="">Select Size</option>{" "}
-                      {/* Static default option */}
+                      <option value="">Select Size</option> {/* Static default option */}
                       {/* Options populated visually */}
                       {fakeEngineSizes.map((size, index) => (
                         <option key={index} value={size.toLowerCase()}>
@@ -253,8 +233,7 @@ const CarListing = () => {
                       />
                       {/* Displaying the visually selected price */}
                       <span className="price-range-value">
-                        ${fakePriceRange[0]} - ${selectedPrice}{" "}
-                        {/* Displays range based on state */}
+                        ${fakePriceRange[0]} - ${selectedPrice} {/* Displays range based on state */}
                       </span>
                     </div>
                   </div>
@@ -273,8 +252,7 @@ const CarListing = () => {
                     />
                     {/* Displaying the visually selected seat count */}
                     <span className="seats-range-value">
-                      {selectedSeats} {selectedSeats === 1 ? "Seat" : "Seats"}{" "}
-                      {/* Displays count based on state */}
+                      {selectedSeats} {selectedSeats === 1 ? "Seat" : "Seats"} {/* Displays count based on state */}
                     </span>
                   </div>
 
@@ -287,8 +265,7 @@ const CarListing = () => {
                       onChange={handleTransmissionChange} // Updates state on change
                       disabled // Disabled
                     >
-                      <option value="">Select Transmission</option>{" "}
-                      {/* Static default option */}
+                      <option value="">Select Transmission</option> {/* Static default option */}
                       {fakeTransmissions.map((trans, index) => (
                         <option key={index} value={trans.toLowerCase()}>
                           {trans}
@@ -306,8 +283,7 @@ const CarListing = () => {
                       onChange={handleColorChange} // Updates state on change
                       disabled // Disabled
                     >
-                      <option value="">Select Color</option>{" "}
-                      {/* Static default option */}
+                      <option value="">Select Color</option> {/* Static default option */}
                       {fakeColors.map((color, index) => (
                         <option key={index} value={color.toLowerCase()}>
                           {color}
@@ -346,8 +322,7 @@ const CarListing = () => {
                     ) => (
                       <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
                         {/* Render each motor item using the MotorItem component */}
-                        <MotorItem item={item} key={item.id} type="motors" />{" "}
-                        {/* Using MotorItem */}
+                        <ScooterItem item={item} key={item.id} type="Bikes" /> {/* Using MotorItem */}
                       </Col>
                     )
                   )

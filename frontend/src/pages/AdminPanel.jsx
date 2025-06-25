@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -38,7 +38,57 @@ ChartJS.register(
   Legend
 );
 
-// Chart Data (static, as in your original)
+// Mock Data
+const MOCK_RESERVATIONS = [
+  {
+    id: 1,
+    user: "Alice",
+    vehicle: "Toyota Corolla",
+    duration: "3 days",
+    status: "pending",
+  },
+  {
+    id: 2,
+    user: "Bob",
+    vehicle: "Honda Civic",
+    duration: "5 days",
+    status: "pending",
+  },
+  {
+    id: 3,
+    user: "Charlie",
+    vehicle: "BMW X3",
+    duration: "7 days",
+    status: "pending",
+  },
+];
+
+const MOCK_PAYMENTS = [
+  { id: 1, user: "Alice", amount: 150, date: "2025-06-20", status: "pending" },
+  { id: 2, user: "Bob", amount: 250, date: "2025-06-18", status: "pending" },
+  {
+    id: 3,
+    user: "Charlie",
+    amount: 350,
+    date: "2025-06-19",
+    status: "pending",
+  },
+];
+
+const MOCK_NOTIFICATIONS = [
+  { id: 1, message: "New reservation made by Alice", type: "info" },
+  { id: 2, message: "Payment received from Bob", type: "success" },
+  { id: 3, message: "New accessory added", type: "info" },
+  { id: 4, message: "Vehicle maintenance scheduled", type: "warning" },
+];
+
+const MOCK_ACCESSORIES = [
+  { id: 1, name: "GPS Navigation", price: 25, category: "Electronics" },
+  { id: 2, name: "Child Safety Seat", price: 15, category: "Safety" },
+  { id: 3, name: "Phone Charger", price: 10, category: "Electronics" },
+];
+
+// Chart Data
 const profitOverviewData = {
   labels: [
     "Jan",
@@ -87,7 +137,7 @@ const inventoryOverviewData = {
   ],
 };
 
-// Chart Options (same as original)
+// Chart Options
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
@@ -108,7 +158,7 @@ const chartOptions = {
   },
 };
 
-// Helper Components (unchanged)
+// Helper Components
 const SummaryCard = ({ title, value, subValue, percentage, isPositive }) => (
   <Card className="dashboard-card summary-card">
     <CardBody>
@@ -200,64 +250,17 @@ const NotificationCard = ({ notifications, handleRemoveNotification }) => (
   </Card>
 );
 
+// Main Component
 const AdminDashboard = () => {
-  const [reservations, setReservations] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const [notifications, setNotifications] = useState([]);
-  const [accessories, setAccessories] = useState([]);
+  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
+  const [payments, setPayments] = useState(MOCK_PAYMENTS);
+  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
+  const [accessories, setAccessories] = useState(MOCK_ACCESSORIES);
   const [newAccessory, setNewAccessory] = useState({
     name: "",
     price: "",
     category: "",
   });
-
-  // Fetch Reservations from backend
-  useEffect(() => {
-    fetch("https://localhost:443/api/admin/")
-      .then((res) => res.json())
-      .then((data) => {
-        setReservations(data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch reservations:", err);
-      });
-  }, []);
-
-  // Fetch Payments from backend
-  useEffect(() => {
-    fetch("https://localhost:443/api/adminpayment/")
-      .then((res) => res.json())
-      .then((data) => {
-        setPayments(data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch payments:", err);
-      });
-  }, []);
-
-  // Fetch Notifications from backend
-  useEffect(() => {
-    fetch("/api/notifications")
-      .then((res) => res.json())
-      .then((data) => {
-        setNotifications(data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch notifications:", err);
-      });
-  }, []);
-
-  // Fetch Accessories from backend
-  useEffect(() => {
-    fetch("/api/accessories")
-      .then((res) => res.json())
-      .then((data) => {
-        setAccessories(data);
-      })
-      .catch((err) => {
-        console.error("Failed to fetch accessories:", err);
-      });
-  }, []);
 
   const handleAction = useCallback((setState, id, action) => {
     setState((prev) =>
@@ -337,7 +340,7 @@ const AdminDashboard = () => {
           <Col xs={12} sm={6} md={4}>
             <SummaryCard
               title="TOTAL RESERVATIONS"
-              value={reservations.length.toString()}
+              value="3"
               subValue="2 last month"
               percentage="50%"
               isPositive={true}
@@ -346,7 +349,7 @@ const AdminDashboard = () => {
           <Col xs={12} sm={6} md={4}>
             <SummaryCard
               title="PENDING PAYMENTS"
-              value={payments.filter((p) => p.Status === "pending").length.toString()}
+              value="3"
               subValue="4 last month"
               percentage="25%"
               isPositive={false}
@@ -355,10 +358,7 @@ const AdminDashboard = () => {
           <Col xs={12} sm={6} md={4}>
             <SummaryCard
               title="TOTAL REVENUE"
-              value={`$${payments
-                .filter((p) => p.Status === "accepted")
-                .reduce((acc, cur) => acc + Number(cur.Amount), 0)
-                .toFixed(2)}`}
+              value="$750.00"
               subValue="$600 last month"
               percentage="25%"
               isPositive={true}
@@ -424,67 +424,65 @@ const AdminDashboard = () => {
         </Row>
         <Row className="g-2">
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card">
+            <Card className="dashboard-card h-100">
               <CardHeader>
-                <h5 className="mb-0">PENDING RESERVATIONS</h5>
+                <h5 className="mb-0">RESERVATION MANAGEMENT</h5>
               </CardHeader>
               <CardBody className="p-0">
-                <Table responsive hover className="m-0 p-0">
+                <Table hover className="align-middle mb-0">
                   <thead>
                     <tr>
-                      <th>Renter Name</th>
+                      <th>User</th>
                       <th>Vehicle</th>
-                      <th>Start Date</th>
-                      <th>End Date</th>
+                      <th>Duration</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {reservations.map((reservation) => (
-                      <tr key={reservation.ReservationID}>
-                        <td>{reservation.UserID}</td>
-                        <td>{reservation.VehicleID}</td>
-                        <td>{formatDate(reservation.StartDate)}</td>
-                        <td>{formatDate(reservation.EndDate)}</td>
-                        <td>{reservation.Status}</td>
+                      <tr key={reservation.id}>
+                        <td>{reservation.user}</td>
+                        <td>{reservation.vehicle}</td>
+                        <td>{reservation.duration}</td>
                         <td>
                           <Badge
                             color={
-                              reservation.status === "pending"
-                                ? "warning"
-                                : reservation.status === "accepted"
+                              reservation.status === "accepted"
                                 ? "success"
-                                : "danger"
+                                : reservation.status === "rejected"
+                                ? "danger"
+                                : "warning"
                             }
                           >
                             {reservation.status}
                           </Badge>
                         </td>
                         <td>
-                          {reservation.status === "pending" && (
-                            <>
-                              <Button
-                                color="success"
-                                size="sm"
-                                onClick={() =>
-                                  handleAction(setReservations, reservation.id, "accepted")
-                                }
-                                className="me-1"
-                              >
-                                Accept
-                              </Button>
-                              <Button
-                                color="danger"
-                                size="sm"
-                                onClick={() =>
-                                  handleAction(setReservations, reservation.id, "rejected")
-                                }
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
+                          <Button
+                            className="btn btn-accept me-2"
+                            onClick={() =>
+                              handleAction(
+                                setReservations,
+                                reservation.id,
+                                "accepted"
+                              )
+                            }
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            className="btn btn-reject"
+                            onClick={() =>
+                              handleAction(
+                                setReservations,
+                                reservation.id,
+                                "rejected"
+                              )
+                            }
+                          >
+                            Reject
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -494,72 +492,57 @@ const AdminDashboard = () => {
             </Card>
           </Col>
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card">
+            <Card className="dashboard-card h-100">
               <CardHeader>
-                <h5 className="mb-0">PAYMENT VERIFICATION</h5>
+                <h5 className="mb-0">PAYMENT MANAGEMENT</h5>
               </CardHeader>
               <CardBody className="p-0">
-                <Table responsive hover className="m-0 p-0">
+                <Table hover className="align-middle mb-0">
                   <thead>
                     <tr>
-                      <th>Renter Name</th>
-                      <th>Vehicle</th>
-                      <th>Payment Proof</th>
+                      <th>User</th>
                       <th>Amount</th>
+                      <th>Date</th>
                       <th>Status</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {payments.map((payment) => (
-                      <tr key={payment.PaymentID}>
-                        <td>{payment.renterName}</td>
-                        <td>{payment.vehicleName}</td>
-                        <td>
-                          <img
-                            src={payment.paymentProof}
-                            alt="Payment Proof"
-                            style={{ width: 100 }}
-                          />
-                        </td>
-                        <td>{formatCurrency(payment.Amount)}</td>
+                      <tr key={payment.id}>
+                        <td>{payment.user}</td>
+                        <td>{formatCurrency(payment.amount)}</td>
+                        <td>{formatDate(payment.date)}</td>
                         <td>
                           <Badge
                             color={
-                              payment.status === "pending"
-                                ? "warning"
-                                : payment.status === "accepted"
+                              payment.status === "accepted"
                                 ? "success"
-                                : "danger"
+                                : payment.status === "rejected"
+                                ? "danger"
+                                : "warning"
                             }
                           >
                             {payment.status}
                           </Badge>
                         </td>
                         <td>
-                          {payment.status === "pending" && (
-                            <>
-                              <Button
-                                color="success"
-                                size="sm"
-                                onClick={() =>
-                                  handleAction(setPayments, payment.id, "accepted")
-                                }
-                                className="me-1"
-                              >
-                                Accept
-                              </Button>
-                              <Button
-                                color="danger"
-                                size="sm"
-                                onClick={() =>
-                                  handleAction(setPayments, payment.id, "rejected")
-                                }
-                              >
-                                Reject
-                              </Button>
-                            </>
-                          )}
+                          <Button
+                            className="btn btn-accept me-2"
+                            onClick={() =>
+                              handleAction(setPayments, payment.id, "accepted")
+                            }
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            className="btn btn-reject"
+                            onClick={() =>
+                              handleAction(setPayments, payment.id, "rejected")
+                            }
+                          >
+                            Reject
+                          </Button>
                         </td>
                       </tr>
                     ))}
@@ -568,33 +551,18 @@ const AdminDashboard = () => {
               </CardBody>
             </Card>
           </Col>
-        </Row>
-        <Row className="g-2 mt-3">
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card">
+            <Card className="dashboard-card h-100">
               <CardHeader>
-                <h5 className="mb-0">ACCESSORY MANAGEMENT</h5>
+                <h5 className="mb-0">ACCESSORIES MANAGEMENT</h5>
               </CardHeader>
               <CardBody>
-                <Table responsive hover>
-                  <thead>
-                    <tr>
-                      <th>Accessory Name</th>
-                      <th>Price</th>
-                      <th>Category</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accessories.map((accessory) => (
-                      <tr key={accessory.id}>
-                        <td>{accessory.name}</td>
-                        <td>{formatCurrency(accessory.price)}</td>
-                        <td>{accessory.category}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
-                <div className="d-flex flex-column flex-md-row gap-2 mt-3">
+                <div
+                  className="form-grid d-grid gap-2 mb-3"
+                  style={{
+                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                  }}
+                >
                   <input
                     type="text"
                     className="form-control"
@@ -604,7 +572,6 @@ const AdminDashboard = () => {
                   />
                   <input
                     type="number"
-                    min="0"
                     className="form-control"
                     placeholder="Price"
                     value={newAccessory.price}
@@ -615,12 +582,48 @@ const AdminDashboard = () => {
                     className="form-control"
                     placeholder="Category"
                     value={newAccessory.category}
-                    onChange={(e) => handleInputChange("category", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("category", e.target.value)
+                    }
                   />
-                  <Button color="primary" onClick={handleAddAccessory}>
+                  <Button
+                    className="btn btn-primary"
+                    onClick={handleAddAccessory}
+                  >
                     Add Accessory
                   </Button>
                 </div>
+                <Table hover className="align-middle mb-0">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Price</th>
+                      <th>Category</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {accessories.map((accessory) => (
+                      <tr key={accessory.id}>
+                        <td>{accessory.name}</td>
+                        <td>{formatCurrency(accessory.price)}</td>
+                        <td>{accessory.category}</td>
+                        <td>
+                          <Button
+                            className="btn btn-remove"
+                            onClick={() =>
+                              setAccessories((prev) =>
+                                prev.filter((item) => item.id !== accessory.id)
+                              )
+                            }
+                          >
+                            Remove
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
               </CardBody>
             </Card>
           </Col>

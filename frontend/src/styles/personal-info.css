@@ -1,123 +1,104 @@
+.chauffeur-profile {
+  display: flex;
+  min-height: 100vh;
+  background: #f5f7fa;
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background-color: #005566;
+  color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  padding: 20px 15px;
+  overflow-y: auto;
+  z-index: 1000;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: white;
+}
+
+.sidebar-toggle {
+  font-size: 1.5rem;
+  color: white;
+  cursor: pointer;
+}
+
+/* Sidebar Nav */
+.sidebar-nav {
+  padding: 0;
+  list-style: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  color: white;
+  text-decoration: none;
+  font-size: 1rem;
+  border-radius: 6px;
+  transition: background 0.3s;
+  margin-bottom: 8px;
+}
+
+.nav-link i {
+  margin-right: 10px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+}
+
+/* Content */
 .content-area {
   margin-left: 250px;
-  padding: 30px;
-  background: linear-gradient(135deg, #f0f4f8, #ffffff);
-  min-height: calc(100vh - 80px);
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  background: linear-gradient(to bottom, #f5f7fa, #eef1f6); /* hafif degrade */
 }
 
+/* Profile Content Box */
 .profile-section {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
   max-width: 600px;
-  margin: 0 auto;
-  background: #ffffff;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 85, 102, 0.1);
-  padding: 25px;
-  animation: fadeIn 0.5s ease-in-out;
+  margin-top: 2rem;
+  text-align: left;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.profile-section h2 {
-  font-size: 2rem;
-  color: #005566;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 25px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.label {
-  font-size: 1rem;
-  color: #333;
-  font-weight: 500;
-  margin-bottom: 5px;
-  display: block;
-}
-
-.input {
-  width: 100%;
-  padding: 10px 15px;
-  border: 2px solid #e0e7f0;
-  border-radius: 8px;
-  font-size: 1rem;
-  color: #333;
-  transition: border-color 0.3s, box-shadow 0.3s;
-}
-
-.input:focus {
-  border-color: #4dabf7;
-  box-shadow: 0 0 10px rgba(77, 171, 247, 0.3);
-  outline: none;
-}
-
-.profile-picture {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.profile-picture img {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #4dabf7;
-  transition: transform 0.3s;
-}
-
-.profile-picture img:hover {
-  transform: scale(1.1);
-}
-
-.profile-picture .input {
-  display: inline-block;
-  width: auto;
-  margin-top: 10px;
-}
-
-button {
-  width: 100%;
-  padding: 12px;
-  background: linear-gradient(90deg, #005566, #007bff);
-  border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 1.1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.3s, box-shadow 0.3s;
-}
-
-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
-}
-
-@media (max-width: 767px) {
-  .content-area {
-    margin-left: 0;
-    padding: 15px;
+/* Responsive */
+@media (max-width: 768px) {
+  .chauffeur-profile {
+    flex-direction: column;
   }
 
-  .profile-section {
-    padding: 15px;
-  }
-
-  .profile-picture img {
-    width: 120px;
-    height: 120px;
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
   }
 }

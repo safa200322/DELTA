@@ -19,11 +19,17 @@ const Home = () => {
   const navLinks = [
     { path: "/home", display: "Home" },
     { path: "/about", display: "About" },
-    { path: "/cars2", display: "Cars" },
-    { path: "/motors2", display: "Motors" },
+    { path: "/cars", display: "Cars" },
+    { path: "/motors", display: "Motors" },
     { path: "/bicycle", display: "Bicycles" },
-    { path: "/yachts", display: "Yachts" },
+    { path: "/boats", display: "Boats" },
     { path: "/contact", display: "Contact" },
+  ];
+
+  const searchTabs = [
+    { path: "/cars", display: "Vehicles" },
+    { path: "/bicycle", display: "Bicycles" },
+    { path: "/boats", display: "Boats" },
   ];
 
   return (
@@ -32,31 +38,38 @@ const Home = () => {
       <section className="hero__search-section">
         <Container>
           {/* Headline */}
-          <h1 className="hero__title text-white text-center mb-5">
-            Thousands of vehicles. One simple search.
-          </h1>
+          <h1 className="hero__title text-white text-center mb-5">Thousands of vehicles. One simple search.</h1>
 
           {/* Navigation Links */}
           <div className="main-nav d-flex justify-content-center gap-4 mb-4">
             {navLinks.map((item, index) => (
-              <NavLink
-                key={index}
-                to={item.path}
-                className={({ isActive }) =>
-                  isActive ? "main-nav-link active" : "main-nav-link"
-                }
-              >
+              <NavLink key={index} to={item.path} className={({ isActive }) => (isActive ? "main-nav-link active" : "main-nav-link")}>
                 {item.display}
               </NavLink>
             ))}
           </div>
 
-          {/* Search Form (without tabs) */}
+          {/* Search Form */}
           <div className="search__form-container bg-white p-4 rounded-3 shadow-sm mx-auto">
+            <div className="search-tabs d-flex gap-3 mb-4">
+              {searchTabs.map((tab, index) => (
+                <NavLink key={index} to={tab.path} className={({ isActive }) => (isActive ? "search-tab active" : "search-tab")}>
+                  {tab.display}
+                </NavLink>
+              ))}
+            </div>
             <FindCarForm />
           </div>
         </Container>
       </section>
+
+      {/* Optional: HeroSlider below the search section */}
+      {/* <section className="p-0 hero__slider-section">
+        <HeroSlider />
+      </section> */}
+
+      {/* =========== about section ================ */}
+      {/* <AboutSection /> */}
 
       {/* ========== services section ============ */}
       <section>
@@ -95,12 +108,7 @@ const Home = () => {
               </Col>
             ))}
             <Col lg="12" className="text-center mt-4">
-              <Button
-                color="primary"
-                className="view-all-btn px-5 py-3 rounded-5"
-                tag={NavLink}
-                to="/cars2"
-              >
+              <Button color="primary !important" className="view-all-btn px-5 py-3 rounded-5" tag={NavLink} to="/cars">
                 View All Cars
               </Button>
             </Col>

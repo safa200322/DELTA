@@ -18,10 +18,7 @@ const PersonalInfo = () => (
         <strong>Date of Birth:</strong> January 1, 1980
       </p>
       <div className="profile-picture">
-        <img src="https://via.placeholder.com/150" alt="Profile" />
-        <Button color="primary" className="mt-2">
-          Upload New Picture
-        </Button>
+        <Button color="primary">Upload New Picture</Button>
       </div>
     </div>
   </div>

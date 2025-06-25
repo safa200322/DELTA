@@ -2,8 +2,15 @@ import React from "react";
 import { Col } from "reactstrap";
 import { Link } from "react-router-dom";
 import "../../styles/car-item.css";
+import { useNavigate } from "react-router-dom";
 
 const BoatItem = ({ item, type }) => {
+  const navigate = useNavigate();
+
+  const handleBook = (carName, model) => {
+    navigate(`/boats/${carName || model}`);
+  };
+
   return (
     <Col lg="12" className="mb-4">
       <div className="car__item">
@@ -34,18 +41,14 @@ const BoatItem = ({ item, type }) => {
           </div>
           <div className="car__item-rating">
             <span className="rating-value">{item.rating || "4.7"}</span>
-            <span className="rating-text">
-              Excellent ({item.reviews || "188"} reviews)
-            </span>
+            <span className="rating-text">Excellent ({item.reviews || "188"} reviews)</span>
           </div>
           <div className="car__item-price">
-            <span className="original-price">
-              ${item.originalPrice || "250"}
-            </span>
+            <span className="original-price">${item.originalPrice || "250"}</span>
             <span className="current-price">${item.price}/day</span>
           </div>
-          <button className="car__item-btn book-btn">
-            <Link to={`/cars/${item.carName || item.model}`}>Book</Link>
+          <button className="car__item-btn book-btn" onClick={() => handleBook(item.carName, item.model)}>
+            Book        
           </button>
         </div>
       </div>

@@ -1,0 +1,131 @@
+.auth-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+  font-family: "Segoe UI", sans-serif;
+  background: url("../assets/all-images/slider-img/home-bg.jpg") center/cover no-repeat;
+  position: relative;
+  z-index: 1;
+  overflow: auto;
+}
+
+.auth-container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  z-index: 0;
+}
+
+/* 💎 Dış beyaz blur kutu */
+.right-pane {
+  background-color: rgba(255, 255, 255, 0.88);
+  padding: 3rem 3.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 0, 0.2); /* Altın çerçeve efekti */
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  width: 100%;
+  max-width: 600px;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+/* İç form kutusu (signup ile birebir) */
+.form-box {
+  background-color: rgba(255, 255, 255, 0.88);
+  padding: 3rem 3.5rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(6px);
+  width: 100%;
+  max-width: 500px;
+  z-index: 2;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.form-box h2 {
+  text-align: center;
+  font-family: "Playfair Display", serif;
+  color: #1e3a8a;
+  margin-bottom: 2rem;
+  font-size: 2.3rem;
+  letter-spacing: 0.5px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+form label {
+  font-weight: 600;
+  color: #374151;
+  font-size: 1rem;
+}
+
+form input {
+  padding: 0.8rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  font-size: 1.05rem;
+  transition: all 0.3s ease;
+}
+
+form input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.remember-forgot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.95rem;
+  color: #374151;
+}
+
+.remember-forgot a {
+  text-decoration: none;
+  color: #1e3a8a;
+  font-weight: 500;
+}
+
+form button {
+  padding: 1rem;
+  background-color: #1e3a8a;
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+form button:hover {
+  background-color: #162d75;
+}
+
+.switch-text {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 1rem;
+}
+
+.switch-text a {
+  color: #1e3a8a;
+  text-decoration: none;
+  font-weight: 500;
+}

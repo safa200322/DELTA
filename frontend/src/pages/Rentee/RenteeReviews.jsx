@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
-import "../styles/user-profile.css";
-import VehicleManagement from "./VehicleManagement";
+import "../../styles/user-profile.css";
+import ChaffeurVehicleManagement from "../../pages/ChauffeurWorkAvailability";
 
-const UserProfile = () => {
+const RenteeReviews = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   const user = {
-    name: "Umut Umutcuk",
+    name: "Umussdffssuuuuut Umutttttcuuuuuk",
     email: "umutcuk@gmail.com",
     phone: "+90 500 000 0000",
     profilePic: "https://i.pravatar.cc/150?img=3",
@@ -37,40 +37,73 @@ const UserProfile = () => {
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <Col xs="12" md="3" lg="2" className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
+          <Col
+            xs="12"
+            md="3"
+            lg="2"
+            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
+          >
             <div className="sidebar-header">
               <h3>Rentee Profile</h3>
-              <i className="ri-menu-line sidebar-toggle d-md-none" onClick={toggleSidebar}></i>
+              <i
+                className="ri-menu-line sidebar-toggle d-md-none"
+                onClick={toggleSidebar}
+              ></i>
             </div>
             <Nav vertical className="sidebar-nav">
               <NavItem>
-                <NavLink to="/profile/personal-info" className="nav-link">
+                <NavLink to="/profile/rentee-profile" className="nav-link">
                   <i className="ri-user-line"></i> Personal Info
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/work-availability" className="nav-link">
-                  <i className="ri-briefcase-line"></i> Work & Availability
+                <NavLink
+                  to="/profile/rentee-vehicle-management"
+                  className="nav-link"
+                >
+                  <i className="ri-briefcase-line"></i> Vehicle Management
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/booking-history" className="nav-link">
-                  <i className="ri-calendar-line"></i> Booking History
+                <NavLink
+                  to="/profile/rentee-rental-reservations"
+                  className="nav-link"
+                >
+                  <i className="ri-calendar-line"></i> Rental reservations
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/documents-verification" className="nav-link">
-                  <i className="ri-file-text-line"></i> Documents & Verification
+                <NavLink
+                  to="/profile/rentee-earnings-and-payments"
+                  className="nav-link"
+                >
+                  <i className="ri-file-text-line"></i> Earnings & Payments
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/settings" className="nav-link">
-                  <i className="ri-settings-3-line"></i> Settings
+                <NavLink
+                  to="/profile/rentee-maintenance-and-documents"
+                  className="nav-link"
+                >
+                  <i className="ri-settings-3-line"></i> Maintenance & Documents
                 </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/payment-info" className="nav-link">
-                  <i className="ri-wallet-line"></i> Payment Info
+                <NavLink
+                  to="/profile/rentee-notifications"
+                  className="nav-link"
+                >
+                  <i className="ri-wallet-line"></i> Notifications
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink to="/profile/rentee-reviews" className="nav-link">
+                  <i className="ri-wallet-line"></i> Reviews
+                </NavLink>
+              </NavItem>
+              <NavItem>
+                <NavLink to="/profile/rentee-security" className="nav-link">
+                  <i className="ri-wallet-line"></i> Security
                 </NavLink>
               </NavItem>
             </Nav>
@@ -80,7 +113,11 @@ const UserProfile = () => {
             <Row className="mt-4">
               <Col lg="8">
                 <div className="profile-card d-flex align-items-center gap-4 mb-4">
-                  <img src={user.profilePic} alt="Profile" className="profile-pic" />
+                  <img
+                    src={user.profilePic}
+                    alt="Profile"
+                    className="profile-pic"
+                  />
                   <div className="profile-info">
                     <h3 className="mb-2">{user.name}</h3>
                     <p className="mb-1">
@@ -90,11 +127,16 @@ const UserProfile = () => {
                       <strong>Phone:</strong> {user.phone}
                     </p>
                     <p className="mb-0">
-                      <strong>Verification:</strong> {user.isVerified ? <span className="verified">ID Verified ✅</span> : <span className="unverified">Not Verified ❌</span>}
+                      <strong>Verification:</strong>{" "}
+                      {user.isVerified ? (
+                        <span className="verified">ID Verified ✅</span>
+                      ) : (
+                        <span className="unverified">Not Verified ❌</span>
+                      )}
                     </p>
                   </div>
                 </div>
-                <VehicleManagement />
+                <ChaffeurVehicleManagement />
                 {/* Buraya araç yönetimi veya başka şeyler */}
                 <div className="vehicle-management">{/* future use */}</div>
               </Col>
@@ -123,7 +165,9 @@ const UserProfile = () => {
                       <div key={i} className="payout-item mb-3 border-top pt-2">
                         <div className="d-flex justify-content-between">
                           <span>{p.title}</span>
-                          <span className="text-success fw-bold">+${p.amount}</span>
+                          <span className="text-success fw-bold">
+                            +${p.amount}
+                          </span>
                         </div>
                         <small className="text-muted">{p.date}</small>
                       </div>
@@ -140,26 +184,42 @@ const UserProfile = () => {
                     <div className="col-6">
                       <div className="account-box p-3 border rounded text-center h-100">
                         <div className="mb-2">
-                          <i className="ri-lock-line text-warning" style={{ fontSize: "24px" }}></i>
+                          <i
+                            className="ri-lock-line text-warning"
+                            style={{ fontSize: "24px" }}
+                          ></i>
                         </div>
                         <h6 className="fw-bold">Security</h6>
-                        <p className="text-muted mb-2" style={{ fontSize: "14px" }}>
+                        <p
+                          className="text-muted mb-2"
+                          style={{ fontSize: "14px" }}
+                        >
                           Change password & security settings
                         </p>
-                        <button className="btn btn-primary btn-sm">Manage Security</button>
+                        <button className="btn btn-primary btn-sm">
+                          Manage Security
+                        </button>
                       </div>
                     </div>
 
                     <div className="col-6">
                       <div className="account-box p-3 border rounded text-center h-100">
                         <div className="mb-2">
-                          <i className="ri-close-circle-line text-danger" style={{ fontSize: "24px" }}></i>
+                          <i
+                            className="ri-close-circle-line text-danger"
+                            style={{ fontSize: "24px" }}
+                          ></i>
                         </div>
                         <h6 className="fw-bold">Account Actions</h6>
-                        <p className="text-muted mb-2" style={{ fontSize: "14px" }}>
+                        <p
+                          className="text-muted mb-2"
+                          style={{ fontSize: "14px" }}
+                        >
                           Delete or deactivate your account
                         </p>
-                        <button className="btn btn-danger btn-sm">Manage Account</button>
+                        <button className="btn btn-danger btn-sm">
+                          Manage Account
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -173,4 +233,4 @@ const UserProfile = () => {
   );
 };
 
-export default UserProfile;
+export default RenteeReviews;

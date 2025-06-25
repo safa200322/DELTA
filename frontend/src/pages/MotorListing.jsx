@@ -10,10 +10,11 @@ import {
   Collapse,
   Button,
 } from "reactstrap";
-import { useLocation } from "react-router-dom";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
+import motorData from "../assets/data/motorData";
 import Footer from "../components/Footer/Footer";
+
 import MotorItem from "../components/UI/MotorItem";
 import "../styles/car-listing.css";
 
@@ -32,12 +33,10 @@ const fakeSeatOptions = [1, 2];
 const fakeTransmissions = ["Manual", "Automatic"];
 const fakeColors = ["Red", "Blue", "Black", "White", "Silver", "Gray"];
 
-const MotorListing = () => {
-  const location = useLocation();
-
+const CarListing = () => {
   const [sortOption, setSortOption] = useState("Select");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sortedMotors, setSortedMotors] = useState([]);
+  const [sortedMotors, setSortedMotors] = useState(motorData || []);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // State for filter selections (interactive but not used for filtering)
@@ -46,24 +45,27 @@ const MotorListing = () => {
   const [selectedEngineSize, setSelectedEngineSize] = useState("");
   const [selectedTransmission, setSelectedTransmission] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedSeats, setSelectedSeats] = useState(fakeSeatOptions[0]);
-  const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]);
+  const [selectedSeats, setSelectedSeats] = useState(fakeSeatOptions[0]); // Min seats, like car version
+  const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Max price, like car version
 
   useEffect(() => {
-    console.log("🏍️ Motors from backend or location.state:", location.state?.motors);
-    if (location.state && location.state.motors) {
-      setSortedMotors(location.state.motors);
-    } else {
+    console.log("motorData in CarListing:", motorData);
+    if (!motorData || !Array.isArray(motorData)) {
+      console.error("motorData is invalid or empty:", motorData);
       setSortedMotors([]);
+      return;
     }
-  }, [location.state]);
+
+    // Initialize sorted motors with full data
+    setSortedMotors(motorData);
+  }, []); // Empty dependency array, runs once on mount
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
 
   const handleSort = (option) => {
     setSortOption(option);
-    let sorted = [...sortedMotors];
+    let sorted = [...motorData];
     if (option === "Low to High") {
       sorted.sort(
         (a, b) =>
@@ -78,17 +80,6 @@ const MotorListing = () => {
       );
     }
     setSortedMotors(sorted);
-  };
-
-  // Reset filters function
-  const handleResetFilters = () => {
-    setSelectedBrand("");
-    setSelectedType("");
-    setSelectedEngineSize("");
-    setSelectedTransmission("");
-    setSelectedColor("");
-    setSelectedSeats(fakeSeatOptions[0]);
-    setSelectedPrice(fakePriceRange[1]);
   };
 
   return (
@@ -271,7 +262,7 @@ const MotorListing = () => {
                   <Button
                     color="secondary"
                     className="reset-filters-btn"
-                    onClick={handleResetFilters}
+                    disabled // Disabled, like car version
                   >
                     Reset Filters
                   </Button>
@@ -288,7 +279,7 @@ const MotorListing = () => {
                   </Col>
                 ) : (
                   sortedMotors.map((item) => (
-                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id || item.MotorID}>
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
                       <MotorItem item={item} type="motors" />
                     </Col>
                   ))
@@ -303,4 +294,4 @@ const MotorListing = () => {
   );
 };
 
-export default MotorListing;
+export default CarListing;

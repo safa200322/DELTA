@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import "../styles/profile-dropdown.css";
 import { Link } from "react-router-dom";
 
-const ProfileIconDropdown = () => {
+const RenteeProfileIconDropdown = () => {
   const [open, setOpen] = useState(false);
   const iconRef = useRef();
 
@@ -66,4 +66,4 @@ const ProfileIconDropdown = () => {
   );
 };
 
-export default ProfileIconDropdown;
+export default RenteeProfileIconDropdown;

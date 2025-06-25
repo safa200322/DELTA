@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Form, FormGroup, Input, Button, Row, Col, Label } from "reactstrap";
 
 const FindCarForm = () => {
-  const navigate = useNavigate();
-
   const [formData, setFormData] = useState({
     from: "",
     to: "",
     depart: "",
     return: "",
     vehicleType: "Car",
+    nearbyLocations: false,
+    directRoutes: false,
+    driverAge25to70: false,
+    differentDropoff: false,
   });
 
   const handleChange = (e) => {
@@ -21,51 +22,52 @@ const FindCarForm = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    const formatDateTime = (dateStr) => {
-      if (!dateStr) return null;
-      return dateStr + " 00:00:00";
-    };
-
-    const DataToSend = {
-      depart: formatDateTime(formData.depart),
-      return: formatDateTime(formData.return),
-      vehicleType: formData.vehicleType,
-      location: formData.from,
-    };
-
-    try {
-      const response = await fetch("https://localhost:443/api/vehicles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(DataToSend),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to fetch vehicle listings: ${response.status} ${errorText}`);
-      }
-
-      const data = await response.json();
-
-      let route = "/cars";
-      if (formData.vehicleType === "Motorcycle") route = "/motors";
-      else if (formData.vehicleType === "Boat") route = "/yachts";
-
-      navigate(route, { state: { vehicles: data.vehicles, formData } });
-    } catch (error) {
-      console.error("Error fetching vehicle data:", error);
-    }
+    console.log("Search data:", formData);
+    // Add logic to handle search (e.g., navigate to search results)
   };
 
   return (
     <Form className="find-car-form" onSubmit={handleSubmit}>
       <Row className="align-items-end">
-        <Col lg="3" md="6" sm="12" className="mb-3">
+        <Col lg="4" md="6" sm="12" className="mb-3">
           <FormGroup>
-            <Label for="depart">Pick-up Date</Label>
+            <Label for="from" className="form-label">
+              Pick-up Location
+            </Label>
+            <Input
+              type="text"
+              id="from"
+              name="from"
+              value={formData.from}
+              onChange={handleChange}
+              placeholder="From (e.g., Famagusta)"
+              className="form-control shadow-sm"
+            />
+          </FormGroup>
+        </Col>
+        <Col lg="4" md="6" sm="12" className="mb-3">
+          <FormGroup>
+            <Label for="to" className="form-label">
+              Drop-off Location
+            </Label>
+            <Input
+              type="text"
+              id="to"
+              name="to"
+              value={formData.to}
+              onChange={handleChange}
+              placeholder="To (e.g., Nicosia)"
+              className="form-control shadow-sm"
+            />
+          </FormGroup>
+        </Col>
+        <Col lg="2" md="6" sm="12" className="mb-3">
+          <FormGroup>
+            <Label for="depart" className="form-label">
+              Pick-up Date
+            </Label>
             <Input
               type="date"
               id="depart"
@@ -76,9 +78,11 @@ const FindCarForm = () => {
             />
           </FormGroup>
         </Col>
-        <Col lg="3" md="6" sm="12" className="mb-3">
+        <Col lg="2" md="6" sm="12" className="mb-3">
           <FormGroup>
-            <Label for="return">Return Date</Label>
+            <Label for="return" className="form-label">
+              Return Date
+            </Label>
             <Input
               type="date"
               id="return"
@@ -89,24 +93,13 @@ const FindCarForm = () => {
             />
           </FormGroup>
         </Col>
+      </Row>
+      <Row className="align-items-end">
         <Col lg="3" md="6" sm="12" className="mb-3">
           <FormGroup>
-            <Label for="from">Location</Label>
-            <Input
-              type="text"
-              id="from"
-              name="from"
-              value={formData.from}
-              onChange={handleChange}
-              className="form-control shadow-sm"
-              placeholder="Enter location"
-              required
-            />
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12" className="mb-3">
-          <FormGroup>
-            <Label for="vehicleType">Vehicle Type</Label>
+            <Label for="vehicleType" className="form-label">
+              Vehicle Type
+            </Label>
             <Input
               type="select"
               id="vehicleType"
@@ -130,6 +123,69 @@ const FindCarForm = () => {
             Search
           </Button>
         </Col>
+        <Col lg="3" md="6" sm="12">
+          <FormGroup check className="mb-2">
+            <Input
+              type="checkbox"
+              id="nearbyLocations"
+              name="nearbyLocations"
+              checked={formData.nearbyLocations}
+              onChange={handleChange}
+              className="form-check-input custom-checkbox"
+            />
+            <Label for="nearbyLocations" className="form-check-label">
+              Add nearby locations
+            </Label>
+          </FormGroup>
+        </Col>
+        <Col lg="3" md="6" sm="12">
+          <FormGroup check className="mb-2">
+            <Input
+              type="checkbox"
+              id="directRoutes"
+              name="directRoutes"
+              checked={formData.directRoutes}
+              onChange={handleChange}
+              className="form-check-input custom-checkbox"
+            />
+            <Label for="directRoutes" className="form-check-label">
+              Direct routes only
+            </Label>
+          </FormGroup>
+        </Col>
+      </Row>
+      <Row>
+        <Col lg="3" md="6" sm="12">
+          <FormGroup check className="mb-2">
+            <Input
+              type="checkbox"
+              id="driverAge25to70"
+              name="driverAge25to70"
+              checked={formData.driverAge25to70}
+              onChange={handleChange}
+              className="form-check-input custom-checkbox"
+            />
+            <Label for="driverAge25to70" className="form-check-label">
+              Driver age 25 - 70
+            </Label>
+          </FormGroup>
+        </Col>
+        <Col lg="3" md="6" sm="12">
+          <FormGroup check className="mb-2">
+            <Input
+              type="checkbox"
+              id="differentDropoff"
+              name="differentDropoff"
+              checked={formData.differentDropoff}
+              onChange={handleChange}
+              className="form-check-input custom-checkbox"
+            />
+            <Label for="differentDropoff" className="form-check-label">
+              Drop off at a different location
+            </Label>
+          </FormGroup>
+        </Col>
+        <Col lg="6" md="6" sm="12"></Col>
       </Row>
     </Form>
   );

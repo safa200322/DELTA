@@ -14,7 +14,7 @@ const quickLinks = [
     display: "About",
   },
   {
-    path: "/cars2",
+    path: "/cars",
     display: "Cars",
   },
 
@@ -55,11 +55,9 @@ const Footer = () => {
               </h1>
             </div>
             <p className="footer__logo-content">
-Discover the beauty of Northern Cyprus with our convenient and reliable vehicle rental services.
- Whether you need a car for city exploration,
- a bicycle for scenic rides, or a small boat for coastal adventures, we have you covered. Enjoy seamless booking, 
- flexible pickup/drop-off locations, 
-and additional features like chauffeur services and vehicle accessories. Experience travel made easy with us!
+              Discover the beauty of Northern Cyprus with our convenient and reliable vehicle rental services. Whether you need a car for city exploration, a bicycle for scenic rides, or a small boat
+              for coastal adventures, we have you covered. Enjoy seamless booking, flexible pickup/drop-off locations, and additional features like chauffeur services and vehicle accessories.
+              Experience travel made easy with us!
             </p>
           </Col>
 
@@ -95,7 +93,7 @@ and additional features like chauffeur services and vehicle accessories. Experie
               <div className="newsletter">
                 <input type="email" placeholder="Email" />
                 <span>
-                  <i class="ri-send-plane-line"></i>
+                  <i class="ri-send-plane-line" style={{ color: "#005566" }}></i>
                 </span>
               </div>
             </div>
@@ -104,8 +102,7 @@ and additional features like chauffeur services and vehicle accessories. Experie
           <Col lg="12">
             <div className="footer__bottom">
               <p className="section__description d-flex align-items-center justify-content-center gap-1 pt-4">
-                <i class="ri-copyright-line"></i>Copyright {year}, Developed by
-                group 1. All rights reserved.
+                <i class="ri-copyright-line"></i>Copyright {year}, Developed by group 1. All rights reserved.
               </p>
             </div>
           </Col>
