@@ -7,11 +7,12 @@ const FindCarForm = () => {
     to: "",
     depart: "",
     return: "",
-    vehicleType: "Car",
+    Type: "Car",
     nearbyLocations: false,
     directRoutes: false,
     driverAge25to70: false,
     differentDropoff: false,
+    Location: "",
   });
 
   const handleChange = (e) => {
@@ -22,10 +23,23 @@ const FindCarForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Search data:", formData);
-    // Add logic to handle search (e.g., navigate to search results)
+    try {
+      const response = await fetch("http://localhost:5000/api/vehicles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      if (response.ok) {
+        // Optionally handle success (e.g., show results, navigate, etc.)
+        console.log("Search submitted successfully");
+      } else {
+        alert("Search failed.");
+      }
+    } catch (error) {
+      alert("An error occurred.");
+    }
   };
 
   return (
@@ -186,6 +200,24 @@ const FindCarForm = () => {
           </FormGroup>
         </Col>
         <Col lg="6" md="6" sm="12"></Col>
+      </Row>
+      <Row className="align-items-end">
+        <Col lg="4" md="6" sm="12" className="mb-3">
+          <FormGroup>
+            <Label for="Location" className="form-label">
+              Location
+            </Label>
+            <Input
+              type="text"
+              id="Location"
+              name="Location"
+              value={formData.Location}
+              onChange={handleChange}
+              placeholder="Location (e.g., City Center)"
+              className="form-control shadow-sm"
+            />
+          </FormGroup>
+        </Col>
       </Row>
     </Form>
   );
