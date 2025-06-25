@@ -22,11 +22,7 @@ const SignUpPage = () => {
     e.preventDefault();
 
     try {
-<<<<<<< HEAD
-      const response = await fetch("http://localhost:500/api/auth/users/session", {
-=======
       const response = await fetch("http://localhost:5000/api/auth/users", {
->>>>>>> 371bedc3aa5796e7fea7e8c21fc99989e52384a5
         method: "POST",
         headers: {
           "Content-Type": "application/json",
