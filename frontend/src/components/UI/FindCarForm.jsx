@@ -12,6 +12,7 @@ const FindCarForm = () => {
     directRoutes: false,
     driverAge25to70: false,
     differentDropoff: false,
+    Location: "",
   });
 
   const handleChange = (e) => {
@@ -22,10 +23,34 @@ const FindCarForm = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Search data:", formData);
-    // Add logic to handle search (e.g., navigate to search results)
+    // Build query string from formData
+    const params = new URLSearchParams();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (typeof value === "boolean") {
+        params.append(key, value ? "1" : "0");
+      } else if (value) {
+        params.append(key, value);
+      }
+    });
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/vehicles?${params.toString()}`,
+        {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.ok) {
+        // Optionally handle success (e.g., show results, navigate, etc.)
+        console.log("Search submitted successfully");
+      } else {
+        alert("Search failed.");
+      }
+    } catch (error) {
+      alert("An error occurred.");
+    }
   };
 
   return (
@@ -78,6 +103,22 @@ const FindCarForm = () => {
               <option value="Motorcycle">Motorcycle</option>
               <option value="Boat">Boat</option>
             </Input>
+          </FormGroup>
+        </Col>
+        <Col lg="3" md="6" sm="12" className="mb-3">
+          <FormGroup>
+            <Label for="Location" className="form-label">
+              Location
+            </Label>
+            <Input
+              type="text"
+              id="Location"
+              name="Location"
+              value={formData.Location}
+              onChange={handleChange}
+              placeholder="Location (e.g., City Center)"
+              className="form-control shadow-sm"
+            />
           </FormGroup>
         </Col>
         <Col lg="3" md="6" sm="12" className="mb-3">
