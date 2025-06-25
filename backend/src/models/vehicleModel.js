@@ -14,3 +14,8 @@ exports.updateVehicleStatus = (vehicleID, status) => {
   const query = 'UPDATE Vehicle SET status = ? WHERE VehicleID = ?';
   return db.query(query, [status, vehicleID]);
 };
+
+exports.deleteVehicle = (vehicleID) => {
+  const query = 'DELETE FROM Vehicle WHERE VehicleID = ?';
+  return db.query(query, [vehicleID]);
+}

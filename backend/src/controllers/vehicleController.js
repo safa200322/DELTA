@@ -186,3 +186,13 @@ exports.rejectVehicle = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+exports.deleteVehicle = async (req, res) => {
+  try {
+    const vehicleID = req.params.id;
+    await vehicleModel.deleteVehicle(vehicleID);
+    res.status(200).json({ message: 'Vehicle deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
