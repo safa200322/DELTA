@@ -59,7 +59,7 @@ const VehicleOwnerLogin = () => {
       <div className="right-pane">
         <div className="form-box">
           <h2>Vehicle Owner Login</h2>
-          
+
           {error && (
             <div className="error-message" style={{
               color: '#dc3545',

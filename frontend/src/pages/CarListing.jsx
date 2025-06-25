@@ -52,7 +52,7 @@ const CarListing = () => {
     // Fetch car data from backend, using query params if present
     const fetchCars = async () => {
       try {
-        let url = "http://localhost:5000/api/vehicles";
+        let url = "http://localhost:5000/api/vehicles/filter";
         if (location.search) {
           url += location.search;
         }
@@ -78,15 +78,19 @@ const CarListing = () => {
     let sorted = [...sortedCars]; // Sort from the current sortedCars state
     if (option === "Low to High") {
       sorted.sort(
-        (a, b) =>
-          parseFloat(a.price.replace("$", "")) -
-          parseFloat(b.price.replace("$", ""))
+        (a, b) => {
+          const priceA = typeof a.Price === 'number' ? a.Price : (typeof a.price === 'number' ? a.price : parseInt(a.Price || a.price || 0));
+          const priceB = typeof b.Price === 'number' ? b.Price : (typeof b.price === 'number' ? b.price : parseInt(b.Price || b.price || 0));
+          return priceA - priceB;
+        }
       );
     } else if (option === "High to Low") {
       sorted.sort(
-        (a, b) =>
-          parseFloat(b.price.replace("$", "")) -
-          parseFloat(a.price.replace("$", ""))
+        (a, b) => {
+          const priceA = typeof a.Price === 'number' ? a.Price : (typeof a.price === 'number' ? a.price : parseInt(a.Price || a.price || 0));
+          const priceB = typeof b.Price === 'number' ? b.Price : (typeof b.price === 'number' ? b.price : parseInt(b.Price || b.price || 0));
+          return priceB - priceA;
+        }
       );
     }
     setSortedCars(sorted);
