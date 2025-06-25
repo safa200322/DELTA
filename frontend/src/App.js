@@ -21,7 +21,7 @@ import ScooterListing from "./pages/ScooterListing";
 import MotorListing from "./pages/MotorListing";
 import ScooterDetails from "./pages/ScooterDetails";
 import Contact from "./pages/Contact";
-import Signup from "./pages/signup";
+import Signup from "./pages/Signup";
 import Login from "./pages/Login";
 import PaymentPage from "./pages/PaymentScreen";
 import NotFound from "./pages/NotFound";
