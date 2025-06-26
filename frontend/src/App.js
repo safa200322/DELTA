@@ -51,10 +51,18 @@ import PaymentsWallet from "./pages/Profile/PaymentsandWallet";
 import NotificationsProfile from "./pages/Profile/Notifications";
 import AccountSettings from "./pages/Profile/AccountSettings";
 import VehicleManagement from "./pages/VehicleManagement";
+<<<<<<< nersanUpdates
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentAdminDashboard from "./pages/PaymentManagement";
 import NotificationsDashboard from "./pages/NotificationsDashboard";
 import AccessoriesManagement from "./pages/AccessoriesManagement";
+=======
+import VehicleOwnerSignup from "./pages/VehicleOwnerSignup";
+import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
+import ProfileRedirect from "./pages/Profile/ProfileRedirect";
+import ChauffureProfilePage from "./pages/ChauffeurProfilePage";
+
+>>>>>>> main
 
 function App() {
   return (
@@ -80,6 +88,17 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/chauffeurs" element={<ChauffeurAdmin />} />
           <Route path="/apply-chauffeur" element={<ApplyChauffeur />} />
+<<<<<<< nersanUpdates
+=======
+          <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignup />} />
+          <Route path="/vehicle-owner-login" element={<VehicleOwnerLogin />} />
+          <Route path="/chauffeur-profile" element={<ChauffureProfilePage />} />
+         
+           {/* Chauffeur Dashboard routes */}
+          <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
+          {/* Vehicle Owner routes */}
+          <Route path="/vehicle-owner/profile" element={<UserProfile />} />
+>>>>>>> main
           <Route
             path="/chaffeur-vehicle-management"
             element={<ChaffeurVehicleManagement />}
