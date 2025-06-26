@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -252,7 +252,7 @@ const NotificationCard = ({ notifications, handleRemoveNotification }) => (
 
 // Main Component
 const AdminDashboard = () => {
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
+  const [reservations, setReservations] = useState([]);
   const [payments, setPayments] = useState(MOCK_PAYMENTS);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [accessories, setAccessories] = useState(MOCK_ACCESSORIES);
@@ -261,6 +261,24 @@ const AdminDashboard = () => {
     price: "",
     category: "",
   });
+
+  useEffect(() => {
+    // Fetch reservations from backend
+    const fetchReservations = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/AdmingetReservations/");
+        if (response.ok) {
+          const data = await response.json();
+          setReservations(data);
+        } else {
+          setReservations([]);
+        }
+      } catch (error) {
+        setReservations([]);
+      }
+    };
+    fetchReservations();
+  }, []);
 
   const handleAction = useCallback((setState, id, action) => {
     setState((prev) =>
@@ -340,7 +358,7 @@ const AdminDashboard = () => {
           <Col xs={12} sm={6} md={4}>
             <SummaryCard
               title="TOTAL RESERVATIONS"
-              value="3"
+              value={reservations.length}
               subValue="2 last month"
               percentage="50%"
               isPositive={true}
