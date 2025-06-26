@@ -74,11 +74,8 @@ function App() {
           <Route path="/cars" element={<CarListing />} />
           <Route path="/cars/:slug" element={<CarDetails />} />
           <Route path="/motorcycles" element={<MotorListing />} />
-          <Route path="/motorcycles/:id" element={<MotorDetails />} />
           <Route path="/bicycle" element={<BicycleListing />} />
-          <Route path="/bicycle/:slug" element={<ScooterDetails />} />
           <Route path="/boats" element={<BoatListing />} />
-          <Route path="/boats/:slug" element={<BoatDetails />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

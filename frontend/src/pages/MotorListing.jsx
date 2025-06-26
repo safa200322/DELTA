@@ -266,7 +266,7 @@ const MotorListing = () => {
                       className="mb-4"
                       key={item.VehicleID}
                     >
-                      <MotorItem item={item} />
+                      <MotorItem item={item} type="motorcycle" />
                     </Col>
                   ))
                 ) : (
