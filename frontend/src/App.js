@@ -107,6 +107,7 @@ function App() {
           <Route path="/profile/NotificationsProfile" element={<NotificationsProfile />} />
           <Route path="/profile/AccountSettings" element={<AccountSettings />} />
           <Route path="/vehicles/:type/:slug" element={<VehicleDetails />} />
+          <Route path="/notifications" element={<Notifications />} />
           {/* Remove legacy/duplicate profile routes and keep only the above */}
           {/* Fallback */}
           <Route path="*" element={<NotFound />} />

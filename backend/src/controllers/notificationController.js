@@ -29,7 +29,7 @@ exports.createNotification = async (req, res) => {
 exports.getMyNotifications = async (req, res) => {
   try {
     const userId = req.user.id;
-    const notifications = await NotificationModel.findByUserId(userId);
+    const notifications = await notificationModel.findByUserId(userId);
     res.json(notifications);
     console.log('[NOTIFICATION] My notifications:', notifications);
   } catch (error) {
@@ -42,7 +42,7 @@ exports.getMyNotifications = async (req, res) => {
 exports.deleteNotification = async (req, res) => {
   try {
     const notificationId = req.params.id;
-    const deleted = await NotificationModel.delete(notificationId);
+    const deleted = await notificationModel.delete(notificationId);
     if (!deleted) {
       return res.status(404).json({ message: 'Notification not found' });
     }
@@ -51,5 +51,16 @@ exports.deleteNotification = async (req, res) => {
   } catch (error) {
     console.error('[ADMIN][NOTIFICATION] Delete error:', error);
     res.status(500).json({ message: 'Error deleting notification', error: error.message });
+  }
+};
+
+// Get all notifications (admin)
+exports.getAllNotifications = async (req, res) => {
+  try {
+    const [rows] = await notificationModel.getAll();
+    res.json(rows);
+  } catch (error) {
+    console.error('[ADMIN][NOTIFICATION] Get all error:', error);
+    res.status(500).json({ message: 'Error fetching all notifications', error: error.message });
   }
 };

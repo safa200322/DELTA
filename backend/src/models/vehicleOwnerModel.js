@@ -91,11 +91,11 @@ const VehicleOwnerModel = {
           WHEN MONTH(r.StartDate) = MONTH(CURRENT_DATE())
           AND YEAR(r.StartDate) = YEAR(CURRENT_DATE())
           AND p.Status = 'Completed'
-          THEN p.Amount 
+          THEN p.TotalPrice 
           ELSE 0 
         END), 0) as MonthlyEarnings,
         COUNT(CASE WHEN p.Status = 'Completed' THEN r.ReservationID END) as TotalRentals,
-        COALESCE(AVG(CASE WHEN p.Status = 'Completed' THEN p.Amount END), 0) as AverageRental
+        COALESCE(AVG(CASE WHEN p.Status = 'Completed' THEN p.TotalPrice END), 0) as AverageRental
       FROM vehicleowner vo
       LEFT JOIN Vehicle v ON vo.OwnerID = v.ownerID
       LEFT JOIN Reservation r ON v.VehicleID = r.VehicleID
@@ -118,7 +118,7 @@ const VehicleOwnerModel = {
           ELSE 'Vehicle Rental'
         END AS title,
         DATE_FORMAT(r.EndDate, '%b %d, %Y') as date,
-        p.Amount as amount
+        p.TotalPrice as amount
       FROM Payment p
       JOIN Reservation r ON p.ReservationID = r.ReservationID
       JOIN Vehicle v ON r.VehicleID = v.VehicleID

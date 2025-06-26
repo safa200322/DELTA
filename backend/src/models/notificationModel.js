@@ -22,3 +22,14 @@ exports.createNotification = async ({
     throw error;
   }
 };
+
+exports.getAll = async () => {
+  const sql = 'SELECT * FROM Notification ORDER BY CreatedAt DESC';
+  try {
+    const [rows] = await db.query(sql);
+    return [rows];
+  } catch (error) {
+    console.error('Model error (getAll):', error);
+    throw error;
+  }
+};
