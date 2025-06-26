@@ -213,7 +213,9 @@ exports.getUserProfile = async (req, res) => {
 
     // Set default profile picture URL if none exists
     let profilePictureUrl = null;
-    switch (userType) {
+
+    // Handle different profile picture fields for different user types
+    switch (user.type) {
       case 'vehicle-owner':
         profilePictureUrl = user.ProfileImage;
         break;
@@ -225,6 +227,8 @@ exports.getUserProfile = async (req, res) => {
         profilePictureUrl = user.ProfilePictureUrl;
         break;
     }
+
+    // Set default if no profile picture
     if (!profilePictureUrl) {
       profilePictureUrl = `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;
     }

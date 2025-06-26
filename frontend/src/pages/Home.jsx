@@ -28,22 +28,22 @@ const Home = () => {
           fetch("http://localhost:5000/api/bicycles/filterbicycle"),
           fetch("http://localhost:5000/api/boats/filter")
         ]);
-        
+
         // Process responses
         const cars = carsResponse.ok ? await carsResponse.json() : [];
         const motorcycles = motorcyclesResponse.ok ? await motorcyclesResponse.json() : [];
         const bicycles = bicyclesResponse.ok ? await bicyclesResponse.json() : [];
         const boats = boatsResponse.ok ? await boatsResponse.json() : [];
-        
+
         // Add type property to each vehicle
         const typedCars = cars.map(car => ({ ...car, Type: 'Car' }));
         const typedMotorcycles = motorcycles.map(motor => ({ ...motor, Type: 'Motorcycle' }));
         const typedBicycles = bicycles.map(bicycle => ({ ...bicycle, Type: 'Bicycle' }));
         const typedBoats = boats.map(boat => ({ ...boat, Type: 'Boat' }));
-        
+
         // Combine all vehicles
         const allVehicles = [...typedCars, ...typedMotorcycles, ...typedBicycles, ...typedBoats];
-        
+
         // Get random 10 vehicles or all if less than 10
         const randomVehicles = allVehicles.sort(() => 0.5 - Math.random()).slice(0, 10);
         setVehicles(randomVehicles);
@@ -134,7 +134,7 @@ const Home = () => {
               <h6 className="section__subtitle text-primary mb-3">Come with</h6>
               <h2 className="section__title mb-4">Hot Offers</h2>
             </Col>
-            
+
             {loading ? (
               <Col lg="12" className="text-center">
                 <p>Loading hot offers...</p>

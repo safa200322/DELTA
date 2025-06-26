@@ -9,10 +9,10 @@ const NotificationModel = {
     `;
     const content = title ? `${title}: ${message}` : message;
     const [result] = await db.execute(query, [userId, type || 'General', content]);
-    return { 
-      id: result.insertId, 
-      userId, 
-      type: type || 'General', 
+    return {
+      id: result.insertId,
+      userId,
+      type: type || 'General',
       content,
       status: 'unread'
     };

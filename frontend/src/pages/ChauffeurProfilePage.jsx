@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, NavLink, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Routes, Route, NavLink } from "react-router-dom";
 import { Container, Row, Col, Button, Nav, NavItem } from "reactstrap";
-import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
-
+import { Link } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
 
 // Placeholder components for each section
 const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
+// --- Child Components with props ---
+const PersonalInfo = ({ chauffeur }) => (
   <div className="profile-section">
     <h2>Personal Information</h2>
     {loading ? (
@@ -68,6 +71,11 @@ const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMo
             </Button>
           </form>
         )}
+    <div className="section-content">
+      <p><strong>Full Name:</strong> {chauffeur?.fullName || "N/A"}</p>
+      <p><strong>Date of Birth:</strong> {chauffeur?.dob || "N/A"}</p>
+      <div className="profile-picture">
+        <Button color="primary">Upload New Picture</Button>
       </div>
     ) : null}
   </div>
@@ -105,9 +113,13 @@ const WorkAvailability = () => {
     };
     fetchAssignments();
   }, [actionMsg]);
+const WorkAvailability = ({ chauffeur }) => {
+  const [status, setStatus] = useState(chauffeur?.status || "Available");
 
   const handleStatusChange = () => {
-    setStatus((prev) => (prev === "Available" ? "Unavailable" : prev === "Unavailable" ? "On a Job" : "Available"));
+    setStatus((prev) =>
+      prev === "Available" ? "Unavailable" : prev === "Unavailable" ? "On a Job" : "Available"
+    );
   };
 
   const handleAssignmentAction = async (reservationId, action) => {
@@ -138,12 +150,11 @@ const WorkAvailability = () => {
     <div className="profile-section">
       <h2>Work & Availability</h2>
       <div className="section-content">
-        <p>
-          <strong>Current Status:</strong> {status}
-        </p>
+        <p><strong>Current Status:</strong> {status}</p>
         <Button color="primary" onClick={handleStatusChange} className="mb-3">
           Change Status
         </Button>
+        <p><strong>Location:</strong> {chauffeur?.location || "Unknown"}</p>
         <div className="assigned-vehicles">
           <h4>Assigned Reservations</h4>
           {loading ? (
@@ -167,6 +178,16 @@ const WorkAvailability = () => {
             </ul>
           )}
           {actionMsg && <p className="text-success">{actionMsg}</p>}
+          <h4>Assigned Vehicle(s)</h4>
+          <ul>
+            {chauffeur?.vehicles?.map((vehicle, index) => (
+              <li key={index}>
+                {vehicle.name} - <Link to={`/reservation/${vehicle.id}`}>View Reservation</Link>{" "}
+                <Button color="success" size="sm">Accept</Button>{" "}
+                <Button color="danger" size="sm">Reject</Button>
+              </li>
+            )) || <li>No vehicles assigned</li>}
+          </ul>
         </div>
       </div>
     </div>
@@ -194,9 +215,7 @@ const DocumentsVerification = () => (
   <div className="profile-section">
     <h2>Documents & Verification</h2>
     <div className="section-content">
-      <p>
-        <strong>Driving License:</strong> Uploaded (License #DL123456)
-      </p>
+      <p><strong>Driving License:</strong> Uploaded (License #DL123456)</p>
       <Button color="primary">Upload New Document</Button>
     </div>
   </div>
@@ -207,11 +226,10 @@ const Settings = () => (
     <h2>Settings</h2>
     <div className="section-content">
       <h4>Password & Security</h4>
-      <Button color="primary" className="mb-3">
-        Change Password
-      </Button>
+      <Button color="primary" className="mb-3">Change Password</Button>
       <h4>Account Management</h4>
-      <Button color="danger">Delete Account</Button> <Button color="warning">Deactivate Account</Button>
+      <Button color="danger">Delete Account</Button>{" "}
+      <Button color="warning">Deactivate Account</Button>
     </div>
   </div>
 );
@@ -220,9 +238,7 @@ const PaymentInfo = () => (
   <div className="profile-section">
     <h2>Payment Info</h2>
     <div className="section-content">
-      <p>
-        <strong>Total Earnings:</strong> $5,000
-      </p>
+      <p><strong>Total Earnings:</strong> $5,000</p>
       <h4>Recent Payouts</h4>
       <ul>
         <li>Payout #001: $500 on 05/15/2025</li>
@@ -232,7 +248,10 @@ const PaymentInfo = () => (
   </div>
 );
 
+// --- Main Page ---
 const ChauffeurProfilePage = () => {
+  const [chauffeur, setChauffeur] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -292,6 +311,23 @@ const ChauffeurProfilePage = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/chauffeurs/chauffeurs/login"); // replace with your API
+        const data = await response.json();
+        setChauffeur(data);
+      } catch (error) {
+        console.error("Error fetching chauffeur data:", error);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+  if (!chauffeur) return <div>No chauffeur data available.</div>;
+
   return (
     <div className="chauffeur-profile">
       <Container fluid>
@@ -341,11 +377,14 @@ const ChauffeurProfilePage = () => {
             <Routes>
               <Route path="personal-info" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
               <Route path="work-availability" element={<WorkAvailability />} />
+              <Route path="personal-info" element={<PersonalInfo chauffeur={chauffeur} />} />
+              <Route path="work-availability" element={<WorkAvailability chauffeur={chauffeur} />} />
               <Route path="booking-history" element={<BookingHistory />} />
               <Route path="documents-verification" element={<DocumentsVerification />} />
               <Route path="settings" element={<Settings />} />
               <Route path="payment-info" element={<PaymentInfo />} />
               <Route path="/" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
+              <Route path="/" element={<PersonalInfo chauffeur={chauffeur} />} />
             </Routes>
           </Col>
         </Row>

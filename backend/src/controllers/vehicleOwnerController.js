@@ -51,7 +51,7 @@ exports.getProfile = async (req, res) => {
   try {
     const ownerId = req.user.id;
     const owner = await VehicleOwnerModel.getOwnerById(ownerId);
-    
+
     if (!owner) {
       return res.status(404).json({ message: 'Owner not found' });
     }
@@ -71,7 +71,7 @@ exports.updateProfile = async (req, res) => {
     const { FullName, Email, PhoneNumber, NationalID } = req.body;
 
     await VehicleOwnerModel.updateOwner(ownerId, { FullName, Email, PhoneNumber, NationalID });
-    
+
     res.json({ message: 'Profile updated successfully' });
   } catch (error) {
     console.error('Update profile error:', error);
@@ -82,17 +82,17 @@ exports.updateProfile = async (req, res) => {
 exports.updateProfilePicture = async (req, res) => {
   try {
     const ownerId = req.user.id;
-    
+
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }
 
     const profileImageUrl = `/uploads/profile-pictures/${req.file.filename}`;
     await VehicleOwnerModel.updateProfilePicture(ownerId, profileImageUrl);
-    
-    res.json({ 
-      message: 'Profile picture updated successfully', 
-      profileImageUrl 
+
+    res.json({
+      message: 'Profile picture updated successfully',
+      profileImageUrl
     });
   } catch (error) {
     console.error('Update profile picture error:', error);
@@ -104,7 +104,7 @@ exports.getMyVehicles = async (req, res) => {
   try {
     const ownerId = req.user.id;
     const vehicles = await VehicleOwnerModel.getVehiclesByOwner(ownerId);
-    
+
     res.json(vehicles);
   } catch (error) {
     console.error('Get vehicles error:', error);
@@ -117,7 +117,7 @@ exports.getEarnings = async (req, res) => {
     const ownerId = req.user.id;
     const earnings = await VehicleOwnerModel.getEarningsByOwner(ownerId);
     const recentPayouts = await VehicleOwnerModel.getRecentPayouts(ownerId);
-    
+
     res.json({
       ...earnings,
       recentPayouts

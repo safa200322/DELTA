@@ -1,6 +1,6 @@
 const db = require("../db");
 const bcrypt = require('bcrypt');
- //I KNOW SOME MODELS ARE NOT USED WE WILL COMMENT THEM GUYS 
+//I KNOW SOME MODELS ARE NOT USED WE WILL COMMENT THEM GUYS 
 
 exports.getReservationById = async (reservationId) => {
   const [rows] = await db.query(
@@ -126,14 +126,14 @@ exports.updateReservationResponseStatus = async (reservationId, status) => {
 
 exports.registerChauffeur = async (chauffeurData) => {
   const { Name, PhoneNumber, Email, Password, LicenseNumber, Location, Date_of_birth } = chauffeurData;
-  
+
   const hashedPassword = await bcrypt.hash(Password, 10);
-  
+
   const query = `
     INSERT INTO Chauffeur (Name, PhoneNumber, Email, Password, LicenseNumber, Location, Date_of_birth, Status)
     VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')
   `;
-  
+
   const [result] = await db.query(query, [Name, PhoneNumber, Email, hashedPassword, LicenseNumber, Location, Date_of_birth]);
   return result;  // Returns insertId for the new chauffeur
 };
@@ -141,7 +141,7 @@ exports.registerChauffeur = async (chauffeurData) => {
 // Fetch a chauffeur by PhoneNumber (for login)
 exports.getChauffeurByPhoneNumber = async (phoneNumber) => {
   const [rows] = await db.query("SELECT * FROM Chauffeur WHERE PhoneNumber = ?", [phoneNumber]);
-  return rows[0]; 
+  return rows[0];
 };
 
 // Get chauffeur by ID

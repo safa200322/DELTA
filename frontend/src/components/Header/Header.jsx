@@ -1,5 +1,6 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
+import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import "../../styles/header.css";
 import "remixicon/fonts/remixicon.css";
@@ -22,11 +23,11 @@ const authNavLinks = [
 const Header = () => {
   const menuRef = useRef(null);
   const navRef = useRef(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userType, setUserType] = useState(null);
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-  const [userType, setUserType] = React.useState(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const checkAuth = () => {
       const token = localStorage.getItem("token");
       const type = localStorage.getItem("userType");
@@ -115,32 +116,26 @@ const Header = () => {
                 <Link to="/notifications" className="profile__icon" title="Notifications">
                   <i className="ri-notification-3-fill" style={{ color: "#EF3E3F" }}></i>
                 </Link>
-
-                {/* Show profile options based on user type */}
-                {userType === 'user' && (
+                {userType === 'user' &&
                   <Link to="/profile/ProfileOverview" className="profile__icon" title="User Profile">
                     <i className="ri-user-3-fill" style={{ color: "#007bff" }}></i>
                   </Link>
-                )}
-
-                {userType === 'chauffeur' && (
-                  <Link to="/profile/personal-info" className="profile__icon" title="Chauffeur Profile">
+                }
+                {userType === 'chauffeur' &&
+                  <Link to="/chauffeur/dashboard" className="profile__icon" title="Chauffeur Profile">
                     <i className="ri-steering-2-fill" style={{ color: "#28a745" }}></i>
                   </Link>
-                )}
-
-                {userType === 'vehicle-owner' && (
-                  <Link to="/profile/rentee-profile" className="profile__icon" title="Vehicle Owner Profile">
+                }
+                {userType === 'vehicle-owner' &&
+                  <Link to="/profile/rentee-profile" className="profile__icon" title="Rentee Profile">
                     <i className="ri-car-fill" style={{ color: "#F88D56" }}></i>
                   </Link>
-                )}
-
-                {userType === 'admin' && (
+                }
+                {userType === 'admin' &&
                   <Link to="/admin" className="profile__icon" title="Admin Profile">
                     <i className="ri-user-2-fill" style={{ color: "#EBC222" }}></i>
                   </Link>
-                )}
-
+                }
                 <button
                   onClick={handleLogout}
                   className="profile__icon"
