@@ -14,6 +14,17 @@ const VehicleOwnerSignUp = () => {
     PhoneNumber: "",
     NationalID: "",
   });
+  const [countryCode, setCountryCode] = useState("+90"); // Default country code
+
+  // Helper to format phone as 5488550424 (no spaces, just digits)
+  const formatPhone = (value) => {
+    return value.replace(/\D/g, "");
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, PhoneNumber: formatted });
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -31,6 +42,7 @@ const VehicleOwnerSignUp = () => {
 
     // Prepare data for backend (exclude confirmPassword)
     const { confirmPassword, ...submitData } = formData;
+    submitData.PhoneNumber = countryCode + formData.PhoneNumber;
 
     try {
       const response = await fetch("http://localhost:5000/api/vehicle-owner/register", {
@@ -107,14 +119,29 @@ const VehicleOwnerSignUp = () => {
             />
 
             <label htmlFor="PhoneNumber">Phone Number</label>
-            <input
-              type="tel"
-              id="PhoneNumber"
-              placeholder="Enter your phone number"
-              value={formData.PhoneNumber}
-              onChange={handleChange}
-              required
-            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                id="countryCode"
+                value={countryCode}
+                onChange={e => setCountryCode(e.target.value)}
+                style={{ width: '90px' }}
+              >
+                <option value="+90">+90</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                {/* Add more country codes as needed */}
+              </select>
+              <input
+                type="tel"
+                id="PhoneNumber"
+                placeholder="5488550424"
+                value={formData.PhoneNumber}
+                onChange={handlePhoneChange}
+                maxLength={15}
+                style={{ flex: 1 }}
+                required
+              />
+            </div>
 
             <label htmlFor="NationalID">National ID</label>
             <input
