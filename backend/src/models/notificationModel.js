@@ -1,34 +1,24 @@
-// src/models/notificationModel.js
-const db = require('../db');
+const db = require('../db'); // your MySQL pool
 
-// Create a notification for a user
-exports.createUserNotification = async ({
-  UserID,
-  Title,
-  Message,
-  Type,
-  RelatedID = null
+exports.createNotification = async ({
+  recipientID = null,
+  title,
+  message,
+  type,
+  broadcastGroup = null
 }) => {
-  await db.query(
-    `INSERT INTO Notification (RecipientType, RecipientID, Title, Message, Type, RelatedID)
-     VALUES ('User', ?, ?, ?, ?, ?)`,
-    [UserID, Title, Message, Type, RelatedID]
-  );
-};
+  const sql = `
+    INSERT INTO Notification 
+    (RecipientID, Title, Message, Type, BroadcastGroup)
+    VALUES (?, ?, ?, ?, ?)
+  `;
+  const values = [recipientID, title, message, type, broadcastGroup];
 
-// Get all notifications for a user (most recent first)
-exports.getUserNotifications = async (UserID) => {
-  const [rows] = await db.query(
-    `SELECT * FROM Notification WHERE RecipientType = 'User' AND RecipientID = ? ORDER BY CreatedAt DESC`,
-    [UserID]
-  );
-  return rows;
-};
-
-// Mark a notification as read
-exports.markNotificationRead = async (NotificationID) => {
-  await db.query(
-    `UPDATE Notification SET IsRead = TRUE WHERE NotificationID = ?`,
-    [NotificationID]
-  );
+  try {
+    const [result] = await db.execute(sql, values);
+    return result.insertId;
+  } catch (error) {
+    console.error("Model error (createNotification):", error);
+    throw error;
+  }
 };
