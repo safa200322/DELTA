@@ -83,6 +83,16 @@ exports.createPayment = async (req, res) => {
       startDate: StartDate,
       endDate: EndDate
     });
+    console.log('--- Payment Calculation Debug ---');
+    console.log('VehicleID:', VehicleID);
+    console.log('ChauffeurID:', ChauffeurID);
+    console.log('AccessoryID:', AccessoryID);
+    console.log('StartDate:', StartDate, 'EndDate:', EndDate);
+    console.log('totalPrice:', totalPrice);
+    console.log('commissionAmount:', commissionAmount);
+    console.log('ownerEarnings:', ownerEarnings);
+    console.log('chauffeurAmount:', chauffeurAmount);
+    console.log('ChauffeurID for calculation:', ChauffeurID);
 
     // Payment data to insert
     const paymentData = {

@@ -76,7 +76,6 @@ exports.createPayment = async (paymentData) => {
   
   const [result] = await db.query(query, [
     paymentData.ReservationID,
-    paymentData.Amount,
     paymentData.Status,
     paymentData.NameOnCard,
     paymentData.CardNumber,
