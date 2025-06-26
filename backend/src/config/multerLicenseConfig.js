@@ -7,8 +7,19 @@ const storage = multer.diskStorage({
     cb(null, path.join(__dirname, '../../public/uploads/licenses'));
   },
   filename: (req, file, cb) => {
-    // Use chauffeur id from auth middleware
-    cb(null, `chauffeur-${req.user.id}-${Date.now()}${path.extname(file.originalname)}`);
+    // Support both general user and chauffeur uploads
+    let id = null;
+    let prefix = 'user';
+    if (req.chauffeur && (req.chauffeur.id || req.chauffeur.ChauffeurID)) {
+      id = req.chauffeur.id || req.chauffeur.ChauffeurID;
+      prefix = 'chauffeur';
+    } else if (req.user && (req.user.id || req.user.UserID)) {
+      id = req.user.id || req.user.UserID;
+      prefix = 'user';
+    }
+    // fallback if no id found
+    if (!id) id = 'unknown';
+    cb(null, `${prefix}-${id}-${Date.now()}${path.extname(file.originalname)}`);
   }
 });
 

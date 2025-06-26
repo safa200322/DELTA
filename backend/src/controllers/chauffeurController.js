@@ -282,10 +282,16 @@ exports.getOwnProfile = async (req, res) => {
 // Update the authenticated chauffeur's own profile
 exports.updateOwnProfile = async (req, res) => {
   try {
-    const id = req.chauffeur.id;
+    // Robustly extract id from both possible JWT payloads
+    const id = (req.chauffeur && (req.chauffeur.id || req.chauffeur.ChauffeurID)) || (req.user && (req.user.id || req.user.UserID));
+    console.log('updateOwnProfile: id =', id);
+    console.log('updateOwnProfile: fields =', req.body);
+    if (!id) {
+      return res.status(400).json({ error: "No valid user or chauffeur id found" });
+    }
     const fields = req.body;
     // Only allow updating certain fields for security
-    const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl"];
+    const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl", "LicenseFileUrl"];
     const updates = {};
     for (const key of allowedFields) {
       if (fields[key] !== undefined) updates[key] = fields[key];
@@ -306,12 +312,21 @@ exports.updateOwnProfile = async (req, res) => {
 };
 
 exports.uploadLicenseFile = async (req, res) => {
+  // Debug logging for troubleshooting
+  console.log('uploadLicenseFile: req.chauffeur =', req.chauffeur);
+  console.log('uploadLicenseFile: req.user =', req.user);
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded' });
   }
   const fileUrl = `/uploads/licenses/${req.file.filename}`;
   try {
-    await chauffeurModel.updateChauffeurLicenseFile(req.user.id, fileUrl);
+    // Use both possible sources for id
+    const id = (req.chauffeur && (req.chauffeur.id || req.chauffeur.ChauffeurID)) || (req.user && (req.user.id || req.user.UserID));
+    if (!id) {
+      console.error('uploadLicenseFile: No user or chauffeur id found');
+      return res.status(400).json({ message: 'No user or chauffeur id found' });
+    }
+    await chauffeurModel.updateChauffeurLicenseFile(id, fileUrl);
     res.status(200).json({ message: 'License uploaded successfully', fileUrl });
   } catch (err) {
     console.error('Error saving license file URL:', err);
@@ -321,9 +336,15 @@ exports.uploadLicenseFile = async (req, res) => {
 
 exports.getLicenseFileUrl = async (req, res) => {
   try {
-    const fileUrl = await chauffeurModel.getChauffeurLicenseFileUrl(req.user.id);
+    // Use both possible sources for id
+    const id = (req.chauffeur && (req.chauffeur.id || req.chauffeur.ChauffeurID)) || (req.user && (req.user.id || req.user.UserID));
+    if (!id) {
+      console.error('getLicenseFileUrl: No user or chauffeur id found');
+      return res.status(400).json({ message: 'No user or chauffeur id found' });
+    }
+    const fileUrl = await chauffeurModel.getChauffeurLicenseFileUrl(id);
     if (!fileUrl) {
-      return res.status(404).json({ message: 'No license file found' });
+      return res.status(200).json({ message: 'No license file found' });
     }
     res.status(200).json({ fileUrl });
   } catch (err) {
