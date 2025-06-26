@@ -331,3 +331,21 @@ exports.getLicenseFileUrl = async (req, res) => {
     res.status(500).json({ message: 'Failed to retrieve license file URL' });
   }
 };
+
+// Get booking history for the authenticated chauffeur
+exports.getBookingHistory = async (req, res) => {
+  try {
+    const chauffeurId = req.chauffeur?.id || req.chauffeur?.ChauffeurID;
+    if (!chauffeurId) {
+      return res.status(401).json({ message: "Unauthorized: No chauffeur ID found in token." });
+    }
+    const bookings = await require('../models/chauffeurModel').getBookingHistoryByChauffeur(chauffeurId);
+    const now = new Date();
+    const pastBookings = bookings.filter(b => new Date(b.EndDate) < now);
+    const upcomingBookings = bookings.filter(b => new Date(b.EndDate) >= now);
+    res.json({ pastBookings, upcomingBookings });
+  } catch (err) {
+    console.error('Error fetching chauffeur booking history:', err);
+    res.status(500).json({ message: 'Internal server error', details: err.message });
+  }
+};

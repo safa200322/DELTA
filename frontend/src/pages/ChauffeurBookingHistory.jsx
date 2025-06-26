@@ -1,143 +1,114 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  Container,
-  Row,
-  Col,
   Nav,
   NavItem,
   NavLink as ReactstrapNavLink,
   TabContent,
   TabPane,
+  Spinner,
+  Alert
 } from "reactstrap";
-import { NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import "../styles/booking-history.css";
 
 const ChauffeurBookingHistory = () => {
   const [activeTab, setActiveTab] = useState("past");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const location = useLocation();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [pastBookings, setPastBookings] = useState([]);
+  const [upcomingBookings, setUpcomingBookings] = useState([]);
 
-  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  useEffect(() => {
+    const fetchBookings = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5000/api/chauffeurs/bookings/history", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error("Failed to fetch booking history");
+        const data = await res.json();
+        setPastBookings(data.pastBookings || []);
+        setUpcomingBookings(data.upcomingBookings || []);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchBookings();
+  }, []);
+
+  const renderBooking = (b, idx, type) => (
+    <li key={b.ReservationID || idx} className="booking-item">
+      <div className="booking-card">
+        <div className="booking-header">
+          <span className="booking-id">Booking #{b.ReservationID}</span>
+          <span className={`status-badge status-${b.ResponseStatus?.toLowerCase() || 'unknown'}`}>{b.ResponseStatus || 'Unknown'}</span>
+        </div>
+        <div className="booking-details">
+          <div><strong>Renter:</strong> {b.RenterName} ({b.RenterPhone})</div>
+          <div><strong>Vehicle:</strong> {b.VehicleDetails} <span className="vehicle-type">[{b.VehicleType}]</span></div>
+          <div><strong>Pickup:</strong> {b.PickupLocation} <strong>Dropoff:</strong> {b.DropoffLocation}</div>
+          <div><strong>From:</strong> {new Date(b.StartDate).toLocaleString()} <strong>To:</strong> {new Date(b.EndDate).toLocaleString()}</div>
+        </div>
+        {b.VehiclePic && (
+          <div className="vehicle-pic-wrap">
+            <img src={b.VehiclePic} alt="Vehicle" className="vehicle-pic" />
+          </div>
+        )}
+      </div>
+    </li>
+  );
 
   return (
-    <div className="chauffeur-profile">
-      <Container fluid>
-        <Row>
-          <Col
-            xs="12"
-            md="3"
-            lg="2"
-            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
+    <div className="profile-section">
+      <h2>Booking History</h2>
+      <Nav tabs>
+        <NavItem>
+          <ReactstrapNavLink
+            className={activeTab === "past" ? "active" : ""}
+            onClick={() => setActiveTab("past")}
           >
-            <div className="sidebar-header">
-              <h3>Chauffeur Profile</h3>
-              <i
-                className="ri-menu-line sidebar-toggle d-md-none"
-                onClick={toggleSidebar}
-              ></i>
-            </div>
-            <Nav vertical className="sidebar-nav">
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/personal-info"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-user-line"></i> Personal Info
-                </RouterNavLink>
-              </NavItem>
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/work-availability"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-briefcase-line"></i> Work & Availability
-                </RouterNavLink>
-              </NavItem>
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/booking-history"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-calendar-line"></i> Booking History
-                </RouterNavLink>
-              </NavItem>
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/documents-verification"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-file-text-line"></i> Documents & Verification
-                </RouterNavLink>
-              </NavItem>
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/settings"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-settings-3-line"></i> Settings
-                </RouterNavLink>
-              </NavItem>
-              <NavItem>
-                <RouterNavLink
-                  to="/profile/payment-info"
-                  className={({ isActive }) =>
-                    isActive ? "nav-link active" : "nav-link"
-                  }
-                >
-                  <i className="ri-wallet-line"></i> Payment Info
-                </RouterNavLink>
-              </NavItem>
-            </Nav>
-          </Col>
-          <Col xs="12" md="9" lg="10" className="content-area">
-            <div className="profile-section">
-              <h2>Booking History</h2>
-              <Nav tabs>
-                <NavItem>
-                  <ReactstrapNavLink
-                    className={activeTab === "past" ? "active" : ""}
-                    onClick={() => setActiveTab("past")}
-                  >
-                    Past Bookings
-                  </ReactstrapNavLink>
-                </NavItem>
-                <NavItem>
-                  <ReactstrapNavLink
-                    className={activeTab === "upcoming" ? "active" : ""}
-                    onClick={() => setActiveTab("upcoming")}
-                  >
-                    Upcoming Bookings
-                  </ReactstrapNavLink>
-                </NavItem>
-              </Nav>
-              <TabContent activeTab={activeTab}>
-                <TabPane tabId="past">
-                  <ul>
-                    <li>Booking #123: Completed on 05/20/2025 with User A</li>
-                    <li>Booking #124: Completed on 05/25/2025 with User B</li>
-                  </ul>
-                </TabPane>
-                <TabPane tabId="upcoming">
-                  <ul>
-                    <li>Booking #125: Scheduled for 06/10/2025 with User C</li>
-                  </ul>
-                </TabPane>
-              </TabContent>
-            </div>
-          </Col>
-        </Row>
-      </Container>
+            Past Bookings
+          </ReactstrapNavLink>
+        </NavItem>
+        <NavItem>
+          <ReactstrapNavLink
+            className={activeTab === "upcoming" ? "active" : ""}
+            onClick={() => setActiveTab("upcoming")}
+          >
+            Upcoming Bookings
+          </ReactstrapNavLink>
+        </NavItem>
+      </Nav>
+      {loading ? (
+        <div className="text-center my-4"><Spinner color="primary" /> Loading booking history...</div>
+      ) : error ? (
+        <Alert color="danger" className="my-3">{error}</Alert>
+      ) : (
+        <TabContent activeTab={activeTab}>
+          <TabPane tabId="past">
+            {pastBookings.length === 0 ? (
+              <div className="text-muted my-3">No past bookings found.</div>
+            ) : (
+              <ul className="booking-list">
+                {pastBookings.map((b, idx) => renderBooking(b, idx, "past"))}
+              </ul>
+            )}
+          </TabPane>
+          <TabPane tabId="upcoming">
+            {upcomingBookings.length === 0 ? (
+              <div className="text-muted my-3">No upcoming bookings found.</div>
+            ) : (
+              <ul className="booking-list">
+                {upcomingBookings.map((b, idx) => renderBooking(b, idx, "upcoming"))}
+              </ul>
+            )}
+          </TabPane>
+        </TabContent>
+      )}
     </div>
   );
 };

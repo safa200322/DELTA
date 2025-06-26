@@ -198,3 +198,34 @@ exports.getChauffeurLicenseFileUrl = async (chauffeurId) => {
   );
   return rows[0]?.LicenseFileUrl || null;
 };
+
+// Get all bookings (past and upcoming) for a chauffeur
+exports.getBookingHistoryByChauffeur = async (chauffeurId) => {
+  const query = `
+    SELECT 
+      r.*, 
+      u.Name AS RenterName, 
+      u.PhoneNumber AS RenterPhone, 
+      v.Type AS VehicleType, 
+      v.VehiclePic, 
+      v.Location AS VehicleLocation,
+      CASE 
+        WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
+        WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
+        WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' - ', b.BoatType)
+        WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
+        ELSE 'Unknown Vehicle'
+      END as VehicleDetails
+    FROM Reservation r
+    JOIN User u ON r.UserID = u.UserID
+    JOIN Vehicle v ON r.VehicleID = v.VehicleID
+    LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
+    LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
+    LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
+    LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
+    WHERE r.ChauffeurID = ?
+    ORDER BY r.StartDate DESC
+  `;
+  const [rows] = await db.query(query, [chauffeurId]);
+  return rows;
+};

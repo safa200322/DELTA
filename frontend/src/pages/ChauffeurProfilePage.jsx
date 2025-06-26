@@ -3,6 +3,7 @@ import { Routes, Route, NavLink } from "react-router-dom";
 import { Container, Row, Col, Button, Nav, NavItem } from "reactstrap";
 import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
+import ChauffeurBookingHistory from "./ChauffeurBookingHistory";
 
 // Personal Info Section
 const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
@@ -156,24 +157,6 @@ const WorkAvailability = () => {
   );
 };
 
-// Booking History Section
-const BookingHistory = () => (
-  <div className="profile-section">
-    <h2>Booking History</h2>
-    <div className="section-content">
-      <h4>Past Bookings</h4>
-      <ul>
-        <li>Booking #123: Completed on 05/20/2025 with User A</li>
-        <li>Booking #124: Completed on 05/25/2025 with User B</li>
-      </ul>
-      <h4>Upcoming Bookings</h4>
-      <ul>
-        <li>Booking #125: Scheduled for 06/10/2025 with User C</li>
-      </ul>
-    </div>
-  </div>
-);
-
 // Documents & Verification Section
 const DocumentsVerification = () => (
   <div className="profile-section">
@@ -312,7 +295,7 @@ const ChauffeurProfilePage = () => {
             <Routes>
               <Route path="personal-info" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
               <Route path="work-availability" element={<WorkAvailability />} />
-              <Route path="booking-history" element={<BookingHistory />} />
+              <Route path="booking-history" element={<ChauffeurBookingHistory />} />
               <Route path="documents-verification" element={<DocumentsVerification />} />
               <Route path="settings" element={<Settings />} />
               <Route path="payment-info" element={<PaymentInfo />} />

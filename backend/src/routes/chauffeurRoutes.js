@@ -37,4 +37,7 @@ router.get("/me/license", authChauffeur, chauffeurController.getLicenseFileUrl);
 // Get a single chauffeur by ID
 router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
 
+// Get booking history for the authenticated chauffeur
+router.get("/bookings/history", authChauffeur, chauffeurController.getBookingHistory);
+
 module.exports = router;
