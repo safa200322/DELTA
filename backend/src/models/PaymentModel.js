@@ -1,6 +1,4 @@
-const db = require('../config/db');
-
-// Commission rates per vehicle type
+const db = require('../db');
 const COMMISSION_RATES = {
   Car: 0.15,
   boats: 0.20,
@@ -19,36 +17,55 @@ exports.createPayment = async ({
   CVV,
   PaymentMethod
 }) => {
-  // 1. Get reservation info
-  const [reservation] = await db.query(
-    'SELECT StartDate, EndDate FROM Reservation WHERE ReservationID = ?',
+  // 1. Fetch Reservation info
+  const [reservationResult] = await db.query(
+    'SELECT StartDate, EndDate, AccessoryID, ChauffeurID FROM Reservation WHERE ReservationID = ?',
     [ReservationID]
   );
-  if (!reservation.length) throw new Error('Reservation not found');
-  const { StartDate, EndDate } = reservation[0];
+  if (!reservationResult.length) throw new Error('Reservation not found');
+  const { StartDate, EndDate, AccessoryID: accessoryFromDB, ChauffeurID: chauffeurFromDB } = reservationResult[0];
 
-  // 2. Get vehicle info
-  const [vehicle] = await db.query(
+  // 2. Fetch Vehicle info
+  const [vehicleResult] = await db.query(
     'SELECT Type, Price FROM Vehicle WHERE VehicleID = ?',
     [VehicleID]
   );
-  if (!vehicle.length) throw new Error('Vehicle not found');
-  const { Type, Price } = vehicle[0];
+  if (!vehicleResult.length) throw new Error('Vehicle not found');
+  const { Type, Price: VehiclePrice } = vehicleResult[0];
 
-  // 3. Calculate number of days
+  // 3. Calculate rental duration in days
   const start = new Date(StartDate);
   const end = new Date(EndDate);
   const timeDiff = Math.abs(end - start);
-  const dayCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)); // includes both days
+  const dayCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-  // 4. Calculate totals
+  // 4. Fetch Accessory price (if applicable)
+  let accessoryPrice = 0;
+  if (accessoryFromDB) {
+    const [accessoryResult] = await db.query(
+      'SELECT Price FROM Accessory WHERE AccessoryID = ?',
+      [accessoryFromDB]
+    );
+    if (accessoryResult.length) {
+      accessoryPrice = accessoryResult[0].Price;
+    }
+  }
+
+  // 5. Calculate Chauffeur cost (if applicable)
+  let chauffeurAmount = 0;
+  if (chauffeurFromDB) {
+    chauffeurAmount = 40 * dayCount;
+  }
+
+  // 6. Calculate totals
+  const baseRental = VehiclePrice * dayCount;
   const commissionRate = COMMISSION_RATES[Type];
-  const totalPrice = dayCount * Price;
-  const commissionAmount = totalPrice * commissionRate;
-  const ownerEarning = totalPrice - commissionAmount;
+  const commissionAmount = baseRental * commissionRate;
+  const totalPrice = baseRental + accessoryPrice + chauffeurAmount;
+  const ownerEarning = baseRental - commissionAmount;
 
-  // 5. Insert into Payment table
-  const [result] = await db.query(
+  // 7. Insert into Payment with status 'Pending'
+  const [insertResult] = await db.query(
     `INSERT INTO Payment 
     (ReservationID, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod,
      TotalPrice, CommissionAmount, OwnerEarning, ChauffeurAmount)
@@ -63,13 +80,24 @@ exports.createPayment = async ({
       totalPrice,
       commissionAmount,
       ownerEarning,
-      0 // placeholder for ChauffeurAmount, you’ll handle later
+      chauffeurAmount
     ]
   );
 
+  const paymentId = insertResult.insertId;
+
+  // 8. Immediately mark payment as 'Paid'
+  await db.query(
+    `UPDATE Payment SET Status = 'Paid' WHERE PaymentID = ?`,
+    [paymentId]
+  );
+
+
   return {
-    PaymentID: result.insertId,
+    PaymentID: paymentId,
     TotalPrice: totalPrice,
+    AccessoryPrice: accessoryPrice,
+    ChauffeurAmount: chauffeurAmount,
     CommissionAmount: commissionAmount,
     OwnerEarning: ownerEarning,
     DayCount: dayCount,

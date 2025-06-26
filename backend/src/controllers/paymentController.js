@@ -1,5 +1,4 @@
-const Payment = require('../models/payment.model');
-
+const paymentModel = require('../models/paymentModel');
 exports.createPayment = async (req, res) => {
   try {
     const {
@@ -14,8 +13,7 @@ exports.createPayment = async (req, res) => {
       PaymentMethod
     } = req.body;
 
-    // Step 1: Call model function to create the payment
-    const paymentResult = await Payment.createPayment({
+    const paymentResult = await paymentModel.createPayment({
       ReservationID,
       VehicleID,
       AccessoryID,
@@ -32,7 +30,7 @@ exports.createPayment = async (req, res) => {
       payment: paymentResult
     });
   } catch (error) {
-    console.error('❌ Error creating payment:', error);
+    console.error('Error creating payment:', error);
     res.status(500).json({ error: 'Failed to create payment' });
   }
 };
