@@ -6,7 +6,7 @@ const path = require('path');
 exports.registerChauffeur = async (req, res) => {
   const { Name, PhoneNumber, Email, Password, LicenseNumber, Location, Date_of_birth } = req.body;
 
-  if (!Name || !PhoneNumber || !Email || !Password || !LicenseNumber || !Location|| !Date_of_birth) {
+  if (!Name || !PhoneNumber || !Email || !Password || !LicenseNumber || !Location || !Date_of_birth) {
     return res.status(400).json({ message: 'All fields are required' });
   }
 
@@ -108,11 +108,11 @@ exports.assignChauffeur = async (req, res) => {
 exports.getPendingChauffeurs = async (req, res) => {
   try {
     const rows = await chauffeurModel.getPendingChauffeurs();
-    
+
     if (rows.length === 0) {
       return res.status(404).json({ message: "No pending chauffeurs found." });
     }
-    
+
     res.json(rows);
   } catch (err) {
     console.error('DB error while fetching pending chauffeurs:', err);
@@ -124,13 +124,13 @@ exports.getPendingChauffeurs = async (req, res) => {
 exports.approveChauffeur = async (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(id)) return res.status(400).json({ error: 'Invalid chauffeur ID' });
-  
+
   try {
     const chauffeur = await chauffeurModel.getChauffeurById(id);
     if (!chauffeur) {
       return res.status(404).json({ error: 'Chauffeur not found' });
     }
-    
+
     if (chauffeur.Status === 'Approved') {
       return res.status(400).json({ error: 'Chauffeur is already approved' });
     }
@@ -155,13 +155,13 @@ exports.approveChauffeur = async (req, res) => {
 exports.rejectChauffeur = async (req, res) => {
   const { id } = req.params;
   if (!id || isNaN(id)) return res.status(400).json({ error: 'Invalid chauffeur ID' });
-  
+
   try {
     const chauffeur = await chauffeurModel.getChauffeurById(id);
     if (!chauffeur) {
       return res.status(404).json({ error: 'Chauffeur not found' });
     }
-    
+
     if (chauffeur.Status === 'Rejected') {
       return res.status(400).json({ error: 'Chauffeur is already rejected' });
     }
@@ -170,7 +170,7 @@ exports.rejectChauffeur = async (req, res) => {
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Chauffeur not found' });
     }
-    
+
     res.json({ message: 'Chauffeur rejected.' });
   } catch (err) {
     console.error(`Error while rejecting chauffeur ID ${id}:`, err.message);
@@ -224,13 +224,23 @@ exports.respondToAssignment = async (req, res) => {
 
 
 
-
 exports.getPendingAssignments = async (req, res) => {
-  const chauffeurId = req.params.chauffeurId;
+  // Debug logging
+  console.log('getPendingAssignments called');
+  console.log('req.chauffeur:', req.chauffeur);
+  console.log('req.params:', req.params);
+  const chauffeurId = req.chauffeur?.id || req.chauffeur?.ChauffeurID;
+  if (!chauffeurId) {
+    console.log('No chauffeurId found in JWT');
+    return res.status(401).json({ message: "Unauthorized: No chauffeur ID found in token." });
+  }
   try {
     const assignments = await chauffeurModel.getPendingAssignmentsByChauffeur(chauffeurId);
-    if (assignments.length === 0) {
-      return res.status(404).json({ message: "No pending assignments found" });
+    console.log('Assignments found:', assignments);
+    if (!assignments || assignments.length === 0) {
+      console.log('No pending assignments found for chauffeurId:', chauffeurId);
+      // Return 200 with empty array instead of 404
+      return res.status(200).json([]);
     }
     res.json(assignments);
   } catch (err) {

@@ -86,6 +86,7 @@ function App() {
 
           {/* Chauffeur Dashboard routes */}
           <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
+          <Route path="/chauffeur/dashboard/*" element={<ChauffeurProfilePage />} />
           {/* Vehicle Owner routes */}
           <Route path="/vehicle-owner/profile" element={<UserProfile />} />
           <Route
@@ -112,7 +113,7 @@ function App() {
             path="/profile/rentee-earnings-and-payments"
             element={<RenteeEarningsandPayment />}
           />
-          
+
           <Route
             path="/profile/rentee-notifications"
             element={<RenteeNotifications />}
@@ -154,7 +155,7 @@ function App() {
           <Route path="/reservation-management" element={<ReservationManagement />} />
           <Route path="/payment-admin" element={<PaymentAdminDashboard />} />
           <Route path="/notifications-Dashboard" element={<NotificationsDashboard />} />
-          <Route path="/accessories-management" element={< AccessoriesManagement/>} />
+          <Route path="/accessories-management" element={< AccessoriesManagement />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

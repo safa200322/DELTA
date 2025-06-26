@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const chauffeurController = require("../controllers/chauffeurController");
-const adminAuth = require("../middleware/adminAuth"); 
+const adminAuth = require("../middleware/adminAuth");
 const authMiddleware = require('../middleware/authMiddleware');
 const authChauffeur = require('../middleware/authChauffeur');
 const uploadLicense = require('../config/multerLicenseConfig');
@@ -11,11 +11,11 @@ router.post("/register", chauffeurController.registerChauffeur);
 
 // router.post("/login", chauffeurController.loginChauffeur); // Removed, use unified login
 
-router.patch("/approve/:id",adminAuth, chauffeurController.approveChauffeur);
+router.patch("/approve/:id", adminAuth, chauffeurController.approveChauffeur);
 
-router.patch("/reject/:id",adminAuth, chauffeurController.rejectChauffeur);
+router.patch("/reject/:id", adminAuth, chauffeurController.rejectChauffeur);
 
-router.patch("/assignments/respond/:reservationId",authChauffeur, chauffeurController.respondToAssignment);
+router.patch("/assignments/respond/:reservationId", authChauffeur, chauffeurController.respondToAssignment);
 
 router.post("/assignments/assign/:reservationId", authMiddleware, chauffeurController.assignChauffeur);
 
@@ -35,6 +35,6 @@ router.post("/me/license", authChauffeur, uploadLicense.single('license'), chauf
 router.get("/me/license", authChauffeur, chauffeurController.getLicenseFileUrl);
 
 // Get a single chauffeur by ID
-router.get( "/:id", adminAuth, chauffeurController.getChauffeurById);
+router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
 
 module.exports = router;

@@ -50,8 +50,8 @@ const WorkAvailability = () => {
       prev === "Available"
         ? "Unavailable"
         : prev === "Unavailable"
-        ? "On a Job"
-        : "Available"
+          ? "On a Job"
+          : "Available"
     );
   };
 
@@ -228,4 +228,7 @@ const WorkAvailability = () => {
   );
 };
 
+// This page should be rendered by the route /chauffeur/dashboard/work-availability
+// Remove sidebar and layout duplication if this is now a subpage of ChauffeurProfilePage
+// Only export the WorkAvailability component
 export default WorkAvailability;
