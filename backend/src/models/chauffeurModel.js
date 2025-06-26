@@ -229,3 +229,11 @@ exports.getBookingHistoryByChauffeur = async (chauffeurId) => {
   const [rows] = await db.query(query, [chauffeurId]);
   return rows;
 };
+
+exports.updateChauffeurPassword = async (chauffeurId, hashedPassword) => {
+  const [result] = await db.query(
+    "UPDATE Chauffeur SET Password = ? WHERE ChauffeurID = ?",
+    [hashedPassword, chauffeurId]
+  );
+  return [result];
+};

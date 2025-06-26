@@ -34,6 +34,9 @@ router.post("/me/license", authChauffeur, uploadLicense.single('license'), chauf
 // Get chauffeur license file URL
 router.get("/me/license", authChauffeur, chauffeurController.getLicenseFileUrl);
 
+// Change password for authenticated chauffeur
+router.put("/me/password", authChauffeur, chauffeurController.changePassword);
+
 // Get a single chauffeur by ID
 router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
 
