@@ -1,38 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
 import "../../styles/user-profile.css";
 
 const NotificationsProfile = () => {
-  const notifications = [
-    {
-      id: 1,
-      type: "owner",
-      message:
-        "John Doe has updated the pickup time for your Toyota Camry to 10:30 AM.",
-      timestamp: "June 20, 2025, 09:00 PM +03",
-    },
-    {
-      id: 2,
-      type: "rental",
-      message:
-        "Your rental of Honda CR-V has been confirmed for June 21-23, 2025.",
-      timestamp: "June 20, 2025, 08:45 PM +03",
-    },
-    {
-      id: 3,
-      type: "admin",
-      message: "New platform update: Enhanced security features are now live!",
-      timestamp: "June 20, 2025, 09:15 PM +03",
-    },
-    {
-      id: 4,
-      type: "owner",
-      message:
-        "Jane Smith has requested maintenance details for your Ford Focus.",
-      timestamp: "June 19, 2025, 03:00 PM +03",
-    },
-  ];
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        // Get JWT token from localStorage (adjust if you store it elsewhere)
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5000/api/notifications/my", {
+          credentials: "include",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error("Failed to fetch notifications");
+        const data = await res.json();
+        setNotifications(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
 
   return (
     <div className="user-profile-page">
@@ -104,21 +101,36 @@ const NotificationsProfile = () => {
             <Col lg="8">
               <div className="notification-section">
                 <h3 className="section-title">Notifications</h3>
-                {notifications.map((notification) => (
-                  <div
-                    key={notification.id}
-                    className={`notification-card ${notification.type}`}
-                  >
-                    <div className="notification-details">
-                      <p className="notification-message">
-                        {notification.message}
-                      </p>
-                      <p className="notification-timestamp">
-                        <strong>Time:</strong> {notification.timestamp}
-                      </p>
+                {loading && <p>Loading notifications...</p>}
+                {error && <p className="text-danger">{error}</p>}
+                {!loading && !error && notifications.length === 0 && (
+                  <p>No notifications found.</p>
+                )}
+                {!loading &&
+                  !error &&
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`notification-card ${notification.type}`}
+                    >
+                      <div className="notification-details">
+                        <p className="notification-message">
+                          {notification.message || notification.content}
+                        </p>
+                        {notification.createdAt && (
+                          <p className="notification-timestamp">
+                            <strong>Time:</strong>{" "}
+                            {new Date(notification.createdAt).toLocaleString()}
+                          </p>
+                        )}
+                        {notification.timestamp && !notification.createdAt && (
+                          <p className="notification-timestamp">
+                            <strong>Time:</strong> {notification.timestamp}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </Col>
           </Row>

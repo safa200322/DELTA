@@ -115,36 +115,36 @@ const Header = () => {
                 <Link to="/notifications" className="profile__icon" title="Notifications">
                   <i className="ri-notification-3-fill" style={{ color: "#EF3E3F" }}></i>
                 </Link>
-                
+
                 {/* Show profile options based on user type */}
                 {userType === 'user' && (
                   <Link to="/profile/ProfileOverview" className="profile__icon" title="User Profile">
                     <i className="ri-user-3-fill" style={{ color: "#007bff" }}></i>
                   </Link>
                 )}
-                
+
                 {userType === 'chauffeur' && (
                   <Link to="/profile/personal-info" className="profile__icon" title="Chauffeur Profile">
                     <i className="ri-steering-2-fill" style={{ color: "#28a745" }}></i>
                   </Link>
                 )}
-                
+
                 {userType === 'vehicle-owner' && (
                   <Link to="/profile/rentee-profile" className="profile__icon" title="Vehicle Owner Profile">
                     <i className="ri-car-fill" style={{ color: "#F88D56" }}></i>
                   </Link>
                 )}
-                
+
                 {userType === 'admin' && (
                   <Link to="/admin" className="profile__icon" title="Admin Profile">
                     <i className="ri-user-2-fill" style={{ color: "#EBC222" }}></i>
                   </Link>
                 )}
-                
-                <button 
+
+                <button
                   onClick={handleLogout}
                   className="profile__icon"
-                  style={{ 
+                  style={{
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',

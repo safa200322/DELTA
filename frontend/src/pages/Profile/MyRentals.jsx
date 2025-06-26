@@ -89,7 +89,7 @@ const MyRentals = () => {
     const now = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (now < start) return 'status-pending';
     if (now >= start && now <= end) return 'status-active';
     return 'status-completed';
@@ -99,7 +99,7 @@ const MyRentals = () => {
     const now = new Date();
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     if (now < start) return 'Upcoming';
     if (now >= start && now <= end) return 'Active';
     return 'Completed';
