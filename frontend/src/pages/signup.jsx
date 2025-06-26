@@ -48,8 +48,11 @@ const SignUpPage = () => {
 
         if (loginResponse.ok) {
           const data = await loginResponse.json();
-          // Store the JWT token
+          // Store the JWT token and user info
           localStorage.setItem('token', data.token);
+          localStorage.setItem('userType', data.user ? data.user.type : 'user');
+          localStorage.setItem('userName', data.user ? data.user.name : '');
+          localStorage.setItem('userId', data.user ? data.user.id : '');
           alert("Account created successfully!");
           // Redirect to profile page
           navigate('/profile/ProfileOverview');

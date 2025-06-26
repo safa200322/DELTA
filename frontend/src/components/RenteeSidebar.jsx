@@ -35,11 +35,6 @@ const RenteeSidebar = ({
       label: "Notifications"
     },
     {
-      to: "/profile/rentee-reviews",
-      icon: "ri-star-line",
-      label: "Reviews"
-    },
-    {
       to: "/profile/rentee-security",
       icon: "ri-shield-line",
       label: "Security"
