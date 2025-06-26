@@ -147,7 +147,7 @@ const SignUpPage = () => {
 
           <p className="login-text">
             Already have an account? <a href="/login">Login here</a>
-           
+
           </p>
           <p className="login-text"> Vehicle owner? <a href="/vehicle-owner-signup">Sign up as a Vehicle Owner</a></p>
         </div>

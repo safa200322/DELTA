@@ -4,6 +4,7 @@ const chauffeurController = require("../controllers/chauffeurController");
 const adminAuth = require("../middleware/adminAuth"); 
 const authMiddleware = require('../middleware/authMiddleware');
 const authChauffeur = require('../middleware/authChauffeur');
+const uploadLicense = require('../config/multerLicenseConfig');
 
 
 router.post("/register", chauffeurController.registerChauffeur);
@@ -27,6 +28,11 @@ router.get("/me", authChauffeur, chauffeurController.getOwnProfile);
 
 // Update chauffeur profile (self-service)
 router.put("/me", authChauffeur, chauffeurController.updateOwnProfile);
+
+// Upload chauffeur license file
+router.post("/me/license", authChauffeur, uploadLicense.single('license'), chauffeurController.uploadLicenseFile);
+// Get chauffeur license file URL
+router.get("/me/license", authChauffeur, chauffeurController.getLicenseFileUrl);
 
 // Get a single chauffeur by ID
 router.get( "/:id", adminAuth, chauffeurController.getChauffeurById);
