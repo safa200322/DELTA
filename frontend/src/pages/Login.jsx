@@ -49,11 +49,11 @@ const Login = () => {
               navigate('/chauffeur/dashboard');
               break;
             case 'vehicle-owner':
-              navigate('/vehicle-owner/profile');
+              navigate('/profile/rentee-profile'); // or '/profile/rentee-vehicle-management' if that's the main dashboard
               break;
             case 'user':
             default:
-              navigate('/profile/ProfileOverview');
+              navigate('/profile');
               break;
           }
         }
