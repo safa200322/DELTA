@@ -43,4 +43,7 @@ router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
 // Get booking history for the authenticated chauffeur
 router.get("/bookings/history", authChauffeur, chauffeurController.getBookingHistory);
 
+// Route to get Chauffeur payout for a reservation
+router.get('/payout/:reservationId', authChauffeur, chauffeurController.getChauffeurPayout);
+
 module.exports = router;

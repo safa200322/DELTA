@@ -393,3 +393,21 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', details: err.message });
   }
 };
+
+// Get Chauffeur payout (ChauffeurAmount) for a reservation
+exports.getChauffeurPayout = async (req, res) => {
+  try {
+    const { reservationId } = req.params;
+    if (!reservationId) {
+      return res.status(400).json({ message: 'Reservation ID is required' });
+    }
+    const payout = await chauffeurModel.getChauffeurPayoutByReservation(reservationId);
+    if (payout === null) {
+      return res.status(404).json({ message: 'No payout found for this reservation' });
+    }
+    res.json({ reservationId, chauffeurPayout: payout });
+  } catch (err) {
+    console.error('Error fetching chauffeur payout:', err);
+    res.status(500).json({ message: 'Internal server error', details: err.message });
+  }
+};

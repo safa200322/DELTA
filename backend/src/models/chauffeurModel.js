@@ -237,3 +237,12 @@ exports.updateChauffeurPassword = async (chauffeurId, hashedPassword) => {
   );
   return [result];
 };
+
+// Fetch Chauffeur payout (ChauffeurAmount) for a given reservation or payment
+exports.getChauffeurPayoutByReservation = async (reservationId) => {
+  const [rows] = await db.query(
+    'SELECT ChauffeurAmount FROM Payment WHERE ReservationID = ?',
+    [reservationId]
+  );
+  return rows.length ? rows[0].ChauffeurAmount : null;
+};
