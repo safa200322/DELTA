@@ -1,0 +1,2 @@
+-- This migration has been removed as per user request.
+-- (Original Notification table creation was here)
