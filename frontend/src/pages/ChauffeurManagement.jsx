@@ -136,6 +136,35 @@ const ChauffeurManagement = () => {
               {/* Chauffeur Management Icon */}
             </Link>
           </li>
+           <li className="nav-item">
+                 <Link className="nav-link active" to="/reservation-management">
+               <span className="sidebar-icon">📅</span> {/* Reservation Management Icon */}
+             </Link>
+           </li>
+           <li className="nav-item">
+                       <Link
+                         to="/payment-admin"
+                         className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                       >
+                         <span className="sidebar-icon">💰</span> {/* Payment Admin Icon */}
+                       </Link>
+                     </li>
+          <li className="nav-item">
+                      <Link
+                        to="/notifications-Dashboard"
+                        className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                      >
+                        <span className="sidebar-icon">🔔</span> {/* Notifications Icon */}
+                      </Link>
+                    </li>
+                    <li className="nav-item">
+                                <Link
+                                  to="/accessories-management"
+                                  className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                                >
+                                  <span className="sidebar-icon">🛠️</span> {/* Accessories Icon */}
+                                </Link>
+                              </li>
         </ul>
         <div className="sidebar-footer text-center p-3">
           <img

@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -252,7 +252,7 @@ const NotificationCard = ({ notifications, handleRemoveNotification }) => (
 
 // Main Component
 const AdminDashboard = () => {
-  const [reservations, setReservations] = useState([]);
+  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
   const [payments, setPayments] = useState(MOCK_PAYMENTS);
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
   const [accessories, setAccessories] = useState(MOCK_ACCESSORIES);
@@ -261,24 +261,6 @@ const AdminDashboard = () => {
     price: "",
     category: "",
   });
-
-  useEffect(() => {
-    // Fetch reservations from backend
-    const fetchReservations = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/AdmingetReservations/");
-        if (response.ok) {
-          const data = await response.json();
-          setReservations(data);
-        } else {
-          setReservations([]);
-        }
-      } catch (error) {
-        setReservations([]);
-      }
-    };
-    fetchReservations();
-  }, []);
 
   const handleAction = useCallback((setState, id, action) => {
     setState((prev) =>
@@ -344,6 +326,35 @@ const AdminDashboard = () => {
               <span className="sidebar-icon">👤</span>
             </Link>
           </li>
+           <li className="nav-item">
+                      <Link className="nav-link active" to="/reservation-management">
+                        <span className="sidebar-icon">📅</span> {/* Reservation Management Icon */}
+                      </Link>
+                    </li>
+            <li className="nav-item">
+                        <Link
+                          to="/payment-admin"
+                          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                        >
+                          <span className="sidebar-icon">💰</span> {/* Payment Admin Icon */}
+                        </Link>
+                      </li>
+                       <li className="nav-item">
+                                  <Link
+                                    to="/notifications-Dashboard"
+                                    className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                                  >
+                                    <span className="sidebar-icon">🔔</span> {/* Notifications Icon */}
+                                  </Link>
+                                </li>
+                      <li className="nav-item">
+                                  <Link
+                                    to="/accessories-management"
+                                    className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
+                                  >
+                                    <span className="sidebar-icon">🛠️</span> {/* Accessories Icon */}
+                                  </Link>
+                                </li>
         </ul>
         <div className="sidebar-footer text-center p-3">
           <img
@@ -358,7 +369,7 @@ const AdminDashboard = () => {
           <Col xs={12} sm={6} md={4}>
             <SummaryCard
               title="TOTAL RESERVATIONS"
-              value={reservations.length}
+              value="3"
               subValue="2 last month"
               percentage="50%"
               isPositive={true}
