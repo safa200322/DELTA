@@ -19,6 +19,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve static files from the public directory
 app.use(express.static('public'));
+// Serve static files from the uploads directory (for images)
+app.use('/uploads', express.static('public/uploads'));
 
 app.use(session({
   secret: 'yourSecretHere',

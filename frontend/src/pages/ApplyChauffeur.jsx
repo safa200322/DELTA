@@ -16,18 +16,37 @@ const ApplyChauffeur = () => {
     Password: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [countryCode, setCountryCode] = useState("+90"); // Default country code
+
+  // Helper to format phone as (548) 855 04 24
+  const formatPhone = (value) => {
+    const digits = value.replace(/\D/g, "");
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    if (digits.length <= 8) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)} ${digits.slice(6)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)} ${digits.slice(6, 8)} ${digits.slice(8, 10)}`;
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, PhoneNumber: formatted });
+  };
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const submitData = {
+      ...formData,
+      PhoneNumber: countryCode + ' ' + formData.PhoneNumber,
+    };
     try {
       const response = await fetch("http://localhost:5000/api/chauffeurs/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(submitData),
       });
       if (response.ok) {
         setSubmitted(true);
@@ -78,7 +97,29 @@ const ApplyChauffeur = () => {
 
               <FormGroup>
                 <Label for="PhoneNumber">Phone Number</Label>
-                <Input type="tel" name="PhoneNumber" value={formData.PhoneNumber} onChange={handleChange} required />
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <select
+                    id="countryCode"
+                    value={countryCode}
+                    onChange={e => setCountryCode(e.target.value)}
+                    style={{ width: '90px' }}
+                  >
+                    <option value="+90">+90</option>
+                    <option value="+1">+1</option>
+                    <option value="+44">+44</option>
+                    {/* Add more country codes as needed */}
+                  </select>
+                  <Input
+                    type="tel"
+                    name="PhoneNumber"
+                    id="PhoneNumber"
+                    placeholder="(548) 855 04 24"
+                    value={formData.PhoneNumber}
+                    onChange={handlePhoneChange}
+                    maxLength={16}
+                    style={{ flex: 1 }}
+                  />
+                </div>
               </FormGroup>
 
               <FormGroup>

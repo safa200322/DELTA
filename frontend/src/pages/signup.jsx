@@ -15,6 +15,18 @@ const SignUpPage = () => {
     confirmPassword: "",
     birthday: "", // Added birthday
   });
+  const [countryCode, setCountryCode] = useState("+90"); // Default country code
+
+  // Helper to format phone as 5488550424 (no spaces, just digits)
+  const formatPhone = (value) => {
+    // Remove all non-digit characters
+    return value.replace(/\D/g, "");
+  };
+
+  const handlePhoneChange = (e) => {
+    const formatted = formatPhone(e.target.value);
+    setFormData({ ...formData, phone: formatted });
+  };
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -55,7 +67,7 @@ const SignUpPage = () => {
     // Only send required fields to backend
     const signupData = {
       fullName,
-      phone,
+      phone: countryCode + phone,
       email,
       password,
       birthday,
@@ -78,7 +90,7 @@ const SignUpPage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            phonenumber: formData.phone,
+            phonenumber: countryCode + formData.phone,
             password: formData.password
           }),
         });
@@ -142,13 +154,28 @@ const SignUpPage = () => {
             />
 
             <label htmlFor="phone">Phone Number</label>
-            <input
-              type="tel"
-              id="phone"
-              placeholder="Enter your phone number"
-              value={formData.phone}
-              onChange={handleChange}
-            />
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <select
+                id="countryCode"
+                value={countryCode}
+                onChange={e => setCountryCode(e.target.value)}
+                style={{ width: '90px' }}
+              >
+                <option value="+90">+90</option>
+                <option value="+1">+1</option>
+                <option value="+44">+44</option>
+                {/* Add more country codes as needed */}
+              </select>
+              <input
+                type="tel"
+                id="phone"
+                placeholder="5488550424"
+                value={formData.phone}
+                onChange={handlePhoneChange}
+                maxLength={15}
+                style={{ flex: 1 }}
+              />
+            </div>
 
             <label htmlFor="birthday">Birthday</label>
             <input
