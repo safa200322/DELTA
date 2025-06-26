@@ -21,6 +21,7 @@ import {
 } from "reactstrap";
 import "../../styles/user-profile.css";
 import RenteeSidebar from "../../components/RenteeSidebar";
+import VehicleOwnerProfileEdit from "../../components/VehicleOwnerProfileEdit";
 
 const VehicleManagement = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -33,6 +34,8 @@ const VehicleManagement = () => {
   const [maintenanceRecords, setMaintenanceRecords] = useState([]);
   const [rentalHistory, setRentalHistory] = useState([]);
   const [actionLoading, setActionLoading] = useState(false);
+  const [addVehicleModal, setAddVehicleModal] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Check user authentication and role
   const checkAuth = () => {
@@ -321,13 +324,19 @@ const VehicleManagement = () => {
         }}>
           <h4 style={{ color: '#0d47a1', fontWeight: '600' }}>No Vehicles Found</h4>
           <p style={{ color: '#1565c0', fontSize: '16px' }}>You haven't added any vehicles yet. Start by adding your first vehicle to get bookings!</p>
-          <Button color="primary" tag="a" href="/add-vehicle" style={{
+          <Button color="primary" onClick={() => setAddVehicleModal(true)} style={{
             backgroundColor: '#1976d2',
             borderColor: '#1976d2',
             fontWeight: '500'
           }}>
             Add Your First Vehicle
           </Button>
+          <VehicleOwnerProfileEdit
+            isOpen={addVehicleModal}
+            toggle={() => setAddVehicleModal(false)}
+            currentUser={currentUser}
+            onProfileUpdate={() => { setAddVehicleModal(false); fetchVehicles(); }}
+          />
         </Alert>
       ) : (
         <Row>

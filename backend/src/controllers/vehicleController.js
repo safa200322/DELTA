@@ -205,7 +205,15 @@ exports.deleteVehicle = async (req, res) => {
       if (!vehicle) {
         return res.status(404).json({ error: 'Vehicle not found' });
       }
-      if (vehicle.ownerID && vehicle.ownerID !== req.user.id) {
+      
+      // Debug logging to check data types and values
+      console.log('Delete vehicle ownership check:');
+      console.log('vehicle.ownerID:', vehicle.ownerID, 'type:', typeof vehicle.ownerID);
+      console.log('req.user.id:', req.user.id, 'type:', typeof req.user.id);
+      console.log('req.user:', req.user);
+      
+      // Convert both to numbers for comparison
+      if (vehicle.ownerID && parseInt(vehicle.ownerID) !== parseInt(req.user.id)) {
         return res.status(403).json({ error: 'Unauthorized: Vehicle does not belong to you' });
       }
     }
@@ -213,6 +221,7 @@ exports.deleteVehicle = async (req, res) => {
     await vehicleModel.deleteVehicle(vehicleID);
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (err) {
+    console.error('Error in deleteVehicle:', err);
     res.status(500).json({ error: err.message });
   }
 };

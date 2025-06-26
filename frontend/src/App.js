@@ -52,6 +52,7 @@ import AccountSettings from "./pages/Profile/AccountSettings";
 import VehicleManagement from "./pages/VehicleManagement";
 import VehicleOwnerSignup from "./pages/VehicleOwnerSignup";
 import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
+import ProfileRedirect from "./pages/Profile/ProfileRedirect";
 import ChauffureProfilePage from "./pages/ChauffeurProfilePage";
 
 
@@ -129,10 +130,7 @@ function App() {
           />
           <Route path="/profile/settings" element={<Settings />} />
           <Route path="/profile/payment-info" element={<PaymentInfo />} />
-          <Route
-            path="/profile"
-            element={<Navigate to="/profile/rentee-profile" />}
-          />
+          <Route path="/profile" element={<ProfileRedirect />} />
           <Route
             path="/profile/ProfileOverview"
             element={<ProfileOverview />}

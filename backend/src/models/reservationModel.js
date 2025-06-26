@@ -53,7 +53,35 @@ const ReservationModel = {
   },
 
   async getReservationsByUserId(UserID) {
-    const [rows] = await db.query('SELECT * FROM Reservation WHERE UserID = ?', [UserID]);
+    const query = `
+      SELECT 
+        r.*,
+        CASE 
+          WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
+          WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
+          WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' - ', b.BoatType)
+          WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
+          ELSE 'Unknown Vehicle'
+        END as VehicleDetails,
+        v.Type as VehicleType,
+        v.VehiclePic,
+        v.Location as VehicleLocation,
+        vo.FullName as OwnerName,
+        vo.PhoneNumber as OwnerPhone,
+        ch.Name as ChauffeurName,
+        ch.PhoneNumber as ChauffeurPhone
+      FROM Reservation r
+      JOIN Vehicle v ON r.VehicleID = v.VehicleID
+      LEFT JOIN VehicleOwner vo ON v.OwnerID = vo.OwnerID
+      LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
+      LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
+      LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
+      LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
+      LEFT JOIN Chauffeur ch ON r.ChauffeurID = ch.ChauffeurID
+      WHERE r.UserID = ?
+      ORDER BY r.StartDate DESC
+    `;
+    const [rows] = await db.query(query, [UserID]);
     return rows;
   },
 
@@ -69,16 +97,25 @@ const ReservationModel = {
     const query = `
       SELECT 
         r.*,
-        v.Brand,
-        v.Model,
-        v.Type,
+        CASE 
+          WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
+          WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
+          WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' - ', b.BoatType)
+          WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
+          ELSE 'Unknown Vehicle'
+        END as VehicleDetails,
+        v.Type as VehicleType,
         v.VehiclePic,
-        u.FirstName,
-        u.LastName,
-        u.Email
+        u.Name as CustomerName,
+        u.Email as CustomerEmail,
+        u.PhoneNumber as CustomerPhone
       FROM Reservation r
       JOIN Vehicle v ON r.VehicleID = v.VehicleID
       JOIN User u ON r.UserID = u.UserID
+      LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
+      LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
+      LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
+      LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
       WHERE v.OwnerID = ?
       ORDER BY r.StartDate DESC
     `;
