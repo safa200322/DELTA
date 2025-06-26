@@ -165,8 +165,8 @@ const UserProfile = () => {
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <RenteeSidebar 
-            sidebarOpen={sidebarOpen} 
+          <RenteeSidebar
+            sidebarOpen={sidebarOpen}
             toggleSidebar={toggleSidebar}
             title="Vehicle Owner Profile"
             customNavItems={[
@@ -177,7 +177,7 @@ const UserProfile = () => {
               },
               {
                 to: "/profile/rentee-vehicle-management",
-                icon: "ri-briefcase-line", 
+                icon: "ri-briefcase-line",
                 label: "Vehicle Management"
               },
               {
@@ -267,9 +267,9 @@ const UserProfile = () => {
                           {new Date(user.CreatedAt).toLocaleDateString()}
                         </p>
                       </div>
-                      <Button 
-                        color="primary" 
-                        size="sm" 
+                      <Button
+                        color="primary"
+                        size="sm"
                         onClick={toggleEditProfile}
                         className="ms-3"
                       >
@@ -378,7 +378,7 @@ const UserProfile = () => {
           </Col>
         </Row>
       </Container>
-      
+
       {/* Profile Edit Modal */}
       <VehicleOwnerProfileEdit
         isOpen={editProfileModal}

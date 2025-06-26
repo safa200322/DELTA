@@ -67,7 +67,7 @@ const BicycleListing = () => {
       filtered = filtered.filter((b) => b.Type && b.Type.toLowerCase() === selectedType.toLowerCase());
     }
     if (selectedPrice < maxPrice) {
-        filtered = filtered.filter((b) => b.Price <= selectedPrice);
+      filtered = filtered.filter((b) => b.Price <= selectedPrice);
     }
     setSortedBicycles(filtered);
   }, [selectedType, selectedPrice, allBicycles, maxPrice]);

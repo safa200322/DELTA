@@ -37,7 +37,7 @@ const CarItem = ({ item, type }) => {
         </div>
         <div className="car__item-content">
           <h4 className="car__item-title">{item.Brand} {item.Model}</h4>
-          
+
           <div className="car__item-info d-flex justify-content-between mt-3">
             <span className="d-flex align-items-center gap-1">
               <i className="ri-gas-station-line"></i> {item.FuelType}
@@ -48,11 +48,11 @@ const CarItem = ({ item, type }) => {
           </div>
 
           <div className="car__item-info d-flex justify-content-between mt-3">
-             <span className="d-flex align-items-center gap-1">
-                <i className="ri-calendar-line"></i> {item.Year}
+            <span className="d-flex align-items-center gap-1">
+              <i className="ri-calendar-line"></i> {item.Year}
             </span>
             <span className="d-flex align-items-center gap-1">
-                <i className="ri-paint-brush-line"></i> {item.Color}
+              <i className="ri-paint-brush-line"></i> {item.Color}
             </span>
           </div>
 

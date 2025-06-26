@@ -1,6 +1,6 @@
 const express = require("express");
 const vehicleController = require("../controllers/vehicleController");
-const adminAuth = require("../middleware/adminAuth"); 
+const adminAuth = require("../middleware/adminAuth");
 const authenticateToken = require('../middleware/authMiddleware');
 const router = express.Router();
 const authvehicleowner = require('../middleware/vehicleOwnerAuth');
@@ -15,14 +15,14 @@ const authvehicleowner = require('../middleware/vehicleOwnerAuth');
 //router.get("/available", vehicleController.getAvailableVehicles);
 //router.get("/:id", vehicleController.getVehicleById);
 
-router.post("/cars", authvehicleowner,vehicleController.addCar);
-router.post("/boats", authvehicleowner,vehicleController.addBoat);
-router.post("/bicycles", authvehicleowner,vehicleController.addBicycle);
+router.post("/cars", authvehicleowner, vehicleController.addCar);
+router.post("/boats", authvehicleowner, vehicleController.addBoat);
+router.post("/bicycles", authvehicleowner, vehicleController.addBicycle);
 router.post("/motorcycles", authvehicleowner, vehicleController.addMotorcycle);
 
 
 router.patch('/:id/approve', adminAuth, vehicleController.approveVehicle);
-router.patch('/:id/reject', adminAuth,vehicleController.rejectVehicle);
+router.patch('/:id/reject', adminAuth, vehicleController.rejectVehicle);
 router.patch("/deactivate/:id", authvehicleowner, vehicleController.deactivateVehicle);
 
 //router.put("/:id", adminAuth, vehicleController.updateVehicle);

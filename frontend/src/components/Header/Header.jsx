@@ -135,10 +135,10 @@ const Header = () => {
                     <i className="ri-user-2-fill" style={{ color: "#EBC222" }}></i>
                   </Link>
                 }
-                <button 
+                <button
                   onClick={handleLogout}
                   className="profile__icon"
-                  style={{ 
+                  style={{
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',

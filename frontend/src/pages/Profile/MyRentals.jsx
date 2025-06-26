@@ -321,7 +321,7 @@ const MyRentals = () => {
                   reservations.map((reservation) => {
                     const status = getStatusClass(reservation.StartDate, reservation.EndDate);
                     const canCancel = status === 'pending';
-                    
+
                     return (
                       <div key={reservation.ReservationID} className="rental-card">
                         <img

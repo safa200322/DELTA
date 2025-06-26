@@ -126,9 +126,30 @@ exports.createPayment = async (req, res) => {
   }
 };
 
+exports.getUserPayments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const payments = await PaymentModel.getUserPayments(userId);
+    res.json(payments);
+  } catch (error) {
+    console.error("❌ Error fetching user payments:", error);
+    res.status(500).json({ error: 'Failed to fetch payments', details: error.message });
+  }
+};
+
+exports.getUserPayments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const payments = await PaymentModel.getUserPayments(userId);
+    res.json(payments);
+  } catch (error) {
+    console.error("❌ Error fetching user payments:", error);
+    res.status(500).json({ error: 'Failed to fetch payments', details: error.message });
+  }
+};
 
 
-// Controller to mark the owner as paid
+
 exports.markOwnerPaid = async (req, res) => {
   const { paymentId } = req.params;  // Payment ID from the URL
 

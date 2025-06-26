@@ -69,27 +69,27 @@ exports.loginUser = async (req, res) => {
     if (!phone || !pass) {
       return res.status(400).json({ err: "Missing credentials" });
     }
-    
+
     // Use unified user lookup
     const user = await findUserAcrossTypes(phone, 'phone');
-    
+
     if (!user) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
-    
+
     // Verify password
     const isValidPassword = await verifyPassword(pass, user);
     if (!isValidPassword) {
       return res.status(401).json({ err: "Invalid credentials" });
     }
-    
+
     // Generate JWT token
     const token = jwt.sign(
       { id: user.id, role: user.role, type: user.type },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
-    
+
     // Determine redirect URL based on user type
     const redirectPaths = {
       'admin': '/admin/dashboard',
@@ -97,7 +97,7 @@ exports.loginUser = async (req, res) => {
       'vehicle-owner': '/vehicle-owner/profile',
       'user': '/profile'
     };
-    
+
     return res.json({
       msg: `${user.type.charAt(0).toUpperCase() + user.type.slice(1)} login successful`,
       token,
@@ -111,7 +111,7 @@ exports.loginUser = async (req, res) => {
       },
       redirectTo: redirectPaths[user.type] || '/profile'
     });
-    
+
   } catch (e) {
     console.log("Error during login:", e);
     res.status(500).json({ err: "Server error during login" });
@@ -197,7 +197,7 @@ exports.getUserProfile = async (req, res) => {
 
     // Set default profile picture URL if none exists
     let profilePictureUrl = null;
-    
+
     // Handle different profile picture fields for different user types
     switch (user.type) {
       case 'vehicle-owner':
@@ -211,7 +211,7 @@ exports.getUserProfile = async (req, res) => {
         profilePictureUrl = user.ProfilePictureUrl;
         break;
     }
-    
+
     // Set default if no profile picture
     if (!profilePictureUrl) {
       profilePictureUrl = `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;

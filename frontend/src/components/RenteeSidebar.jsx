@@ -2,11 +2,11 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { Col, Nav, NavItem } from "reactstrap";
 
-const RenteeSidebar = ({ 
-  sidebarOpen, 
-  toggleSidebar, 
+const RenteeSidebar = ({
+  sidebarOpen,
+  toggleSidebar,
   title = "Rentee Profile",
-  customNavItems = null 
+  customNavItems = null
 }) => {
   const defaultNavItems = [
     {

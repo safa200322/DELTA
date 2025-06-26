@@ -87,7 +87,7 @@ const VehicleOwnerProfileEdit = ({ isOpen, toggle, currentUser, onProfileUpdate 
         <ModalBody>
           {error && <Alert color="danger">{error}</Alert>}
           {success && <Alert color="success">{success}</Alert>}
-          
+
           <FormGroup>
             <Label for="FullName">Full Name</Label>
             <Input

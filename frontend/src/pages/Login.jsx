@@ -32,10 +32,10 @@ const Login = () => {
         localStorage.setItem('userType', data.user.type);
         localStorage.setItem('userName', data.user.name);
         localStorage.setItem('userId', data.user.id);
-        
+
         // Show success message with specific user type
         alert(`Login successful as ${data.user.type}!`);
-        
+
         // Redirect based on user type
         if (data.redirectTo) {
           navigate(data.redirectTo);
