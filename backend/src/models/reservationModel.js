@@ -8,40 +8,34 @@ const COMMISSION_RATES = {
   Bicycle: 0.05
 };
 
-// Fuel prices by fuel type
-const FUEL_PRICE = {
-  Petrol: 50,
-  Diesel: 60,
-  Electric: 20,
-  Hybrid: 50
-};
-
-exports.createPayment = async ({
-  ReservationID,
+exports.createReservation = async ({
+  StartDate,
+  EndDate,
   VehicleID,
   AccessoryID,
   ChauffeurID,
-  NameOnCard,
-  CardNumber,
-  ExpiryDate,
-  CVV,
-  PaymentMethod
+  CustomerID
 }) => {
-  // 1. Get reservation info
-  const [reservationResult] = await db.query(
-    'SELECT StartDate, EndDate, AccessoryID, ChauffeurID FROM Reservation WHERE ReservationID = ?',
-    [ReservationID]
-  );
-  if (!reservationResult.length) throw new Error('Reservation not found');
-  const { StartDate, EndDate, AccessoryID: accessoryFromDB, ChauffeurID: chauffeurFromDB } = reservationResult[0];
+  // 1. Validate dates
+  if (new Date(StartDate) < new Date()) {
+    throw new Error('Start date must be in the future');
+  }
+  if (new Date(EndDate) <= new Date(StartDate)) {
+    throw new Error('End date must be after start date');
+  }
 
-  // 2. Get vehicle info including FuelType
-  const [vehicleResult] = await db.query(
-    'SELECT Type, Price, FuelType FROM Vehicle WHERE VehicleID = ?',
-    [VehicleID]
+  // 2. Check vehicle availability
+  const [existingReservations] = await db.query(
+    `SELECT r.ReservationID FROM Reservation r
+     JOIN Vehicle v ON r.VehicleID = v.VehicleID
+     WHERE v.VehicleID = ?
+     AND r.Status = 'Reserved'
+     AND (? < r.EndDate AND ? > r.StartDate)`,
+    [VehicleID, StartDate, EndDate]
   );
-  if (!vehicleResult.length) throw new Error('Vehicle not found');
-  const { Type, Price: VehiclePrice, FuelType } = vehicleResult[0];
+  if (existingReservations.length) {
+    throw new Error('Vehicle is not available for the selected dates');
+  }
 
   // 3. Calculate rental duration
   const start = new Date(StartDate);
@@ -49,78 +43,54 @@ exports.createPayment = async ({
   const timeDiff = Math.abs(end - start);
   const dayCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
 
-  // 4. Get accessory price if any
+  // 4. Get vehicle info
+  const [vehicleResult] = await db.query(
+    'SELECT Type, Price FROM Vehicle WHERE VehicleID = ?',
+    [VehicleID]
+  );
+  if (!vehicleResult.length) throw new Error('Vehicle not found');
+  const { Type, Price: VehiclePrice } = vehicleResult[0];
+
+  // 5. Calculate base rental price
+  const baseRental = VehiclePrice * dayCount;
+
+  // 6. Get accessory price if any
   let accessoryPrice = 0;
-  if (accessoryFromDB) {
+  if (AccessoryID) {
     const [accessoryResult] = await db.query(
       'SELECT Price FROM Accessory WHERE AccessoryID = ?',
-      [accessoryFromDB]
+      [AccessoryID]
     );
     if (accessoryResult.length) {
       accessoryPrice = accessoryResult[0].Price;
     }
   }
 
-  // 5. Calculate chauffeur price
+  // 7. Calculate chauffeur price
   let chauffeurAmount = 0;
-  if (chauffeurFromDB) {
+  if (ChauffeurID) {
     chauffeurAmount = 40 * dayCount;
   }
 
-  // 6. Get fuel cost from FUEL_PRICE map
-  const fuelCost = FUEL_PRICE[FuelType] || 0;
+  // 8. Calculate totals (exclude fuelCost)
+  const totalPrice = baseRental + accessoryPrice + chauffeurAmount;
 
-  // 7. Calculate totals
-  const baseRental = VehiclePrice * dayCount;
-  const commissionRate = COMMISSION_RATES[Type];
-  const commissionAmount = baseRental * commissionRate;
-  const totalPrice = baseRental + accessoryPrice + chauffeurAmount + fuelCost;
-  const ownerEarning = baseRental - commissionAmount;
-
-  // 8. Insert Payment with status 'Pending'
+  // 9. Insert reservation
   const [insertResult] = await db.query(
-    `INSERT INTO Payment 
-    (ReservationID, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod,
-     TotalPrice, CommissionAmount, OwnerEarning, ChauffeurAmount)
-     VALUES (?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      ReservationID,
-      NameOnCard,
-      CardNumber,
-      ExpiryDate,
-      CVV,
-      PaymentMethod,
-      totalPrice,
-      commissionAmount,
-      ownerEarning,
-      chauffeurAmount
-    ]
+    `INSERT INTO Reservation 
+     (StartDate, EndDate, VehicleID, AccessoryID, ChauffeurID, CustomerID, Status)
+     VALUES (?, ?, ?, ?, ?, ?, 'Pending')`,
+    [StartDate, EndDate, VehicleID, AccessoryID, ChauffeurID, CustomerID]
   );
 
-  const paymentId = insertResult.insertId;
+  const reservationId = insertResult.insertId;
 
-  // 9. Mark payment as 'Paid'
-  await db.query(
-    `UPDATE Payment SET Status = 'Paid' WHERE PaymentID = ?`,
-    [paymentId]
-  );
-
-  // 10. Update reservation status to 'Reserved'
-  await db.query(
-    `UPDATE Reservation SET Status = 'Reserved' WHERE ReservationID = ?`,
-    [ReservationID]
-  );
-
-  // 11. Return summary
+  // 10. Return reservation summary
   return {
-    PaymentID: paymentId,
+    ReservationID: reservationId,
     TotalPrice: totalPrice,
     AccessoryPrice: accessoryPrice,
     ChauffeurAmount: chauffeurAmount,
-    FuelType,
-    FuelCost: fuelCost,
-    CommissionAmount: commissionAmount,
-    OwnerEarning: ownerEarning,
     DayCount: dayCount,
     VehicleType: Type
   };
