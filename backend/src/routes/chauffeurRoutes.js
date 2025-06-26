@@ -6,20 +6,29 @@ const authMiddleware = require('../middleware/authMiddleware');
 const authChauffeur = require('../middleware/authChauffeur');
 
 
-router.post("/chauffeurs/register", chauffeurController.registerChauffeur);
+router.post("/register", chauffeurController.registerChauffeur);
 
-router.post("/chauffeurs/login", chauffeurController.loginChauffeur);
+// router.post("/login", chauffeurController.loginChauffeur); // Removed, use unified login
 
-router.patch("/chauffeurs/approve/:id",adminAuth, chauffeurController.approveChauffeur);
+router.patch("/approve/:id",adminAuth, chauffeurController.approveChauffeur);
 
-router.patch("/chauffeurs/reject/:id",adminAuth, chauffeurController.rejectChauffeur);
+router.patch("/reject/:id",adminAuth, chauffeurController.rejectChauffeur);
 
 router.patch("/assignments/respond/:reservationId",authChauffeur, chauffeurController.respondToAssignment);
 
 router.post("/assignments/assign/:reservationId", authMiddleware, chauffeurController.assignChauffeur);
 
-router.get("/chauffeurs/pending", adminAuth, chauffeurController.getPendingChauffeurs);
+router.get("/pending", adminAuth, chauffeurController.getPendingChauffeurs);
 
 router.get("/assignments/pending/:chauffeurId", authChauffeur, chauffeurController.getPendingAssignments);
+
+// Get the authenticated chauffeur's own profile
+router.get("/me", authChauffeur, chauffeurController.getOwnProfile);
+
+// Update chauffeur profile (self-service)
+router.put("/me", authChauffeur, chauffeurController.updateOwnProfile);
+
+// Get a single chauffeur by ID
+router.get( "/:id", adminAuth, chauffeurController.getChauffeurById);
 
 module.exports = router;

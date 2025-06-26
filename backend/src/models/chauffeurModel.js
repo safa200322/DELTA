@@ -155,3 +155,21 @@ exports.findByPhone = async (phone) => {
   const [rows] = await db.query('SELECT * FROM Chauffeur WHERE PhoneNumber = ?', [phone]);
   return rows[0];
 };
+
+// Update chauffeur profile fields
+exports.updateChauffeurProfile = async (id, updates) => {
+  const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl"];
+  const setClause = Object.keys(updates)
+    .filter((key) => allowedFields.includes(key))
+    .map((key) => `${key} = ?`)
+    .join(", ");
+  const values = Object.keys(updates)
+    .filter((key) => allowedFields.includes(key))
+    .map((key) => updates[key]);
+  if (!setClause) return { affectedRows: 0 };
+  const [result] = await db.query(
+    `UPDATE Chauffeur SET ${setClause} WHERE ChauffeurID = ?`,
+    [...values, id]
+  );
+  return result;
+};
