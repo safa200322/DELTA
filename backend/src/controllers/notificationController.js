@@ -18,9 +18,9 @@ exports.createNotification = async (req, res) => {
       broadcastGroup
     });
 
-    res.status(201).json({ message: '✅ Notification created', notificationId });
+    res.status(201).json({ message: ' Notification created', notificationId });
   } catch (err) {
-    console.error("❌ Controller error:", err);
+    console.error(" Controller error:", err);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -35,6 +35,17 @@ exports.getMyNotifications = async (req, res) => {
   } catch (error) {
     console.error('Get user notifications error:', error);
     res.status(500).json({ message: 'Error fetching user notifications', error: error.message });
+  }
+};
+
+// Get all notifications (admin)
+exports.getAllNotifications = async (req, res) => {
+  try {
+    const notifications = await notificationModel.getAll();
+    res.json(notifications);
+  } catch (error) {
+    console.error('[ADMIN][NOTIFICATION] Get all error:', error);
+    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
   }
 };
 
