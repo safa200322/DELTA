@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
 import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
+import { Link, NavLink as RouterNavLink, useLocation } from "react-router-dom";
 import "../../styles/header.css";
 import "remixicon/fonts/remixicon.css";
 

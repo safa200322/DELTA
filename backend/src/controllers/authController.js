@@ -184,12 +184,28 @@ exports.getUserProfile = async (req, res) => {
     const userId = req.user.id;
     const userType = req.user.type;
 
-    if (!userId) {
-      return res.status(400).json({ error: "Invalid user ID" });
+    if (!userId || !userType) {
+      return res.status(400).json({ error: "Invalid user ID or type" });
     }
 
-    // Get user using unified lookup
-    const user = await findUserAcrossTypes(userId, 'id');
+    // Use userType to select the correct table/model
+    let user;
+    switch (userType) {
+      case 'vehicle-owner':
+        user = await require('../models/vehicleOwnerModel').findById(userId);
+        break;
+      case 'user':
+        user = await require('../models/userModel').findById(userId);
+        break;
+      case 'chauffeur':
+        user = await require('../models/chauffeurModel').findById(userId);
+        break;
+      case 'admin':
+        user = await require('../models/adminModel').findById(userId);
+        break;
+      default:
+        return res.status(400).json({ error: "Unknown user type" });
+    }
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
@@ -219,16 +235,16 @@ exports.getUserProfile = async (req, res) => {
 
     // Return user data without sensitive information
     res.status(200).json({
-      id: user.id,
-      fullName: user.name,
-      username: user.Username || user.name,
-      email: user.email,
-      phone: user.phone,
-      birthday: user.Date_of_birth || user.DateOfBirth,
+      id: user.id || user.UserID || user.VehicleOwnerID || user.ChauffeurID || user.AdminID,
+      fullName: user.name || user.Name,
+      username: user.Username || user.name || user.Name,
+      email: user.email || user.Email,
+      phone: user.phone || user.PhoneNumber,
+      birthday: user.Date_of_birth || user.DateOfBirth || user.Birthday,
       profilePictureUrl: profilePictureUrl,
       isVerified: !!user.isVerified,
-      userType: user.type,
-      role: user.role
+      userType: userType,
+      role: user.role || userType
     });
 
   } catch (error) {

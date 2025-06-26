@@ -37,12 +37,14 @@ const VehicleOwnerLogin = () => {
       const data = await response.json();
 
       if (response.ok) {
-        // Store the JWT token in localStorage
+        // Store the JWT token and user info in localStorage
         localStorage.setItem('token', data.token);
-        localStorage.setItem('userRole', 'vehicle_owner'); // Store role for future reference
+        localStorage.setItem('userType', data.user ? data.user.type : 'vehicle-owner');
+        localStorage.setItem('userName', data.user ? data.user.name : '');
+        localStorage.setItem('userId', data.user ? data.user.id : '');
         alert("Login successful!");
         // Redirect to vehicle owner dashboard
-        navigate('/vehicle-owner/dashboard');
+        navigate('/vehicle-owner/profile');
       } else {
         setError(data.message || "Login failed. Please check your credentials.");
       }
