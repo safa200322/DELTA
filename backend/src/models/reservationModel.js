@@ -86,11 +86,17 @@ const ReservationModel = {
   },
 
   async cancelReservationByUser(ReservationID, UserID) {
-    const [result] = await db.query(
-      'DELETE FROM Reservation WHERE ReservationID = ? AND UserID = ?',
-      [ReservationID, UserID]
+    // 1. Mark reservation as Cancelled
+    const [reservationResult] = await db.query(
+      'UPDATE Reservation SET Status = ? WHERE ReservationID = ? AND UserID = ?',
+      ['Cancelled', ReservationID, UserID]
     );
-    return result;
+    // 2. Mark related payment as Refunded
+    await db.query(
+      'UPDATE Payment SET Status = ? WHERE ReservationID = ?',
+      ['Refunded', ReservationID]
+    );
+    return reservationResult;
   },
 
   async getReservationsByVehicleOwner(ownerID) {
