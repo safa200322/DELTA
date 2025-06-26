@@ -1,135 +1,285 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Container, Row, Col, Nav, NavItem } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Button } from "reactstrap";
 import "../../styles/user-profile.css";
+import "../../styles/vehicle-owner.css";
 import VehicleManagement from "../VehicleManagement";
+import VehicleOwnerProfileEdit from "../../components/VehicleOwnerProfileEdit";
+import RenteeSidebar from "../../components/RenteeSidebar";
 
 const UserProfile = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [earnings, setEarnings] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editProfileModal, setEditProfileModal] = useState(false);
+
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const toggleEditProfile = () => setEditProfileModal(!editProfileModal);
 
-  const user = {
-    name: "Umut Umutcuk",
-    email: "umutcuk@gmail.com",
-    phone: "+90 500 000 0000",
-    profilePic: "https://i.pravatar.cc/150?img=3",
-    isVerified: true,
+  const handleProfileUpdate = (updatedData) => {
+    setUser(prev => ({
+      ...prev,
+      ...updatedData
+    }));
   };
 
-  const earnings = {
-    total: 2840,
-    monthly: 450,
-    payouts: [
-      {
-        title: "Honda CR-V Rental",
-        date: "May 25, 2025",
-        amount: 180,
-      },
-      {
-        title: "Toyota Camry Rental",
-        date: "May 18, 2025",
-        amount: 270,
-      },
-    ],
+  useEffect(() => {
+    fetchUserProfile();
+    fetchEarnings();
+  }, []);
+
+  const fetchUserProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("No authentication token found");
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch(
+        "http://localhost:5000/api/vehicle-owner/profile",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser(userData);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Failed to fetch profile");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      setError("Failed to fetch profile data");
+    }
   };
+
+  const fetchEarnings = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const response = await fetch(
+        "http://localhost:5000/api/vehicle-owner/earnings",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (response.ok) {
+        const earningsData = await response.json();
+        setEarnings(earningsData);
+      } else {
+        console.error("Failed to fetch earnings");
+      }
+    } catch (error) {
+      console.error("Error fetching earnings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleProfilePictureUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("profilePicture", file);
+
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch(
+        "http://localhost:5000/api/vehicle-owner/profile/picture",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        setUser((prev) => ({
+          ...prev,
+          ProfileImage: result.profileImageUrl,
+        }));
+        alert("Profile picture updated successfully!");
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || "Failed to update profile picture");
+      }
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      alert("Failed to upload profile picture");
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container className="mt-5">
+        <div className="text-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-2">Loading profile...</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container className="mt-5">
+        <div className="alert alert-danger text-center">
+          <h4>Error</h4>
+          <p>{error}</p>
+        </div>
+      </Container>
+    );
+  }
+
+  if (!user) {
+    return (
+      <Container className="mt-5">
+        <div className="alert alert-warning text-center">
+          <h4>No User Data</h4>
+          <p>Unable to load user profile</p>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <Col
-            xs="12"
-            md="3"
-            lg="2"
-            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-          >
-            <div className="sidebar-header">
-              <h3>Rentee Profile</h3>
-              <i
-                className="ri-menu-line sidebar-toggle d-md-none"
-                onClick={toggleSidebar}
-              ></i>
-            </div>
-            <Nav vertical className="sidebar-nav">
-              <NavItem>
-                <NavLink to="/profile/personal-info" className="nav-link">
-                  <i className="ri-user-line"></i> Personal Info
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-vehicle-management"
-                  className="nav-link"
-                >
-                  <i className="ri-briefcase-line"></i> Vehicle Management
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/booking-history" className="nav-link">
-                  <i className="ri-calendar-line"></i> Rental reservations
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/documents-verification"
-                  className="nav-link"
-                >
-                  <i className="ri-file-text-line"></i> Earnings & Payments
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/settings" className="nav-link">
-                  <i className="ri-settings-3-line"></i> Maintenance & Documents
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/payment-info" className="nav-link">
-                  <i className="ri-wallet-line"></i> Notifications
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/payment-info" className="nav-link">
-                  <i className="ri-wallet-line"></i> Reviews.
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/payment-info" className="nav-link">
-                  <i className="ri-wallet-line"></i> Security
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </Col>
+          <RenteeSidebar 
+            sidebarOpen={sidebarOpen} 
+            toggleSidebar={toggleSidebar}
+            title="Vehicle Owner Profile"
+            customNavItems={[
+              {
+                to: "/vehicle-owner/profile",
+                icon: "ri-user-line",
+                label: "Personal Info"
+              },
+              {
+                to: "/profile/rentee-vehicle-management",
+                icon: "ri-briefcase-line", 
+                label: "Vehicle Management"
+              },
+              {
+                to: "/profile/rentee-rental-reservations",
+                icon: "ri-calendar-line",
+                label: "Rental Reservations"
+              },
+              {
+                to: "/profile/rentee-earnings-and-payments",
+                icon: "ri-file-text-line",
+                label: "Earnings & Payments"
+              },
+              {
+                to: "/profile/rentee-notifications",
+                icon: "ri-notification-line",
+                label: "Notifications"
+              },
+              {
+                to: "/profile/rentee-reviews",
+                icon: "ri-star-line",
+                label: "Reviews"
+              },
+              {
+                to: "/profile/rentee-security",
+                icon: "ri-shield-line",
+                label: "Security"
+              }
+            ]}
+          />
 
           <Col xs="12" md="9" lg="10" className="content-area">
             <Row className="mt-4">
               <Col lg="8">
                 <div className="profile-card d-flex align-items-center gap-4 mb-4">
-                  <img
-                    src={user.profilePic}
-                    alt="Profile"
-                    className="profile-pic"
-                  />
+                  <div className="profile-pic-container position-relative">
+                    <img
+                      src={
+                        user.ProfileImage
+                          ? `http://localhost:5000${user.ProfileImage}`
+                          : "https://i.pravatar.cc/150?img=3"
+                      }
+                      alt="Profile"
+                      className="profile-pic"
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <label
+                      htmlFor="profilePictureUpload"
+                      className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 cursor-pointer"
+                      style={{ cursor: "pointer", fontSize: "12px" }}
+                    >
+                      <i className="ri-camera-line"></i>
+                    </label>
+                    <input
+                      id="profilePictureUpload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfilePictureUpload}
+                      style={{ display: "none" }}
+                    />
+                  </div>
                   <div className="profile-info">
-                    <h3 className="mb-2">{user.name}</h3>
-                    <p className="mb-1">
-                      <strong>Email:</strong> {user.email}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Phone:</strong> {user.phone}
-                    </p>
-                    <p className="mb-0">
-                      <strong>Verification:</strong>{" "}
-                      {user.isVerified ? (
-                        <span className="verified">ID Verified ✅</span>
-                      ) : (
-                        <span className="unverified">Not Verified ❌</span>
-                      )}
-                    </p>
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h3 className="mb-2">{user.FullName}</h3>
+                        <p className="mb-1">
+                          <strong>Email:</strong> {user.Email}
+                        </p>
+                        <p className="mb-1">
+                          <strong>Phone:</strong> {user.PhoneNumber}
+                        </p>
+                        <p className="mb-1">
+                          <strong>National ID:</strong> {user.NationalID}
+                        </p>
+                        <p className="mb-0">
+                          <strong>Status:</strong>{" "}
+                          <span className="badge bg-success">
+                            {user.Availability || "Available"}
+                          </span>
+                        </p>
+                        <p className="mb-0 mt-1">
+                          <strong>Member since:</strong>{" "}
+                          {new Date(user.CreatedAt).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <Button 
+                        color="primary" 
+                        size="sm" 
+                        onClick={toggleEditProfile}
+                        className="ms-3"
+                      >
+                        <i className="ri-edit-line me-1"></i>
+                        Edit Profile
+                      </Button>
+                    </div>
                   </div>
                 </div>
                 <VehicleManagement />
-                {/* Buraya araç yönetimi veya başka şeyler */}
-                <div className="vehicle-management">{/* future use */}</div>
               </Col>
 
               <Col lg="4">
@@ -141,28 +291,36 @@ const UserProfile = () => {
 
                   <div className="earnings-summary d-flex gap-3 mb-3">
                     <div className="earn-box">
-                      <h3>${earnings.total.toLocaleString()}</h3>
+                      <h3>
+                        ${earnings?.TotalEarnings?.toLocaleString() || "0"}
+                      </h3>
                       <p>Total Earnings</p>
                     </div>
                     <div className="earn-box">
-                      <h3>${earnings.monthly}</h3>
+                      <h3>
+                        ${earnings?.MonthlyEarnings?.toLocaleString() || "0"}
+                      </h3>
                       <p>This Month</p>
                     </div>
                   </div>
 
                   <div className="recent-payouts">
                     <h6 className="text-muted">Recent Payouts</h6>
-                    {earnings.payouts.map((p, i) => (
-                      <div key={i} className="payout-item mb-3 border-top pt-2">
-                        <div className="d-flex justify-content-between">
-                          <span>{p.title}</span>
-                          <span className="text-success fw-bold">
-                            +${p.amount}
-                          </span>
+                    {earnings?.recentPayouts?.length > 0 ? (
+                      earnings.recentPayouts.map((payout, i) => (
+                        <div key={i} className="payout-item mb-3 border-top pt-2">
+                          <div className="d-flex justify-content-between">
+                            <span>{payout.title}</span>
+                            <span className="text-success fw-bold">
+                              +${payout.amount}
+                            </span>
+                          </div>
+                          <small className="text-muted">{payout.date}</small>
                         </div>
-                        <small className="text-muted">{p.date}</small>
-                      </div>
-                    ))}
+                      ))
+                    ) : (
+                      <p className="text-muted">No recent payouts</p>
+                    )}
                   </div>
                 </div>
                 <div className="account-settings-card mt-4">
@@ -220,6 +378,14 @@ const UserProfile = () => {
           </Col>
         </Row>
       </Container>
+      
+      {/* Profile Edit Modal */}
+      <VehicleOwnerProfileEdit
+        isOpen={editProfileModal}
+        toggle={toggleEditProfile}
+        currentUser={user}
+        onProfileUpdate={handleProfileUpdate}
+      />
     </section>
   );
 };

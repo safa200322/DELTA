@@ -1,92 +1,108 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Container, Row, Col, Dropdown, DropdownToggle, DropdownMenu, DropdownItem, Collapse, Button } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
 import BoatItem from "../components/UI/BoatItem";
-import boatData from "../assets/data/boatData";
+import VehicleSkeletonItem from "../components/UI/VehicleSkeletonItem";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
+import "../styles/skeleton.css";
 
-const fakeBoatPriceRange = [0, 50000];
-const fakeCapacityRange = [1, 20];
-const fakeBoatTypes = ["Fishing Boat", "Sail Boat", "Pontoon Boat", "Cruiser", "Yacht"];
-const fakeBoatBrands = ["Boston Whaler", "Sea Ray", "Grady-White", "Bayliner", "Sunseeker"];
-const fakeBoatSizes = ["Small", "Medium", "Large"];
-
-const CarListing = () => {
-  const [sortOption, setSortOption] = useState("Select");
+const BoatListing = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [displayedBoats, setDisplayedBoats] = useState(boatData || []);
+  const [allBoats, setAllBoats] = useState([]);
+  const [displayedBoats, setDisplayedBoats] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [selectedPrice, setSelectedPrice] = useState(fakeBoatPriceRange[1]);
-  const [selectedCapacity, setSelectedCapacity] = useState(fakeCapacityRange[1]);
-  const [selectedType, setSelectedType] = useState("");
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
+  
+  // Filter states
+  const [selectedPrice, setSelectedPrice] = useState(1000);
+  const [selectedCapacity, setSelectedCapacity] = useState(20);
+  const [selectedBoatType, setSelectedBoatType] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("");
-  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedEngineType, setSelectedEngineType] = useState("");
 
+  // Fetch all boats from backend on mount
   useEffect(() => {
-    console.log("boatData:", boatData);
-    if (!boatData || !Array.isArray(boatData)) {
-      setDisplayedBoats([]);
-    } else {
-      setDisplayedBoats(boatData);
-    }
+    const fetchBoats = async () => {
+      setIsLoading(true); // Start loading
+      try {
+        const response = await fetch("http://localhost:5000/api/boats/filter");
+        if (response.ok) {
+          const data = await response.json();
+          setAllBoats(data);
+          setDisplayedBoats(data);
+        } else {
+          setAllBoats([]);
+          setDisplayedBoats([]);
+        }
+      } catch (error) {
+        console.error("Error fetching boats:", error);
+        setAllBoats([]);
+        setDisplayedBoats([]);
+      } finally {
+        setIsLoading(false); // End loading regardless of result
+      }
+    };
+    fetchBoats();
   }, []);
 
+  // Derive filter options from data
+  const { boatTypes, brands, engineTypes, maxPrice, maxCapacity } = useMemo(() => {
+    const boatTypes = [...new Set(allBoats.map(boat => boat.BoatType).filter(Boolean))].sort();
+    const brands = [...new Set(allBoats.map(boat => boat.Brand).filter(Boolean))].sort();
+    const engineTypes = [...new Set(allBoats.map(boat => boat.EngineType).filter(Boolean))].sort();
+    const maxPrice = Math.max(...allBoats.map(boat => boat.Price || 0), 1000);
+    const maxCapacity = Math.max(...allBoats.map(boat => boat.Capacity || 0), 20);
+    return { boatTypes, brands, engineTypes, maxPrice, maxCapacity };
+  }, [allBoats]);
+
+  // Update max values when data loads
   useEffect(() => {
-    let filtered = [...boatData];
-    try {
-      if (selectedCapacity !== fakeCapacityRange[1]) {
-        filtered = filtered.filter((boat) => (boat.capacity || 0) <= selectedCapacity);
-      }
-      if (selectedType) {
-        filtered = filtered.filter((boat) => boat.type?.toLowerCase() === selectedType.toLowerCase());
-      }
-      if (selectedBrand) {
-        filtered = filtered.filter((boat) => boat.brand?.toLowerCase() === selectedBrand.toLowerCase());
-      }
-      if (selectedSize) {
-        filtered = filtered.filter((boat) => boat.size?.toLowerCase() === selectedSize.toLowerCase());
-      }
+    setSelectedPrice(maxPrice);
+    setSelectedCapacity(maxCapacity);
+  }, [maxPrice, maxCapacity]);
 
-      let sortedAndFiltered = [...filtered];
-      if (sortOption === "Low to High") {
-        sortedAndFiltered.sort((a, b) => {
-          const priceA = parseFloat((a.price || "0").replace(/[^0-9.-]+/g, "") || "0");
-          const priceB = parseFloat((b.price || "0").replace(/[^0-9.-]+/g, "") || "0");
-          return priceA - priceB;
-        });
-      } else if (sortOption === "High to Low") {
-        sortedAndFiltered.sort((a, b) => {
-          const priceA = parseFloat((a.price || "0").replace(/[^0-9.-]+/g, "") || "0");
-          const priceB = parseFloat((b.price || "0").replace(/[^0-9.-]+/g, "") || "0");
-          return priceB - priceA;
-        });
-      }
-
-      setDisplayedBoats(sortedAndFiltered);
-    } catch (error) {
-      console.error("Error in filtering boats:", error);
-      setDisplayedBoats([]);
+  // Apply filters
+  useEffect(() => {
+    let filtered = [...allBoats];
+    
+    if (selectedBoatType) {
+      filtered = filtered.filter(boat => 
+        boat.BoatType && boat.BoatType.toLowerCase() === selectedBoatType.toLowerCase());
     }
-  }, [selectedCapacity, selectedType, selectedBrand, selectedSize, sortOption]);
+    
+    if (selectedBrand) {
+      filtered = filtered.filter(boat => 
+        boat.Brand && boat.Brand.toLowerCase() === selectedBrand.toLowerCase());
+    }
+    
+    if (selectedEngineType) {
+      filtered = filtered.filter(boat => 
+        boat.EngineType && boat.EngineType.toLowerCase() === selectedEngineType.toLowerCase());
+    }
+    
+    if (selectedCapacity < maxCapacity) {
+      filtered = filtered.filter(boat => boat.Capacity <= selectedCapacity);
+    }
+    
+    if (selectedPrice < maxPrice) {
+      filtered = filtered.filter(boat => boat.Price <= selectedPrice);
+    }
+
+    setDisplayedBoats(filtered);
+  }, [selectedBoatType, selectedBrand, selectedEngineType, selectedCapacity, selectedPrice, allBoats, maxCapacity, maxPrice]);
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
-  const handleSort = (option) => setSortOption(option);
-  const handlePriceChange = (e) => setSelectedPrice(parseInt(e.target.value));
-  const handleCapacityChange = (e) => setSelectedCapacity(parseInt(e.target.value));
-  const handleTypeChange = (e) => setSelectedType(e.target.value);
-  const handleBrandChange = (e) => setSelectedBrand(e.target.value);
-  const handleSizeChange = (e) => setSelectedSize(e.target.value);
-
+  
   const handleResetFilters = () => {
-    setSelectedPrice(fakeBoatPriceRange[1]);
-    setSelectedCapacity(fakeCapacityRange[1]);
-    setSelectedType("");
+    setSelectedPrice(maxPrice);
+    setSelectedCapacity(maxCapacity);
+    setSelectedBoatType("");
     setSelectedBrand("");
-    setSelectedSize("");
-    setSortOption("Select");
+    setSelectedEngineType("");
+    setDisplayedBoats(allBoats);
   };
 
   return (
@@ -97,21 +113,6 @@ const CarListing = () => {
           <Row className="mb-4">
             <Col lg="12">
               <div className="car-listing-controls d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div className="sort-section d-flex align-items-center gap-2">
-                  <span className="sort-label d-flex align-items-center gap-2">
-                    <i className="ri-sort-asc"></i> Sort By
-                  </span>
-                  <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                    <DropdownToggle caret className="sort-dropdown">
-                      {sortOption}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem onClick={() => handleSort("Select")}>Select</DropdownItem>
-                      <DropdownItem onClick={() => handleSort("Low to High")}>Low to High</DropdownItem>
-                      <DropdownItem onClick={() => handleSort("High to Low")}>High to Low</DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
                 <div className="filter-toggle-mobile d-lg-none">
                   <Button color="primary" onClick={toggleFilterPanel} className="filter-toggle-btn">
                     {isFilterOpen ? "Hide Filters" : "Show Filters"}
@@ -125,53 +126,85 @@ const CarListing = () => {
               <Collapse isOpen={isFilterOpen} className="d-lg-block filter-panel">
                 <div className="filter-panel-content">
                   <h5 className="filter-title">Filters</h5>
+                  
                   <div className="filter-group">
                     <label className="filter-label">Price ($/day)</label>
                     <div className="price-range-inputs">
-                      <input type="range" className="price-slider" min={fakeBoatPriceRange[0]} max={fakeBoatPriceRange[1]} value={selectedPrice} onChange={handlePriceChange} />
+                      <input 
+                        type="range" 
+                        className="price-slider" 
+                        min={0} 
+                        max={maxPrice} 
+                        value={selectedPrice} 
+                        onChange={(e) => setSelectedPrice(parseInt(e.target.value))} 
+                      />
                       <span className="price-range-value">
-                        ${fakeBoatPriceRange[0]} - ${selectedPrice}
+                        $0 - ${selectedPrice}
                       </span>
                     </div>
                   </div>
+                  
                   <div className="filter-group">
                     <label className="filter-label">Capacity (People)</label>
-                    <input type="range" className="seats-slider" min={fakeCapacityRange[0]} max={fakeCapacityRange[1]} value={selectedCapacity} onChange={handleCapacityChange} />
+                    <input 
+                      type="range" 
+                      className="seats-slider" 
+                      min={1} 
+                      max={maxCapacity} 
+                      value={selectedCapacity} 
+                      onChange={(e) => setSelectedCapacity(parseInt(e.target.value))} 
+                    />
                     <span className="seats-range-value">{selectedCapacity} People</span>
                   </div>
+                  
                   <div className="filter-group">
-                    <label className="filter-label">Type</label>
-                    <select className="filter-dropdown" value={selectedType} onChange={handleTypeChange}>
+                    <label className="filter-label">Boat Type</label>
+                    <select 
+                      className="filter-dropdown" 
+                      value={selectedBoatType} 
+                      onChange={(e) => setSelectedBoatType(e.target.value)}
+                    >
                       <option value="">Select Type</option>
-                      {fakeBoatTypes.map((type, index) => (
+                      {boatTypes.map((type, index) => (
                         <option key={index} value={type.toLowerCase()}>
                           {type}
                         </option>
                       ))}
                     </select>
                   </div>
+                  
                   <div className="filter-group">
                     <label className="filter-label">Brand</label>
-                    <select className="filter-dropdown" value={selectedBrand} onChange={handleBrandChange}>
+                    <select 
+                      className="filter-dropdown" 
+                      value={selectedBrand} 
+                      onChange={(e) => setSelectedBrand(e.target.value)}
+                    >
                       <option value="">Select Brand</option>
-                      {fakeBoatBrands.map((brand, index) => (
+                      {brands.map((brand, index) => (
                         <option key={index} value={brand.toLowerCase()}>
                           {brand}
                         </option>
                       ))}
                     </select>
                   </div>
+                  
                   <div className="filter-group">
-                    <label className="filter-label">Size</label>
-                    <select className="filter-dropdown" value={selectedSize} onChange={handleSizeChange}>
-                      <option value="">Select Size</option>
-                      {fakeBoatSizes.map((size, index) => (
-                        <option key={index} value={size.toLowerCase()}>
-                          {size}
+                    <label className="filter-label">Engine Type</label>
+                    <select 
+                      className="filter-dropdown" 
+                      value={selectedEngineType} 
+                      onChange={(e) => setSelectedEngineType(e.target.value)}
+                    >
+                      <option value="">Select Engine Type</option>
+                      {engineTypes.map((engine, index) => (
+                        <option key={index} value={engine.toLowerCase()}>
+                          {engine}
                         </option>
                       ))}
                     </select>
                   </div>
+                  
                   <Button color="secondary" className="reset-filters-btn" onClick={handleResetFilters}>
                     Reset Filters
                   </Button>
@@ -180,14 +213,21 @@ const CarListing = () => {
             </Col>
             <Col lg="9">
               <Row>
-                {displayedBoats.length === 0 ? (
+                {isLoading ? (
+                  // Show skeletons while loading
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={index}>
+                      <VehicleSkeletonItem />
+                    </Col>
+                  ))
+                ) : displayedBoats.length === 0 ? (
                   <Col lg="12">
                     <p className="no-cars-text">No boats available.</p>
                   </Col>
                 ) : (
                   displayedBoats.map((item) => (
-                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                      <BoatItem item={item} type="boats" />
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.VehicleID}>
+                      <BoatItem item={item} type="boat" />
                     </Col>
                   ))
                 )}
@@ -201,4 +241,4 @@ const CarListing = () => {
   );
 };
 
-export default CarListing;
+export default BoatListing;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Row,
@@ -13,618 +13,759 @@ import {
   DropdownToggle,
   DropdownMenu,
   DropdownItem,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Form,
+  FormGroup,
+  Label,
 } from "reactstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/admin-dashboard.css"; // For sidebar and base styles
-import "../styles/vehicle-management.css"; // New CSS for Vehicle Management
-
-// Mock Data for Vehicle Management
-const MOCK_VEHICLES = [
-  {
-    id: 1,
-    thumbnail: "https://i.imgur.com/a7WJc55.png",
-    type: "Tesla",
-    model: "Model 3",
-    price: "$150/day",
-    status: "Available",
-    owner: "Steven Wabb",
-    actions: ["Approve", "Delete", "Edit"],
-  },
-  {
-    id: 2,
-    thumbnail: "https://i.imgur.com/1p6L00L.png",
-    type: "Glant",
-    model: "Mountain",
-    price: "$20/day",
-    status: "Available",
-    owner: "Claire Adams",
-    actions: ["Approve", "Delete", "Edit"],
-  },
-  {
-    id: 3,
-    thumbnail: "https://i.imgur.com/R7h2VjM.png",
-    type: "Motorcycle",
-    model: "Bicycle",
-    price: "$100/day",
-    status: "Pending Approval",
-    owner: "Annette Murphy",
-    actions: ["Approve", "Delete", "Edit"],
-  },
-  {
-    id: 4,
-    thumbnail: "https://i.imgur.com/zV2X7wP.png",
-    type: "Bayliner",
-    model: "18-feet",
-    price: "$300/day",
-    status: "Mainten.",
-    owner: "Annette Murphy",
-    actions: ["Approve", "Delete", "Edit"],
-  },
-  {
-    id: 5,
-    thumbnail: "https://i.imgur.com/R7h2VjM.png",
-    type: "Biscot",
-    model: "Diet-trim",
-    price: "$300/day",
-    status: "Mainten",
-    owner: "Annette Murphy",
-    actions: ["Approve", "Delete", "Edit"],
-  },
-];
+import "../styles/admin-dashboard.css";
+import "../styles/vehicle-management.css";
 
 const VehicleManagement = () => {
   const [dropdownTypeOpen, setDropdownTypeOpen] = useState(false);
   const [dropdownLocationOpen, setDropdownLocationOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
-  const [vehicles, setVehicles] = useState(MOCK_VEHICLES);
+  const [vehicles, setVehicles] = useState([]);
+  const [filteredVehicles, setFilteredVehicles] = useState([]);
   const [typeFilter, setTypeFilter] = useState("All");
   const [locationFilter, setLocationFilter] = useState("All locations");
   const [sortOption, setSortOption] = useState("Price (Low to High)");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [addVehicleModal, setAddVehicleModal] = useState(false);
+  const [vehicleType, setVehicleType] = useState("Car");
+  const [vehicleFormData, setVehicleFormData] = useState({});
 
   const toggleTypeDropdown = () => setDropdownTypeOpen((prev) => !prev);
   const toggleLocationDropdown = () => setDropdownLocationOpen((prev) => !prev);
   const toggleSortDropdown = () => setSortOpen((prev) => !prev);
+  const toggleAddVehicleModal = () => setAddVehicleModal((prev) => !prev);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  useEffect(() => {
+    filterAndSortVehicles();
+  }, [vehicles, typeFilter, locationFilter, searchQuery, sortOption]);
+
+  const fetchVehicles = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('No authentication token found');
+        setLoading(false);
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/vehicle-owner/vehicles', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const vehicleData = await response.json();
+        setVehicles(vehicleData);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to fetch vehicles');
+      }
+    } catch (error) {
+      console.error('Error fetching vehicles:', error);
+      setError('Failed to fetch vehicles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterAndSortVehicles = () => {
+    let filtered = [...vehicles];
+
+    // Filter by type
+    if (typeFilter !== "All") {
+      filtered = filtered.filter(
+        (vehicle) => vehicle.Type.toLowerCase() === typeFilter.toLowerCase()
+      );
+    }
+
+    // Filter by location
+    if (locationFilter !== "All locations") {
+      filtered = filtered.filter((vehicle) =>
+        vehicle.Location.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (vehicle) =>
+          vehicle.VehicleName.toLowerCase().includes(query) ||
+          vehicle.Location.toLowerCase().includes(query) ||
+          vehicle.Type.toLowerCase().includes(query)
+      );
+    }
+
+    // Sort vehicles
+    filtered.sort((a, b) => {
+      const priceA = parseFloat(a.Price);
+      const priceB = parseFloat(b.Price);
+      return sortOption === "Price (Low to High)"
+        ? priceA - priceB
+        : priceB - priceA;
+    });
+
+    setFilteredVehicles(filtered);
+  };
 
   const handleTypeFilter = (type) => {
     setTypeFilter(type);
-    filterVehicles(type, locationFilter, searchQuery);
   };
 
   const handleLocationFilter = (location) => {
     setLocationFilter(location);
-    filterVehicles(typeFilter, location, searchQuery);
   };
 
   const handleSort = (option) => {
     setSortOption(option);
-    const sortedVehicles = [...vehicles].sort((a, b) => {
-      const priceA = parseFloat(a.price.replace("$", "").split("/")[0]);
-      const priceB = parseFloat(b.price.replace("$", "").split("/")[0]);
-      return option === "Price (Low to High)"
-        ? priceA - priceB
-        : priceB - priceA;
-    });
-    setVehicles(sortedVehicles);
   };
 
   const handleSearch = (e) => {
-    const query = e.target.value.toLowerCase();
-    setSearchQuery(query);
-    filterVehicles(typeFilter, locationFilter, query);
+    setSearchQuery(e.target.value);
   };
 
-  const filterVehicles = (type, location, query) => {
-    let filtered = MOCK_VEHICLES;
-    if (type !== "All") {
-      filtered = filtered.filter(
-        (vehicle) => vehicle.type.toLowerCase() === type.toLowerCase()
-      );
+  const handleDeleteVehicle = async (vehicleId) => {
+    if (!window.confirm('Are you sure you want to delete this vehicle?')) {
+      return;
     }
-    if (location !== "All locations") {
-      filtered = filtered.filter((vehicle) =>
-        vehicle.owner.toLowerCase().includes(location.toLowerCase())
-      );
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/vehicles/vehicleownerdeletion/${vehicleId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setVehicles(vehicles.filter(v => v.VehicleID !== vehicleId));
+        alert('Vehicle deleted successfully');
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Failed to delete vehicle');
+      }
+    } catch (error) {
+      console.error('Error deleting vehicle:', error);
+      alert('Failed to delete vehicle');
     }
-    if (query) {
-      filtered = filtered.filter(
-        (vehicle) =>
-          vehicle.type.toLowerCase().includes(query) ||
-          vehicle.model.toLowerCase().includes(query) ||
-          vehicle.owner.toLowerCase().includes(query)
-      );
-    }
-    setVehicles(filtered);
   };
 
-  const handleAddVehicle = () => {
-    alert("Add New Vehicle functionality to be implemented");
+  const handleAddVehicle = async (e) => {
+    e.preventDefault();
+    
+    try {
+      const token = localStorage.getItem('token');
+      const endpoint = `http://localhost:5000/api/vehicles/${vehicleType.toLowerCase()}s`;
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(vehicleFormData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`${vehicleType} added successfully!`);
+        setAddVehicleModal(false);
+        setVehicleFormData({});
+        fetchVehicles(); // Refresh the vehicle list
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || `Failed to add ${vehicleType}`);
+      }
+    } catch (error) {
+      console.error('Error adding vehicle:', error);
+      alert(`Failed to add ${vehicleType}`);
+    }
   };
 
-  // Statistical data
+  const handleFormChange = (field, value) => {
+    setVehicleFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'Available':
+        return <Badge color="success">Available</Badge>;
+      case 'Rented':
+        return <Badge color="warning">Rented</Badge>;
+      case 'Maintenance':
+        return <Badge color="secondary">Maintenance</Badge>;
+      default:
+        return <Badge color="light">{status}</Badge>;
+    }
+  };
+
+  // Get unique locations for filter
+  const uniqueLocations = [...new Set(vehicles.map(v => v.Location))];
+
+  // Calculate stats
   const stats = [
-    { label: "Total Vehicles", value: 126, icon: "🚗", color: "#4e73df" },
-    { label: "Available", value: 87, icon: "✅", color: "#34c38f" },
-    { label: "Pending Approval", value: 14, icon: "⏳", color: "#f1b44c" },
-    { label: "Rented", value: 14, icon: "📅", color: "#ff6f61" },
-    { label: "Mainten.", value: 19, icon: "🛠️", color: "#74788d" },
+    { 
+      label: "Total Vehicles", 
+      value: vehicles.length, 
+      icon: "🚗", 
+      color: "#4e73df" 
+    },
+    { 
+      label: "Available", 
+      value: vehicles.filter(v => v.Status === 'Available').length, 
+      icon: "✅", 
+      color: "#34c38f" 
+    },
+    { 
+      label: "Rented", 
+      value: vehicles.filter(v => v.Status === 'Rented').length, 
+      icon: "📅", 
+      color: "#f1b44c" 
+    },
+    { 
+      label: "Maintenance", 
+      value: vehicles.filter(v => v.Status === 'Maintenance').length, 
+      icon: "🛠️", 
+      color: "#74788d" 
+    },
   ];
 
-  return (
-    <div className="dashboard-wrapper d-flex">
-      {/* Sidebar */}
-      <div className="dashboard-sidebar">
-        <div className="sidebar-header text-center p-3">
-          <img
-            src="https://placehold.co/40x40/667fff/ffffff.png?text=L"
-            alt="Logo"
-            className="mb-2"
-          />
-        </div>
-        <ul className="nav flex-column sidebar-nav">
-          <li className="nav-item">
-            <Link className="nav-link" to="/admin" end>
-              <span className="sidebar-icon">📊</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link active" to="/vehicle-management">
-              <span className="sidebar-icon">🚗</span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link" to="/chauffeur-management">
-              <span className="sidebar-icon">👤</span>
-            </Link>
-          </li>
-        </ul>
-        <div className="sidebar-footer text-center p-3">
-          <img
-            src="https://placehold.co/40x40/cccccc/ffffff.png?text=JD"
-            alt="Profile"
-            className="rounded-circle mb-2"
-          />
-        </div>
-      </div>
-
-      {/* Main Content Area */}
-      <div className="dashboard-main-content flex-grow-1 p-4">
-        <div className="vehicle-management-header mb-4">
-          <h4 className="vehicle-management-title">
-            <span className="title-icon">🚗</span> Vehicle Management
-          </h4>
-          <Button className="add-vehicle-btn" onClick={handleAddVehicle}>
-            Add New Vehicle
-          </Button>
-        </div>
-
-        {/* Stats Section */}
-        <Row className="mb-4">
-          {stats.map((stat, index) => (
-            <Col xs={12} sm={6} md={4} lg={2} key={index} className="mb-3">
-              <Card className="stat-card">
-                <CardBody className="text-center p-3">
-                  <div
-                    className="stat-icon"
-                    style={{ backgroundColor: stat.color }}
-                  >
-                    {stat.icon}
-                  </div>
-                  <h6 className="stat-label mt-2">{stat.label}</h6>
-                  <h4 className="stat-value">{stat.value}</h4>
-                </CardBody>
-              </Card>
-            </Col>
-          ))}
-        </Row>
-
-        {/* Filters and Search Section */}
-        <Card className="dashboard-card filters-card mb-4">
-          <CardBody className="p-3 d-flex flex-wrap align-items-center gap-3">
-            <div className="search-container">
+  const renderVehicleForm = () => {
+    switch (vehicleType) {
+      case 'Car':
+        return (
+          <>
+            <FormGroup>
+              <Label for="brand">Brand</Label>
               <Input
                 type="text"
-                placeholder="Search vehicles..."
-                value={searchQuery}
-                onChange={handleSearch}
-                className="vehicle-search-input"
+                id="brand"
+                value={vehicleFormData.Brand || ''}
+                onChange={(e) => handleFormChange('Brand', e.target.value)}
+                required
               />
-            </div>
-            <div className="filter-group">
-              <span className="filter-label">Filter by Type</span>
-              <Dropdown isOpen={dropdownTypeOpen} toggle={toggleTypeDropdown}>
-                <DropdownToggle className="custom-dropdown-toggle">
-                  {typeFilter}
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem onClick={() => handleTypeFilter("All")}>
-                    All
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleTypeFilter("Car")}>
-                    Car
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleTypeFilter("Bicycle")}>
-                    Bicycle
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleTypeFilter("Motorcycle")}>
-                    Motorcycle
-                  </DropdownItem>
-                  <DropdownItem onClick={() => handleTypeFilter("Boat")}>
-                    Boat
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-            <div className="filter-group">
-              <span className="filter-label">Filter by Location</span>
-              <Dropdown
-                isOpen={dropdownLocationOpen}
-                toggle={toggleLocationDropdown}
+            </FormGroup>
+            <FormGroup>
+              <Label for="model">Model</Label>
+              <Input
+                type="text"
+                id="model"
+                value={vehicleFormData.Model || ''}
+                onChange={(e) => handleFormChange('Model', e.target.value)}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="year">Year</Label>
+              <Input
+                type="number"
+                id="year"
+                value={vehicleFormData.Year || ''}
+                onChange={(e) => handleFormChange('Year', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="fuelType">Fuel Type</Label>
+              <Input
+                type="select"
+                id="fuelType"
+                value={vehicleFormData.FuelType || ''}
+                onChange={(e) => handleFormChange('FuelType', e.target.value)}
+                required
               >
-                <DropdownToggle className="custom-dropdown-toggle">
-                  {locationFilter}
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem
-                    onClick={() => handleLocationFilter("All locations")}
-                  >
-                    All locations
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => handleLocationFilter("Location 1")}
-                  >
-                    Location 1
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => handleLocationFilter("Location 2")}
-                  >
-                    Location 2
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-            <div className="filter-group ms-auto">
-              <span className="filter-label">Sort by</span>
-              <Dropdown isOpen={sortOpen} toggle={toggleSortDropdown}>
-                <DropdownToggle className="custom-dropdown-toggle">
-                  {sortOption}
-                </DropdownToggle>
-                <DropdownMenu>
-                  <DropdownItem
-                    onClick={() => handleSort("Price (Low to High)")}
-                  >
-                    Price (Low to High)
-                  </DropdownItem>
-                  <DropdownItem
-                    onClick={() => handleSort("Price (High to Low)")}
-                  >
-                    Price (High to Low)
-                  </DropdownItem>
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-          </CardBody>
-        </Card>
+                <option value="">Select Fuel Type</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+              </Input>
+            </FormGroup>
+            <FormGroup>
+              <Label for="transmission">Transmission</Label>
+              <Input
+                type="select"
+                id="transmission"
+                value={vehicleFormData.Transmission || ''}
+                onChange={(e) => handleFormChange('Transmission', e.target.value)}
+              >
+                <option value="">Select Transmission</option>
+                <option value="Manual">Manual</option>
+                <option value="Automatic">Automatic</option>
+              </Input>
+            </FormGroup>
+            <FormGroup>
+              <Label for="seats">Number of Seats</Label>
+              <Input
+                type="number"
+                id="seats"
+                value={vehicleFormData.Seats || ''}
+                onChange={(e) => handleFormChange('Seats', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="color">Color</Label>
+              <Input
+                type="text"
+                id="color"
+                value={vehicleFormData.Color || ''}
+                onChange={(e) => handleFormChange('Color', e.target.value)}
+              />
+            </FormGroup>
+          </>
+        );
+      case 'Boat':
+        return (
+          <>
+            <FormGroup>
+              <Label for="brand">Brand</Label>
+              <Input
+                type="text"
+                id="brand"
+                value={vehicleFormData.Brand || ''}
+                onChange={(e) => handleFormChange('Brand', e.target.value)}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="boatType">Boat Type</Label>
+              <Input
+                type="text"
+                id="boatType"
+                value={vehicleFormData.BoatType || ''}
+                onChange={(e) => handleFormChange('BoatType', e.target.value)}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="capacity">Capacity</Label>
+              <Input
+                type="number"
+                id="capacity"
+                value={vehicleFormData.Capacity || ''}
+                onChange={(e) => handleFormChange('Capacity', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="engineType">Engine Type</Label>
+              <Input
+                type="select"
+                id="engineType"
+                value={vehicleFormData.EngineType || ''}
+                onChange={(e) => handleFormChange('EngineType', e.target.value)}
+                required
+              >
+                <option value="">Select Engine Type</option>
+                <option value="Inboard">Inboard</option>
+                <option value="Outboard">Outboard</option>
+                <option value="Sail">Sail</option>
+              </Input>
+            </FormGroup>
+          </>
+        );
+      case 'Bicycle':
+        return (
+          <>
+            <FormGroup>
+              <Label for="type">Bicycle Type</Label>
+              <Input
+                type="select"
+                id="type"
+                value={vehicleFormData.Type || ''}
+                onChange={(e) => handleFormChange('Type', e.target.value)}
+                required
+              >
+                <option value="">Select Type</option>
+                <option value="Road">Road</option>
+                <option value="Mountain">Mountain</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Electric">Electric</option>
+              </Input>
+            </FormGroup>
+            <FormGroup>
+              <Label for="gears">Number of Gears</Label>
+              <Input
+                type="number"
+                id="gears"
+                value={vehicleFormData.Gears || ''}
+                onChange={(e) => handleFormChange('Gears', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+          </>
+        );
+      case 'Motorcycle':
+        return (
+          <>
+            <FormGroup>
+              <Label for="brand">Brand</Label>
+              <Input
+                type="text"
+                id="brand"
+                value={vehicleFormData.Brand || ''}
+                onChange={(e) => handleFormChange('Brand', e.target.value)}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="engine">Engine (CC)</Label>
+              <Input
+                type="number"
+                id="engine"
+                value={vehicleFormData.Engine || ''}
+                onChange={(e) => handleFormChange('Engine', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="year">Year</Label>
+              <Input
+                type="number"
+                id="year"
+                value={vehicleFormData.Year || ''}
+                onChange={(e) => handleFormChange('Year', parseInt(e.target.value))}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="type">Motorcycle Type</Label>
+              <Input
+                type="select"
+                id="type"
+                value={vehicleFormData.Type || ''}
+                onChange={(e) => handleFormChange('Type', e.target.value)}
+                required
+              >
+                <option value="">Select Type</option>
+                <option value="Sport">Sport</option>
+                <option value="Cruiser">Cruiser</option>
+                <option value="Touring">Touring</option>
+                <option value="Standard">Standard</option>
+              </Input>
+            </FormGroup>
+            <FormGroup>
+              <Label for="color">Color</Label>
+              <Input
+                type="text"
+                id="color"
+                value={vehicleFormData.color || ''}
+                onChange={(e) => handleFormChange('color', e.target.value)}
+                required
+              />
+            </FormGroup>
+          </>
+        );
+      default:
+        return null;
+    }
+  };
 
-        {/* Vehicle Table */}
-        <Card className="dashboard-card table-card">
-          <CardBody className="p-0">
-            <div className="table-responsive">
-              <Table className="vehicle-table mb-0">
-                <thead>
-                  <tr>
-                    <th>Thumbnail</th>
-                    <th>Type</th>
-                    <th>Model</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Owner</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {vehicles.map((vehicle) => (
-                    <tr key={vehicle.id}>
-                      <td>
-                        <img
-                          src={vehicle.thumbnail}
-                          alt="Vehicle"
-                          className="vehicle-thumbnail"
-                        />
-                      </td>
-                      <td>{vehicle.type}</td>
-                      <td>{vehicle.model}</td>
-                      <td>{vehicle.price}</td>
-                      <td>
-                        <Badge
-                          color={
-                            vehicle.status === "Available"
-                              ? "success"
-                              : vehicle.status === "Pending Approval"
-                              ? "warning"
-                              : "secondary"
-                          }
-                          className="status-badge"
-                        >
-                          {vehicle.status}
-                        </Badge>
-                      </td>
-                      <td>{vehicle.owner}</td>
-                      <td>
-                        {vehicle.actions.map((action, index) => (
-                          <Button
-                            key={index}
-                            color={
-                              action === "Approve"
-                                ? "success"
-                                : action === "Reject"
-                                ? "danger"
-                                : "secondary"
-                            }
-                            className={`action-btn ${action.toLowerCase()}-btn`}
-                            onClick={() =>
-                              alert(`${action} clicked for ${vehicle.model}`)
-                            }
-                          >
-                            {action === "×" ? <span>×</span> : action}
-                          </Button>
-                        ))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
-            </div>
-          </CardBody>
-        </Card>
+  if (loading) {
+    return (
+      <div className="text-center p-4">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading vehicles...</span>
+        </div>
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger">
+        <h6>Error Loading Vehicles</h6>
+        <p>{error}</p>
+        <Button color="primary" onClick={fetchVehicles}>
+          Retry
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="vehicle-management-container">
+      <div className="vehicle-management-header mb-4 d-flex justify-content-between align-items-center">
+        <h4 className="vehicle-management-title">
+          <span className="title-icon">🚗</span> My Vehicles
+        </h4>
+        <Button color="primary" onClick={toggleAddVehicleModal}>
+          <i className="ri-add-line me-2"></i>Add New Vehicle
+        </Button>
+      </div>
+
+      {/* Stats Section */}
+      <Row className="mb-4">
+        {stats.map((stat, index) => (
+          <Col xs={12} sm={6} md={3} key={index} className="mb-3">
+            <Card className="stat-card">
+              <CardBody className="text-center p-3">
+                <div
+                  className="stat-icon"
+                  style={{ backgroundColor: stat.color }}
+                >
+                  {stat.icon}
+                </div>
+                <h6 className="stat-label mt-2">{stat.label}</h6>
+                <h4 className="stat-value">{stat.value}</h4>
+              </CardBody>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+
+      {/* Filters and Search Section */}
+      <Card className="dashboard-card filters-card mb-4">
+        <CardBody className="p-3 d-flex flex-wrap align-items-center gap-3">
+          <div className="search-container">
+            <Input
+              type="text"
+              placeholder="Search vehicles..."
+              value={searchQuery}
+              onChange={handleSearch}
+              className="vehicle-search-input"
+            />
+          </div>
+          <div className="filter-group">
+            <span className="filter-label">Filter by Type</span>
+            <Dropdown isOpen={dropdownTypeOpen} toggle={toggleTypeDropdown}>
+              <DropdownToggle className="custom-dropdown-toggle">
+                {typeFilter}
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem onClick={() => handleTypeFilter("All")}>
+                  All
+                </DropdownItem>
+                <DropdownItem onClick={() => handleTypeFilter("Car")}>
+                  Car
+                </DropdownItem>
+                <DropdownItem onClick={() => handleTypeFilter("Bicycle")}>
+                  Bicycle
+                </DropdownItem>
+                <DropdownItem onClick={() => handleTypeFilter("Motorcycle")}>
+                  Motorcycle
+                </DropdownItem>
+                <DropdownItem onClick={() => handleTypeFilter("boats")}>
+                  Boat
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+          <div className="filter-group">
+            <span className="filter-label">Filter by Location</span>
+            <Dropdown
+              isOpen={dropdownLocationOpen}
+              toggle={toggleLocationDropdown}
+            >
+              <DropdownToggle className="custom-dropdown-toggle">
+                {locationFilter}
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem
+                  onClick={() => handleLocationFilter("All locations")}
+                >
+                  All locations
+                </DropdownItem>
+                {uniqueLocations.map((location, index) => (
+                  <DropdownItem
+                    key={index}
+                    onClick={() => handleLocationFilter(location)}
+                  >
+                    {location}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+          <div className="filter-group ms-auto">
+            <span className="filter-label">Sort by</span>
+            <Dropdown isOpen={sortOpen} toggle={toggleSortDropdown}>
+              <DropdownToggle className="custom-dropdown-toggle">
+                {sortOption}
+              </DropdownToggle>
+              <DropdownMenu>
+                <DropdownItem
+                  onClick={() => handleSort("Price (Low to High)")}
+                >
+                  Price (Low to High)
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => handleSort("Price (High to Low)")}
+                >
+                  Price (High to Low)
+                </DropdownItem>
+              </DropdownMenu>
+            </Dropdown>
+          </div>
+        </CardBody>
+      </Card>
+
+      {/* Vehicles Table */}
+      <Card className="dashboard-card">
+        <CardBody className="p-0">
+          {filteredVehicles.length === 0 ? (
+            <div className="text-center p-4">
+              <p className="text-muted">No vehicles found matching your criteria.</p>
+              <Button color="primary" onClick={toggleAddVehicleModal}>
+                Add Your First Vehicle
+              </Button>
+            </div>
+          ) : (
+            <Table responsive hover className="vehicles-table mb-0">
+              <thead className="table-header">
+                <tr>
+                  <th>Vehicle</th>
+                  <th>Type</th>
+                  <th>Location</th>
+                  <th>Price/Day</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredVehicles.map((vehicle) => (
+                  <tr key={vehicle.VehicleID}>
+                    <td>
+                      <div className="d-flex align-items-center">
+                        <img
+                          src={
+                            vehicle.vehiclepic 
+                              ? vehicle.vehiclepic.startsWith('http') 
+                                ? vehicle.vehiclepic 
+                                : `http://localhost:5000${vehicle.vehiclepic}`
+                              : "https://via.placeholder.com/50x40?text=No+Image"
+                          }
+                          alt={vehicle.VehicleName}
+                          className="vehicle-thumbnail me-3"
+                          style={{ width: '50px', height: '40px', objectFit: 'cover', borderRadius: '4px' }}
+                          onError={(e) => {
+                            e.target.src = "https://via.placeholder.com/50x40?text=No+Image";
+                          }}
+                        />
+                        <div>
+                          <strong>{vehicle.VehicleName}</strong>
+                          {vehicle.Color && (
+                            <div className="text-muted small">
+                              Color: {vehicle.Color}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <Badge color="info" pill>
+                        {vehicle.Type}
+                      </Badge>
+                    </td>
+                    <td>{vehicle.Location}</td>
+                    <td className="text-success fw-bold">
+                      ${vehicle.Price}/day
+                    </td>
+                    <td>{getStatusBadge(vehicle.Status)}</td>
+                    <td>
+                      <div className="action-buttons">
+                        <Button
+                          size="sm"
+                          color="danger"
+                          outline
+                          onClick={() => handleDeleteVehicle(vehicle.VehicleID)}
+                          className="me-2"
+                        >
+                          <i className="ri-delete-bin-line"></i>
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </CardBody>
+      </Card>
+
+      {/* Add Vehicle Modal */}
+      <Modal isOpen={addVehicleModal} toggle={toggleAddVehicleModal} size="lg">
+        <Form onSubmit={handleAddVehicle}>
+          <ModalHeader toggle={toggleAddVehicleModal}>
+            Add New Vehicle
+          </ModalHeader>
+          <ModalBody>
+            <FormGroup>
+              <Label for="vehicleType">Vehicle Type</Label>
+              <Input
+                type="select"
+                id="vehicleType"
+                value={vehicleType}
+                onChange={(e) => {
+                  setVehicleType(e.target.value);
+                  setVehicleFormData({});
+                }}
+              >
+                <option value="Car">Car</option>
+                <option value="Boat">Boat</option>
+                <option value="Bicycle">Bicycle</option>
+                <option value="Motorcycle">Motorcycle</option>
+              </Input>
+            </FormGroup>
+
+            {renderVehicleForm()}
+
+            <FormGroup>
+              <Label for="location">Location</Label>
+              <Input
+                type="text"
+                id="location"
+                value={vehicleFormData.Location || ''}
+                onChange={(e) => handleFormChange('Location', e.target.value)}
+                required
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label for="vehiclepic">Vehicle Picture URL (Optional)</Label>
+              <Input
+                type="text"
+                id="vehiclepic"
+                value={vehicleFormData.vehiclepic || ''}
+                onChange={(e) => handleFormChange('vehiclepic', e.target.value)}
+                placeholder="Enter image URL"
+              />
+            </FormGroup>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="secondary" onClick={toggleAddVehicleModal}>
+              Cancel
+            </Button>
+            <Button color="primary" type="submit">
+              Add Vehicle
+            </Button>
+          </ModalFooter>
+        </Form>
+      </Modal>
     </div>
   );
 };
 
 export default VehicleManagement;
-
-// import React, { useState } from "react";
-// import { NavLink } from "react-router-dom";
-// import {
-//   Container,
-//   Row,
-//   Col,
-//   Nav,
-//   NavItem,
-//   Card,
-//   CardBody,
-//   Button,
-//   Badge,
-//   Dropdown,
-//   DropdownToggle,
-//   DropdownMenu,
-//   DropdownItem,
-// } from "reactstrap";
-// import "../styles/user-profile.css";
-
-// // Sample vehicle data (replace with actual data from API or state management)
-// const vehicles = [
-//   {
-//     id: 1,
-//     brand: "Toyota",
-//     model: "Camry",
-//     type: "Sedan",
-//     thumbnail: "https://i.pravatar.cc/150?img=5", // Replace with actual vehicle image
-//     status: "available",
-//   },
-//   {
-//     id: 2,
-//     brand: "Honda",
-//     model: "CR-V",
-//     type: "SUV",
-//     thumbnail: "https://i.pravatar.cc/150?img=6",
-//     status: "rented",
-//   },
-//   {
-//     id: 3,
-//     brand: "Ford",
-//     model: "Focus",
-//     type: "Compact",
-//     thumbnail: "https://i.pravatar.cc/150?img=7",
-//     status: "maintenance",
-//   },
-// ];
-
-// const VehicleManagement = () => {
-//   const [dropdownOpen, setDropdownOpen] = useState({});
-
-//   const toggleDropdown = (id) => {
-//     setDropdownOpen((prev) => ({ ...prev, [id]: !prev[id] }));
-//   };
-
-//   const getStatusBadge = (status) => {
-//     switch (status) {
-//       case "available":
-//         return <Badge color="success">Available</Badge>;
-//       case "rented":
-//         return <Badge color="warning">Rented</Badge>;
-//       case "maintenance":
-//         return <Badge color="danger">Maintenance</Badge>;
-//       default:
-//         return <Badge color="secondary">Unknown</Badge>;
-//     }
-//   };
-
-//   return (
-//     <div className="vehicle-management">
-//       <h5 className="section-title mb-3">
-//         <i className="ri-car-line me-2 text-primary"></i>
-//         Vehicle Management
-//       </h5>
-//       <Row>
-//         {vehicles.map((vehicle) => (
-//           <Col md="6" lg="4" key={vehicle.id} className="mb-4">
-//             <Card className="vehicle-card">
-//               <img
-//                 src={vehicle.thumbnail}
-//                 alt={`${vehicle.brand} ${vehicle.model}`}
-//                 className="vehicle-thumbnail"
-//                 style={{ width: "100%", height: "150px", objectFit: "cover" }}
-//               />
-//               <CardBody>
-//                 <h6 className="vehicle-title">
-//                   {vehicle.brand} {vehicle.model}
-//                 </h6>
-//                 <p className="text-muted mb-2">Type: {vehicle.type}</p>
-//                 <p className="mb-2">Status: {getStatusBadge(vehicle.status)}</p>
-//                 <div className="vehicle-actions d-flex gap-2">
-//                   <Button
-//                     color="primary"
-//                     size="sm"
-//                     onClick={() =>
-//                       alert(
-//                         `Uploading maintenance for ${vehicle.brand} ${vehicle.model}`
-//                       )
-//                     }
-//                   >
-//                     <i className="ri-file-upload-line me-1"></i>
-//                     Maintenance
-//                   </Button>
-//                   <Button
-//                     color="info"
-//                     size="sm"
-//                     onClick={() =>
-//                       alert(
-//                         `Viewing rental history for ${vehicle.brand} ${vehicle.model}`
-//                       )
-//                     }
-//                   >
-//                     <i className="ri-history-line me-1"></i>
-//                     History
-//                   </Button>
-//                   <Dropdown
-//                     isOpen={dropdownOpen[vehicle.id] || false}
-//                     toggle={() => toggleDropdown(vehicle.id)}
-//                   >
-//                     <DropdownToggle caret color="danger" size="sm">
-//                       <i className="ri-more-fill"></i>
-//                     </DropdownToggle>
-//                     <DropdownMenu>
-//                       <DropdownItem
-//                         onClick={() =>
-//                           alert(`Removing ${vehicle.brand} ${vehicle.model}`)
-//                         }
-//                       >
-//                         Remove Vehicle
-//                       </DropdownItem>
-//                       <DropdownItem
-//                         onClick={() =>
-//                           alert(
-//                             `Deactivating ${vehicle.brand} ${vehicle.model}`
-//                           )
-//                         }
-//                       >
-//                         Deactivate Vehicle
-//                       </DropdownItem>
-//                     </DropdownMenu>
-//                   </Dropdown>
-//                 </div>
-//               </CardBody>
-//             </Card>
-//           </Col>
-//         ))}
-//       </Row>
-//     </div>
-//   );
-// };
-
-// const RenteeVehicleManagement = () => {
-//   const [sidebarOpen, setSidebarOpen] = useState(false);
-//   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
-
-//   return (
-//     <section style={{ marginTop: "10px" }}>
-//       <Container fluid>
-//         <Row>
-//           <Col
-//             xs="12"
-//             md="3"
-//             lg="2"
-//             className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-//           >
-//             <div className="sidebar-header">
-//               <h3>Rentee Profile</h3>
-//               <i
-//                 className="ri-menu-line sidebar-toggle d-md-none"
-//                 onClick={toggleSidebar}
-//               ></i>
-//             </div>
-//             <Nav vertical className="sidebar-nav">
-//               <NavItem>
-//                 <NavLink to="/profile/rentee-profile" className="nav-link">
-//                   <i className="ri-user-line"></i> Personal Info
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink
-//                   to="/profile/rentee-vehicle-management"
-//                   className="nav-link"
-//                 >
-//                   <i className="ri-briefcase-line"></i> Vehicle Management
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink
-//                   to="/profile/rentee-rental-reservations"
-//                   className="nav-link"
-//                 >
-//                   <i className="ri-calendar-line"></i> Rental reservations
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink
-//                   to="/profile/rentee-earnings-and-payments"
-//                   className="nav-link"
-//                 >
-//                   <i className="ri-file-text-line"></i> Earnings & Payments
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink
-//                   to="/profile/rentee-maintenance-and-documents"
-//                   className="nav-link"
-//                 >
-//                   <i className="ri-settings-3-line"></i> Maintenance & Documents
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink
-//                   to="/profile/rentee-notifications"
-//                   className="nav-link"
-//                 >
-//                   <i className="ri-wallet-line"></i> Notifications
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink to="/profile/rentee-reviews" className="nav-link">
-//                   <i className="ri-wallet-line"></i> Reviews
-//                 </NavLink>
-//               </NavItem>
-//               <NavItem>
-//                 <NavLink to="/profile/rentee-security" className="nav-link">
-//                   <i className="ri-wallet-line"></i> Security
-//                 </NavLink>
-//               </NavItem>
-//             </Nav>
-//           </Col>
-
-//           <Col xs="12" md="9" lg="10" className="content-area">
-//             <Row className="mt-4">
-//               <Col lg="12">
-//                 <VehicleManagement />
-//               </Col>
-//             </Row>
-//           </Col>
-//         </Row>
-//       </Container>
-//     </section>
-//   );
-// };
-
-// export default RenteeVehicleManagement;

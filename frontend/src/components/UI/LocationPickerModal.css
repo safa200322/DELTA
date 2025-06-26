@@ -1,0 +1,35 @@
+/* LocationPickerModal specific styles */
+.map-container {
+  position: relative;
+  z-index: 1;
+}
+
+.map-container .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  border-radius: 8px;
+}
+
+.map-container .leaflet-control-container {
+  z-index: 1000;
+}
+
+.map-container .leaflet-tile-pane {
+  z-index: 1;
+}
+
+.map-container .leaflet-marker-pane {
+  z-index: 600;
+}
+
+.search-results {
+  z-index: 2000 !important;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.search-results .hover-bg-light:hover {
+  background-color: #f8f9fa !important;
+}

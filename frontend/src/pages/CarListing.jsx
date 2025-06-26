@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Container,
   Row,
@@ -13,83 +13,150 @@ import {
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
 import CarItem from "../components/UI/CarItem";
+import VehicleSkeletonItem from "../components/UI/VehicleSkeletonItem";
 import Footer from "../components/Footer/Footer";
 import "../styles/car-listing.css";
-import { useLocation } from "react-router-dom";
-
-// --- FAKE DATA FOR FILTERING OPTIONS ---
-const fakeBrands = ["Toyota", "Honda", "Ford", "BMW", "Mercedes-Benz", "Audi"];
-const fakeModels = {
-  Toyota: ["Camry", "Corolla", "RAV4", "Hilux"],
-  Honda: ["Civic", "Accord", "CR-V", "Pilot"],
-  Ford: ["Focus", "Mustang", "F-150", "Ranger"],
-  BMW: ["3 Series", "5 Series", "X3", "X5"],
-  "Mercedes-Benz": ["C-Class", "E-Class", "GLC", "GLE"],
-  Audi: ["A4", "A6", "Q5", "Q7"],
-};
-const fakeTransmissions = ["Manual", "Automatic"];
-const fakeColors = ["Red", "Blue", "Black", "White", "Silver", "Gray"];
-const fakeSeatOptions = [2, 4, 5, 7, 8];
-const fakePriceRange = [0, 1000];
-// ------------------------------------
+import "../styles/skeleton.css";
+import { useLocation, useSearchParams } from "react-router-dom";
 
 const CarListing = () => {
-  const [sortOption, setSortOption] = useState("Select");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sortedCars, setSortedCars] = useState([]); // Start with empty array
+  const [allCars, setAllCars] = useState([]); // Store all fetched cars
+  const [sortedCars, setSortedCars] = useState([]); // Cars to be displayed after sorting/filtering
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
   const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  // State to hold selected filter values (currently not used for filtering logic)
+  // State to hold selected filter values
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedTransmission, setSelectedTransmission] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedSeats, setSelectedSeats] = useState(fakeSeatOptions[0]); // Initialize with min seat value
-  const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Initialize with max price value
+  const [selectedSeats, setSelectedSeats] = useState(""); // Changed to string for 'Select' option
+  const [selectedPrice, setSelectedPrice] = useState(1000); // Default max price
+
+  // Extract pickup/dropoff datetimes from URL params and store in localStorage
+  useEffect(() => {
+    const departDate = searchParams.get("depart");
+    const returnDate = searchParams.get("return");
+
+    if (departDate) {
+      localStorage.setItem("pickupDateTime", departDate);
+    }
+    if (returnDate) {
+      localStorage.setItem("dropoffDateTime", returnDate);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
-    // Fetch car data from backend, using query params if present
+    // Fetch car data from backend
     const fetchCars = async () => {
+      setIsLoading(true); // Start loading
       try {
-        let url = "http://localhost:5000/api/vehicles";
+        let url = "http://localhost:5000/api/vehicles/filter";
         if (location.search) {
           url += location.search;
         }
         const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
-          setSortedCars(data);
+          setAllCars(data); // Store all cars
+          setSortedCars(data); // Initially display all cars
         } else {
+          setAllCars([]);
           setSortedCars([]);
         }
       } catch (error) {
+        console.error("Failed to fetch cars:", error);
+        setAllCars([]);
         setSortedCars([]);
+      } finally {
+        setIsLoading(false); // End loading regardless of result
       }
     };
     fetchCars();
   }, [location.search]); // Refetch when search params change
 
+  // Memoize filter options to avoid recalculating on every render
+  const { brands, models, transmissions, colors, seatOptions, maxPrice } =
+    useMemo(() => {
+      const brands = [...new Set(allCars.map((car) => car.Brand))].sort();
+      const models = [...new Set(allCars.map((car) => car.Model))].sort();
+      const transmissions = [
+        ...new Set(allCars.map((car) => car.Transmission)),
+      ].sort();
+      const colors = [...new Set(allCars.map((car) => car.Color))].sort();
+      const seatOptions = [
+        ...new Set(allCars.map((car) => car.Seats)),
+      ].sort((a, b) => a - b);
+      const maxPrice = Math.max(...allCars.map((car) => car.Price), 1000);
+      return { brands, models, transmissions, colors, seatOptions, maxPrice };
+    }, [allCars]);
+
+    useEffect(() => {
+      setSelectedPrice(maxPrice);
+    }, [maxPrice]);
+
+
+  // useEffect to apply filters when filter states change
+  useEffect(() => {
+    let filtered = [...allCars];
+
+    if (selectedBrand) {
+      filtered = filtered.filter(
+        (car) => car.Brand.toLowerCase() === selectedBrand.toLowerCase()
+      );
+    }
+    if (selectedModel) {
+      filtered = filtered.filter(
+        (car) => car.Model.toLowerCase() === selectedModel.toLowerCase()
+      );
+    }
+    if (selectedTransmission) {
+      filtered = filtered.filter(
+        (car) =>
+          car.Transmission.toLowerCase() === selectedTransmission.toLowerCase()
+      );
+    }
+    if (selectedColor) {
+      filtered = filtered.filter(
+        (car) => car.Color.toLowerCase() === selectedColor.toLowerCase()
+      );
+    }
+    if (selectedSeats) {
+      filtered = filtered.filter(
+        (car) => car.Seats === parseInt(selectedSeats)
+      );
+    }
+    if (selectedPrice < maxPrice) {
+        filtered = filtered.filter((car) => car.Price <= selectedPrice);
+    }
+
+
+    setSortedCars(filtered);
+  }, [
+    selectedBrand,
+    selectedModel,
+    selectedTransmission,
+    selectedColor,
+    selectedSeats,
+    selectedPrice,
+    allCars,
+    maxPrice
+  ]);
+
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
 
-  const handleSort = (option) => {
-    setSortOption(option);
-    let sorted = [...sortedCars]; // Sort from the current sortedCars state
-    if (option === "Low to High") {
-      sorted.sort(
-        (a, b) =>
-          parseFloat(a.price.replace("$", "")) -
-          parseFloat(b.price.replace("$", ""))
-      );
-    } else if (option === "High to Low") {
-      sorted.sort(
-        (a, b) =>
-          parseFloat(b.price.replace("$", "")) -
-          parseFloat(a.price.replace("$", ""))
-      );
-    }
-    setSortedCars(sorted);
+  const handleResetFilters = () => {
+    setSelectedBrand("");
+    setSelectedModel("");
+    setSelectedTransmission("");
+    setSelectedColor("");
+    setSelectedSeats("");
+    setSelectedPrice(maxPrice);
+    setSortedCars(allCars); // Reset to all cars
   };
 
   return (
@@ -101,27 +168,6 @@ const CarListing = () => {
           <Row className="mb-4">
             <Col lg="12">
               <div className="car-listing-controls d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div className="sort-section d-flex align-items-center gap-2">
-                  <span className="sort-label d-flex align-items-center gap-2">
-                    <i className="ri-sort-asc"></i> Sort By
-                  </span>
-                  <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                    <DropdownToggle className="sort-dropdown">
-                      {sortOption}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem onClick={() => handleSort("Select")}>
-                        Select
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("Low to High")}>
-                        Low to High
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("High to Low")}>
-                        High to Low
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
                 <div className="filter-toggle-mobile d-lg-none">
                   <Button
                     color="primary"
@@ -150,12 +196,11 @@ const CarListing = () => {
                     <label className="filter-label">Brand</label>
                     <select
                       className="filter-dropdown"
-                      // REMOVED disabled attribute to make it interactive
                       value={selectedBrand}
                       onChange={(e) => setSelectedBrand(e.target.value)}
                     >
                       <option value="">Select Brand</option>
-                      {fakeBrands.map((brand, index) => (
+                      {brands.map((brand, index) => (
                         <option key={index} value={brand.toLowerCase()}>
                           {brand}
                         </option>
@@ -163,24 +208,20 @@ const CarListing = () => {
                     </select>
                   </div>
 
-                  {/* Model Filter - Populated from fakeModels */}
+                  {/* Model Filter */}
                   <div className="filter-group">
                     <label className="filter-label">Model</label>
                     <select
                       className="filter-dropdown"
-                      // REMOVED disabled attribute
                       value={selectedModel}
                       onChange={(e) => setSelectedModel(e.target.value)}
                     >
                       <option value="">Select Model</option>
-                      {/* Simple flat list of all models */}
-                      {Object.values(fakeModels)
-                        .flat()
-                        .map((model, index) => (
-                          <option key={index} value={model.toLowerCase()}>
-                            {model}
-                          </option>
-                        ))}
+                      {models.map((model, index) => (
+                        <option key={index} value={model.toLowerCase()}>
+                          {model}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
@@ -191,39 +232,34 @@ const CarListing = () => {
                       <input
                         type="range"
                         className="price-slider"
-                        min={fakePriceRange[0]} // Set min from fake data
-                        max={fakePriceRange[1]} // Set max from fake data
-                        value={selectedPrice} // Bind value to state
+                        min={0}
+                        max={maxPrice}
+                        value={selectedPrice}
                         onChange={(e) =>
                           setSelectedPrice(parseInt(e.target.value))
-                        } // Update state on change
+                        }
                       />
-                      {/* Displaying the selected range */}
                       <span className="price-range-value">
                         0 - {selectedPrice}
-                      </span>{" "}
-                      {/* Display 0 to selected price */}
+                      </span>
                     </div>
                   </div>
 
-                  {/* Seats Filter (Range) */}
+                  {/* Seats Filter */}
                   <div className="filter-group">
                     <label className="filter-label">Seats</label>
-                    <input
-                      type="range"
-                      min={Math.min(...fakeSeatOptions)} // Use min from fake data
-                      max={Math.max(...fakeSeatOptions)} // Use max from fake data
-                      className="seats-slider"
-                      value={selectedSeats} // Bind value to state
-                      onChange={(e) =>
-                        setSelectedSeats(parseInt(e.target.value))
-                      } // Update state on change
-                    />
-                    {/* Displaying the selected value */}
-                    <span className="seats-range-value">
-                      {selectedSeats} Seats
-                    </span>{" "}
-                    {/* Display selected seat count */}
+                    <select
+                      className="filter-dropdown"
+                      value={selectedSeats}
+                      onChange={(e) => setSelectedSeats(e.target.value)}
+                    >
+                      <option value="">Select Seats</option>
+                      {seatOptions.map((seats, index) => (
+                        <option key={index} value={seats}>
+                          {seats}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   {/* Transmission Filter */}
@@ -231,12 +267,11 @@ const CarListing = () => {
                     <label className="filter-label">Transmission</label>
                     <select
                       className="filter-dropdown"
-                      // REMOVED disabled attribute
                       value={selectedTransmission}
                       onChange={(e) => setSelectedTransmission(e.target.value)}
                     >
                       <option value="">Select Transmission</option>
-                      {fakeTransmissions.map((trans, index) => (
+                      {transmissions.map((trans, index) => (
                         <option key={index} value={trans.toLowerCase()}>
                           {trans}
                         </option>
@@ -249,12 +284,11 @@ const CarListing = () => {
                     <label className="filter-label">Color</label>
                     <select
                       className="filter-dropdown"
-                      // REMOVED disabled attribute
                       value={selectedColor}
                       onChange={(e) => setSelectedColor(e.target.value)}
                     >
                       <option value="">Select Color</option>
-                      {fakeColors.map((color, index) => (
+                      {colors.map((color, index) => (
                         <option key={index} value={color.toLowerCase()}>
                           {color}
                         </option>
@@ -262,8 +296,12 @@ const CarListing = () => {
                     </select>
                   </div>
 
-                  {/* Reset Filters Button - Enable this if you add reset logic */}
-                  <Button color="secondary" className="reset-filters-btn">
+                  {/* Reset Filters Button */}
+                  <Button
+                    color="secondary"
+                    className="reset-filters-btn"
+                    onClick={handleResetFilters}
+                  >
                     Reset Filters
                   </Button>
                 </div>
@@ -273,16 +311,24 @@ const CarListing = () => {
             {/* Car Cards Column */}
             <Col lg="9">
               <Row>
-                {sortedCars.length === 0 ? (
+                {isLoading ? (
+                  // Show skeletons while loading
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={index}>
+                      <VehicleSkeletonItem />
+                    </Col>
+                  ))
+                ) : sortedCars.length === 0 ? (
                   <Col lg="12">
                     <p className="no-cars-text">No cars available.</p>
                   </Col>
                 ) : (
-                  sortedCars.map((item) => (
-                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                      {/* Ensure your CarItem component is using the new classes and structure */}
-                      <CarItem item={item} type={item.type || "car"} />{" "}
-                      {/* Pass item.type or a default */}
+                  sortedCars.map((item, index) => (
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.VehicleID || item.id || item.ID || index}>
+                      <CarItem
+                        item={item}
+                        type={item.type || "car"}
+                      />
                     </Col>
                   ))
                 )}

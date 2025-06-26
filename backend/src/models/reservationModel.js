@@ -17,15 +17,14 @@ const ReservationModel = {
 
     const query = `
       INSERT INTO Reservation (
-        UserID, VehicleID, LicenseID, ChauffeurID,
+        UserID, VehicleID, ChauffeurID,
         StartDate, EndDate, PickupLocation, DropoffLocation, AccessoryID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
       UserID,
       VehicleID,
-      LicenseID || null,
       ChauffeurID || null,
       StartDate,
       EndDate,
@@ -59,13 +58,33 @@ const ReservationModel = {
   },
 
   async cancelReservationByUser(ReservationID, UserID) {
-  const [result] = await db.query(
-    'DELETE FROM Reservation WHERE ReservationID = ? AND UserID = ?',
-    [ReservationID, UserID]
-  );
-  return result;
-}
+    const [result] = await db.query(
+      'DELETE FROM Reservation WHERE ReservationID = ? AND UserID = ?',
+      [ReservationID, UserID]
+    );
+    return result;
+  },
 
+  async getReservationsByVehicleOwner(ownerID) {
+    const query = `
+      SELECT 
+        r.*,
+        v.Brand,
+        v.Model,
+        v.Type,
+        v.VehiclePic,
+        u.FirstName,
+        u.LastName,
+        u.Email
+      FROM Reservation r
+      JOIN Vehicle v ON r.VehicleID = v.VehicleID
+      JOIN User u ON r.UserID = u.UserID
+      WHERE v.OwnerID = ?
+      ORDER BY r.StartDate DESC
+    `;
+    const [rows] = await db.query(query, [ownerID]);
+    return rows;
+  }
 };
 
 module.exports = ReservationModel;

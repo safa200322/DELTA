@@ -54,11 +54,6 @@ const RenteeProfileIconDropdown = () => {
             <li>
               <Link to="/profile/rentee-security">Account Settings</Link>
             </li>
-            <li>
-              <Link to="/profile/rentee-maintenance-and-documents">
-                Maintenance & Documents
-              </Link>
-            </li>
           </ul>
         </div>
       )}

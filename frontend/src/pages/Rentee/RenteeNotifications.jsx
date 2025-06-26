@@ -1,231 +1,106 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Container, Row, Col, Nav, NavItem } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col } from "reactstrap";
 import "../../styles/user-profile.css";
-import VehicleManagement from "../VehicleManagement";
+import RenteeSidebar from "../../components/RenteeSidebar";
 
 const RenteeNotifications = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  const user = {
-    name: "Umuuuuuut Umutttttcuuuuuk",
-    email: "umutcuk@gmail.com",
-    phone: "+90 500 000 0000",
-    profilePic: "https://i.pravatar.cc/150?img=3",
-    isVerified: true,
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Try multiple token keys for compatibility
+        const token = localStorage.getItem('token') || localStorage.getItem('vehicleOwnerToken');
+        if (!token) {
+          setError("Not authenticated. Please log in.");
+          setLoading(false);
+          return;
+        }
+        const response = await fetch('http://localhost:5000/api/notifications/my', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch notifications: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setNotifications(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNotifications();
+  }, []);
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "Reservation":
+        return <i className="ri-calendar-line text-primary fs-4"></i>;
+      case "Payment":
+        return <i className="ri-money-dollar-circle-line text-success fs-4"></i>;
+      case "Review":
+        return <i className="ri-star-line text-warning fs-4"></i>;
+      case "System":
+        return <i className="ri-information-line text-info fs-4"></i>;
+      default:
+        return <i className="ri-notification-3-line text-secondary fs-4"></i>;
+    }
   };
 
-  const earnings = {
-    total: 2840,
-    monthly: 450,
-    payouts: [
-      {
-        title: "Honda CR-V Rental",
-        date: "May 25, 2025",
-        amount: 180,
-      },
-      {
-        title: "Toyota Camry Rental",
-        date: "May 18, 2025",
-        amount: 270,
-      },
-    ],
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Just now';
+    const date = new Date(dateString);
+    return date.toLocaleString();
   };
 
   return (
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <Col
-            xs="12"
-            md="3"
-            lg="2"
-            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-          >
-            <div className="sidebar-header">
-              <h3>Rentee Profile</h3>
-              <i
-                className="ri-menu-line sidebar-toggle d-md-none"
-                onClick={toggleSidebar}
-              ></i>
-            </div>
-            <Nav vertical className="sidebar-nav">
-              <NavItem>
-                <NavLink to="/profile/rentee-profile" className="nav-link">
-                  <i className="ri-user-line"></i> Personal Info
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-vehicle-management"
-                  className="nav-link"
-                >
-                  <i className="ri-briefcase-line"></i> Vehicle Management
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-rental-reservations"
-                  className="nav-link"
-                >
-                  <i className="ri-calendar-line"></i> Rental reservations
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-earnings-and-payments"
-                  className="nav-link"
-                >
-                  <i className="ri-file-text-line"></i> Earnings & Payments
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-maintenance-and-documents"
-                  className="nav-link"
-                >
-                  <i className="ri-settings-3-line"></i> Maintenance & Documents
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-notifications"
-                  className="nav-link"
-                >
-                  <i className="ri-wallet-line"></i> Notifications
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-reviews" className="nav-link">
-                  <i className="ri-wallet-line"></i> Reviews
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-security" className="nav-link">
-                  <i className="ri-wallet-line"></i> Security
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </Col>
+          <RenteeSidebar
+            sidebarOpen={sidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
 
           <Col xs="12" md="9" lg="10" className="content-area">
-            <Row className="mt-4">
-              <Col lg="8">
-                <div className="profile-card d-flex align-items-center gap-4 mb-4">
-                  <img
-                    src={user.profilePic}
-                    alt="Profile"
-                    className="profile-pic"
-                  />
-                  <div className="profile-info">
-                    <h3 className="mb-2">{user.name}</h3>
-                    <p className="mb-1">
-                      <strong>Email:</strong> {user.email}
-                    </p>
-                    <p className="mb-1">
-                      <strong>Phone:</strong> {user.phone}
-                    </p>
-                    <p className="mb-0">
-                      <strong>Verification:</strong>{" "}
-                      {user.isVerified ? (
-                        <span className="verified">ID Verified ✅</span>
-                      ) : (
-                        <span className="unverified">Not Verified ❌</span>
-                      )}
-                    </p>
-                  </div>
-                </div>
-                <VehicleManagement />
-                {/* Buraya araç yönetimi veya başka şeyler */}
-                <div className="vehicle-management">{/* future use */}</div>
-              </Col>
-
-              <Col lg="4">
-                <div className="earnings-card">
-                  <h5 className="section-title">
-                    <i className="ri-money-dollar-circle-line me-2 text-warning"></i>
-                    Earnings & Payments
-                  </h5>
-
-                  <div className="earnings-summary d-flex gap-3 mb-3">
-                    <div className="earn-box">
-                      <h3>${earnings.total.toLocaleString()}</h3>
-                      <p>Total Earnings</p>
-                    </div>
-                    <div className="earn-box">
-                      <h3>${earnings.monthly}</h3>
-                      <p>This Month</p>
-                    </div>
-                  </div>
-
-                  <div className="recent-payouts">
-                    <h6 className="text-muted">Recent Payouts</h6>
-                    {earnings.payouts.map((p, i) => (
-                      <div key={i} className="payout-item mb-3 border-top pt-2">
-                        <div className="d-flex justify-content-between">
-                          <span>{p.title}</span>
-                          <span className="text-success fw-bold">
-                            +${p.amount}
-                          </span>
-                        </div>
-                        <small className="text-muted">{p.date}</small>
+            <div className="notifications-section">
+              <h4 className="section-title mb-4 enhanced-contrast-title">
+                <i className="ri-notification-3-line me-2 text-primary"></i>
+                Notifications
+              </h4>
+              {loading ? (
+                <div className="loading-spinner">Loading notifications...</div>
+              ) : error ? (
+                <div className="error-message text-danger">{error}</div>
+              ) : notifications.length === 0 ? (
+                <div className="text-muted">No notifications found.</div>
+              ) : (
+                <ul className="list-unstyled notifications-list">
+                  {notifications.map((notif) => (
+                    <li
+                      key={notif.id}
+                      className={`notification-item notification-${notif.type || 'default'} mb-3 p-3 border rounded shadow-sm d-flex justify-content-between align-items-center`}
+                    >
+                      <div>
+                        <div className="fw-bold">{notif.title}</div>
+                        <div className="mb-1">{notif.message}</div>
+                        <small className="text-muted">{formatDate(notif.createdAt)}</small>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="account-settings-card mt-4">
-                  <h5 className="section-title mb-3">
-                    <i className="ri-user-settings-line me-2 text-primary"></i>
-                    Account Settings
-                  </h5>
-
-                  <div className="row g-3">
-                    <div className="col-6">
-                      <div className="account-box p-3 border rounded text-center h-100">
-                        <div className="mb-2">
-                          <i
-                            className="ri-lock-line text-warning"
-                            style={{ fontSize: "24px" }}
-                          ></i>
-                        </div>
-                        <h6 className="fw-bold">Security</h6>
-                        <p
-                          className="text-muted mb-2"
-                          style={{ fontSize: "14px" }}
-                        >
-                          Change password & security settings
-                        </p>
-                        <button className="btn btn-primary btn-sm">
-                          Manage Security
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="col-6">
-                      <div className="account-box p-3 border rounded text-center h-100">
-                        <div className="mb-2">
-                          <i
-                            className="ri-close-circle-line text-danger"
-                            style={{ fontSize: "24px" }}
-                          ></i>
-                        </div>
-                        <h6 className="fw-bold">Account Actions</h6>
-                        <p
-                          className="text-muted mb-2"
-                          style={{ fontSize: "14px" }}
-                        >
-                          Delete or deactivate your account
-                        </p>
-                        <button className="btn btn-danger btn-sm">
-                          Manage Account
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-            </Row>
+                      {getNotificationIcon(notif.type)}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </Col>
         </Row>
       </Container>

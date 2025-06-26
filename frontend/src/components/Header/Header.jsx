@@ -4,22 +4,35 @@ import { Link, NavLink as RouterNavLink } from "react-router-dom";
 import "../../styles/header.css";
 import "remixicon/fonts/remixicon.css";
 
-const navLinks = [
+const publicNavLinks = [
   { path: "/home", display: "Home" },
   { path: "/about", display: "About" },
   { path: "/cars", display: "Cars" },
-  { path: "/motors", display: "Motors" },
+  { path: "/motorcycles", display: "Motorcycles" },
   { path: "/bicycle", display: "Bicycles" },
   { path: "/boats", display: "Boats" },
   { path: "/contact", display: "Contact" },
+];
+
+const authNavLinks = [
   { path: "/signup", display: "SignUp" },
   { path: "/login", display: "Login" },
-  { path: "/apply-chauffeur", display: "Apply as Chauffeur" },
 ];
 
 const Header = () => {
   const menuRef = useRef(null);
   const navRef = useRef(null);
+  const [isAuthenticated, setIsAuthenticated] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem("token");
+      setIsAuthenticated(!!token);
+    };
+    checkAuth();
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +49,20 @@ const Header = () => {
   const toggleMenu = () => {
     navRef.current.classList.toggle("menu__active");
   };
+
+  // Logout handler
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    window.location.href = '/login';
+  };
+
+  // Only show public links; do not show auth links if authenticated
+  let navLinksToShow = [...publicNavLinks];
+  if (!isAuthenticated) {
+    navLinksToShow = [...publicNavLinks, ...authNavLinks];
+  }
+  navLinksToShow.push({ path: "/apply-chauffeur", display: "Apply as Chauffeur" });
 
   return (
     <header className="header" ref={menuRef}>
@@ -56,7 +83,7 @@ const Header = () => {
             </span>
             <Nav className="navigation d-none d-md-flex" ref={navRef}>
               <div className="menu d-flex gap-3">
-                {navLinks.map((item, index) => (
+                {navLinksToShow.map((item, index) => (
                   <NavItem key={index}>
                     <RouterNavLink to={item.path} className={({ isActive }) => (isActive ? "nav__active nav__item" : "nav__item")}>
                       {item.display}
@@ -75,21 +102,38 @@ const Header = () => {
               </span>
             </div>
 
-            <Link to="/notifications" className="profile__icon" title="Notifications">
-              <i className="ri-notification-3-fill" style={{ color: "#EF3E3F" }}></i>
-            </Link>
-            <Link to="/profile/ProfileOverview" className="profile__icon" title="User Profile">
-              <i className="ri-user-3-fill" style={{ color: "#007bff" }}></i>
-            </Link>
-            <Link to="/profile/personal-info" className="profile__icon" title="Chauffeur Profile">
-              <i className="ri-steering-2-fill" style={{ color: "#28a745" }}></i>
-            </Link>
-            <Link to="/profile/rentee-profile" className="profile__icon" title="Rentee Profile">
-              <i className="ri-car-fill" style={{ color: "#F88D56" }}></i>
-            </Link>
-            <Link to="/admin" className="profile__icon" title="Admin Profile">
-              <i className="ri-user-2-fill" style={{ color: "#EBC222" }}></i>
-            </Link>
+            {isAuthenticated && (
+              <>
+                <Link to="/notifications" className="profile__icon" title="Notifications">
+                  <i className="ri-notification-3-fill" style={{ color: "#EF3E3F" }}></i>
+                </Link>
+                <Link to="/profile/ProfileOverview" className="profile__icon" title="User Profile">
+                  <i className="ri-user-3-fill" style={{ color: "#007bff" }}></i>
+                </Link>
+                <Link to="/profile/personal-info" className="profile__icon" title="Chauffeur Profile">
+                  <i className="ri-steering-2-fill" style={{ color: "#28a745" }}></i>
+                </Link>
+                <Link to="/profile/rentee-profile" className="profile__icon" title="Rentee Profile">
+                  <i className="ri-car-fill" style={{ color: "#F88D56" }}></i>
+                </Link>
+                <Link to="/admin" className="profile__icon" title="Admin Profile">
+                  <i className="ri-user-2-fill" style={{ color: "#EBC222" }}></i>
+                </Link>
+                <button 
+                  onClick={handleLogout}
+                  className="profile__icon"
+                  style={{ 
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: 0
+                  }}
+                  title="Logout"
+                >
+                  <i className="ri-logout-box-line" style={{ color: "#dc3545" }}></i>
+                </button>
+              </>
+            )}
           </Col>
         </Row>
 
@@ -98,7 +142,7 @@ const Header = () => {
           <Col xs="12">
             <Nav className="navigation mobile__nav" ref={navRef}>
               <div className="menu">
-                {navLinks.map((item, index) => (
+                {navLinksToShow.map((item, index) => (
                   <NavItem key={index}>
                     <RouterNavLink to={item.path} className={({ isActive }) => (isActive ? "nav__active nav__item" : "nav__item")} onClick={toggleMenu}>
                       {item.display}

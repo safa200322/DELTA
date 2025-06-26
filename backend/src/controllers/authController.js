@@ -4,6 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const userModel = require('../models/userModel');
 const adminModel = require('../models/adminModel');
+const { findUserAcrossTypes, verifyPassword, updatePassword, deleteUser, updateUserProfile: updateUserProfileUnified, updateProfilePicture: updateProfilePictureUnified } = require('../utils/userUtils');
 require('dotenv').config();
 
 exports.registerUser = async (req, res) => {
@@ -62,53 +63,58 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-
-    const phone = req.body.phonenumber
-    const pass = req.body.password
+    const phone = req.body.phonenumber;
+    const pass = req.body.password;
 
     if (!phone || !pass) {
-      res.status(400).json({ err: "missing stuff" })
-      return
+      return res.status(400).json({ err: "Missing credentials" });
     }
-    const user = await userModel.findByPhone(phone);
-    if (!user || !user.Password) {
-      return res.status(404).json({ err: 'user not found' });
-    }
-
+    
+    // Use unified user lookup
+    const user = await findUserAcrossTypes(phone, 'phone');
+    
     if (!user) {
-      console.log("login fail / user not found:", phone)
-      res.status(404).json({ err: "user gone" })
-      return
+      return res.status(401).json({ err: "Invalid credentials" });
     }
-    if (!user.Password) {
-      console.log('user.Password is missing:', user)
-      return res.status(500).json({ err: 'user data incomplete' })
+    
+    // Verify password
+    const isValidPassword = await verifyPassword(pass, user);
+    if (!isValidPassword) {
+      return res.status(401).json({ err: "Invalid credentials" });
     }
-    const same = await bcrypt.compare(pass, user.Password)
-
-
-
-    if (!same) {
-      res.status(401).json({ err: "no match" })
-      return
-    }
-
-    const token = jwt.sign({ id: user.UserID, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '2h' })
-
-    res.json({
-      msg: "ok login",
+    
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: user.id, role: user.role, type: user.type },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+    
+    // Determine redirect URL based on user type
+    const redirectPaths = {
+      'admin': '/admin/dashboard',
+      'chauffeur': '/chauffeur/dashboard',
+      'vehicle-owner': '/vehicle-owner/profile',
+      'user': '/profile'
+    };
+    
+    return res.json({
+      msg: `${user.type.charAt(0).toUpperCase() + user.type.slice(1)} login successful`,
       token,
       user: {
-        id: user.UserID,
-        name: user.Name,
-        phone: user.phonenumber,
-        profilePictureUrl: user.ProfilePictureUrl
-      }
-    })
-
+        id: user.id,
+        name: user.name,
+        type: user.type,
+        phone: user.phone,
+        email: user.email,
+        profilePictureUrl: user.profilePictureUrl
+      },
+      redirectTo: redirectPaths[user.type] || '/profile'
+    });
+    
   } catch (e) {
-    console.log("err login:", e)
-    res.status(500).json({ err: "server fail" })
+    console.log("Error during login:", e);
+    res.status(500).json({ err: "Server error during login" });
   }
 }
 
@@ -175,33 +181,54 @@ exports.logoutUser = (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
   try {
-    // req.user is set by the authenticateToken middleware
     const userId = req.user.id;
+    const userType = req.user.type;
 
     if (!userId) {
       return res.status(400).json({ error: "Invalid user ID" });
     }
 
-    const user = await userModel.findById(userId);
+    // Get user using unified lookup
+    const user = await findUserAcrossTypes(userId, 'id');
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
     // Set default profile picture URL if none exists
-    const profilePictureUrl = user.ProfilePictureUrl ||
-      `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;
+    let profilePictureUrl = null;
+    
+    // Handle different profile picture fields for different user types
+    switch (user.type) {
+      case 'vehicle-owner':
+        profilePictureUrl = user.ProfileImage;
+        break;
+      case 'user':
+        profilePictureUrl = user.ProfilePictureUrl || user.profilePictureUrl;
+        break;
+      case 'chauffeur':
+      case 'admin':
+        profilePictureUrl = user.ProfilePictureUrl;
+        break;
+    }
+    
+    // Set default if no profile picture
+    if (!profilePictureUrl) {
+      profilePictureUrl = `${req.protocol}://${req.get('host')}/uploads/profile-pictures/default.svg`;
+    }
 
     // Return user data without sensitive information
     res.status(200).json({
-      id: user.UserID,
-      fullName: user.Name,
-      username: user.Username || user.Name,
-      email: user.Email,
-      phone: user.PhoneNumber,
-      birthday: user.Date_of_birth,
+      id: user.id,
+      fullName: user.name,
+      username: user.Username || user.name,
+      email: user.email,
+      phone: user.phone,
+      birthday: user.Date_of_birth || user.DateOfBirth,
       profilePictureUrl: profilePictureUrl,
-      isVerified: !!user.isVerified
+      isVerified: !!user.isVerified,
+      userType: user.type,
+      role: user.role
     });
 
   } catch (error) {
@@ -213,17 +240,27 @@ exports.getUserProfile = async (req, res) => {
 exports.updateProfilePicture = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userType = req.user.type;
 
     if (!req.file) {
       return res.status(400).json({ error: "No file uploaded" });
+    }
+
+    // Get current user using unified lookup
+    const user = await findUserAcrossTypes(userId, 'id');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
     }
 
     // Create the URL for the uploaded file
     const baseUrl = `${req.protocol}://${req.get('host')}`;
     const profilePictureUrl = `${baseUrl}/uploads/profile-pictures/${req.file.filename}`;
 
-    // Update the user's profile picture URL in the database
-    await userModel.updateProfilePicture(userId, profilePictureUrl);
+    // Update the user's profile picture URL using unified utility
+    const success = await updateProfilePictureUnified(user, profilePictureUrl);
+    if (!success) {
+      return res.status(500).json({ error: "Failed to update profile picture" });
+    }
 
     res.status(200).json({
       success: true,
@@ -239,24 +276,35 @@ exports.updateProfilePicture = async (req, res) => {
 exports.updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userType = req.user.type;
     const { fullName, email, phone } = req.body;
 
     if (!fullName || !email || !phone) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Check if email is already used by another user
-    const existingUser = await userModel.findByEmail(email);
-    if (existingUser && existingUser.UserID !== userId) {
+    // Get current user using unified lookup
+    const user = await findUserAcrossTypes(userId, 'id');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if email is already used by another user across all user types
+    const existingUserByEmail = await findUserAcrossTypes(email, 'email');
+    if (existingUserByEmail && existingUserByEmail.id !== userId) {
       return res.status(409).json({ error: "Email already in use" });
     }
 
-    // Update user profile
-    await userModel.updateUserProfile(userId, {
+    // Update user profile using unified utility
+    const success = await updateUserProfileUnified(user, {
       name: fullName,
       email: email,
       phone: phone
     });
+
+    if (!success) {
+      return res.status(500).json({ error: "Failed to update profile" });
+    }
 
     res.status(200).json({
       success: true,
@@ -271,6 +319,7 @@ exports.updateUserProfile = async (req, res) => {
 exports.changePassword = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userType = req.user.type;
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
@@ -281,14 +330,14 @@ exports.changePassword = async (req, res) => {
       return res.status(400).json({ error: "New password must be at least 6 characters" });
     }
 
-    // Get current user
-    const user = await userModel.findById(userId);
+    // Get current user using unified lookup
+    const user = await findUserAcrossTypes(userId, 'id');
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Verify current password
-    const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.Password);
+    // Verify current password using unified utility
+    const isCurrentPasswordValid = await verifyPassword(currentPassword, user);
     if (!isCurrentPasswordValid) {
       return res.status(401).json({ error: "Current password is incorrect" });
     }
@@ -296,8 +345,11 @@ exports.changePassword = async (req, res) => {
     // Hash new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
-    // Update password in database
-    await userModel.updatePassword(userId, hashedNewPassword);
+    // Update password using unified utility
+    const success = await updatePassword(user, hashedNewPassword);
+    if (!success) {
+      return res.status(500).json({ error: "Failed to update password" });
+    }
 
     res.status(200).json({
       success: true,
@@ -312,9 +364,19 @@ exports.changePassword = async (req, res) => {
 exports.deleteAccount = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userType = req.user.type;
 
-    // Delete user account
-    await userModel.deleteUser(userId);
+    // Get current user using unified lookup
+    const user = await findUserAcrossTypes(userId, 'id');
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Delete user account using unified utility
+    const success = await deleteUser(user);
+    if (!success) {
+      return res.status(500).json({ error: "Failed to delete account" });
+    }
 
     res.status(200).json({
       success: true,

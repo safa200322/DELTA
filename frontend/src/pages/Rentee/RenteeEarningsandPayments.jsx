@@ -1,47 +1,78 @@
-import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Container, Row, Col, Nav, NavItem, Card, CardBody } from "reactstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Card, CardBody } from "reactstrap";
 import "../../styles/user-profile.css";
+import RenteeSidebar from "../../components/RenteeSidebar";
 
-// Sample earnings data (replace with actual data from API or state management)
-const earnings = {
-  total: 2840,
-  payouts: [
-    {
-      id: 1,
-      title: "Honda CR-V Rental",
-      date: "2025-05-25",
-      amount: 180,
-    },
-    {
-      id: 2,
-      title: "Toyota Camry Rental",
-      date: "2025-05-18",
-      amount: 270,
-    },
-    {
-      id: 3,
-      title: "Ford F-150 Rental",
-      date: "2025-04-30",
-      amount: 350,
-    },
-  ],
-};
+const EarningsAndPayments = ({ earnings, loading, error }) => {
+  if (loading) {
+    return (
+      <div className="earnings-payments">
+        <h5 className="section-title mb-3 enhanced-contrast-title">
+          <i className="ri-money-dollar-circle-line me-2 text-warning"></i>
+          Earnings & Payments
+        </h5>
+        <div className="loading-spinner">Loading earnings data...</div>
+      </div>
+    );
+  }
 
-const EarningsAndPayments = () => {
+  if (error) {
+    return (
+      <div className="earnings-payments">
+        <h5 className="section-title mb-3 enhanced-contrast-title">
+          <i className="ri-money-dollar-circle-line me-2 text-warning"></i>
+          Earnings & Payments
+        </h5>
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="earnings-payments">
-      <h5 className="section-title mb-3">
+      <h5 className="section-title mb-3 enhanced-contrast-title">
         <i className="ri-money-dollar-circle-line me-2 text-warning"></i>
         Earnings & Payments
       </h5>
       <Row>
-        <Col lg="12">
+        <Col lg="6">
           <Card className="earnings-summary-card mb-4">
             <CardBody>
               <h6 className="mb-3">Total Earnings</h6>
               <h3 className="text-success">
-                ${earnings.total.toLocaleString()}
+                ${(earnings.TotalEarnings || 0).toLocaleString()}
+              </h3>
+            </CardBody>
+          </Card>
+        </Col>
+        <Col lg="6">
+          <Card className="earnings-summary-card mb-4">
+            <CardBody>
+              <h6 className="mb-3">Monthly Earnings</h6>
+              <h3 className="text-primary">
+                ${(earnings.MonthlyEarnings || 0).toLocaleString()}
+              </h3>
+            </CardBody>
+          </Card>
+        </Col>
+      </Row>
+      <Row>
+        <Col lg="6">
+          <Card className="earnings-summary-card mb-4">
+            <CardBody>
+              <h6 className="mb-3">Total Rentals</h6>
+              <h3 className="text-info">
+                {earnings.TotalRentals || 0}
+              </h3>
+            </CardBody>
+          </Card>
+        </Col>
+        <Col lg="6">
+          <Card className="earnings-summary-card mb-4">
+            <CardBody>
+              <h6 className="mb-3">Average Rental</h6>
+              <h3 className="text-secondary">
+                ${(earnings.AverageRental || 0).toFixed(2)}
               </h3>
             </CardBody>
           </Card>
@@ -51,21 +82,25 @@ const EarningsAndPayments = () => {
         <Col lg="12">
           <Card className="payouts-history-card">
             <CardBody>
-              <h6 className="mb-3">Payout History</h6>
-              {earnings.payouts.map((payout) => (
-                <div
-                  key={payout.id}
-                  className="payout-item mb-3 border-top pt-2"
-                >
-                  <div className="d-flex justify-content-between">
-                    <span>{payout.title}</span>
-                    <span className="text-success fw-bold">
-                      +${payout.amount}
-                    </span>
+              <h6 className="mb-3">Recent Payout History</h6>
+              {earnings.recentPayouts && earnings.recentPayouts.length > 0 ? (
+                earnings.recentPayouts.map((payout, index) => (
+                  <div
+                    key={index}
+                    className="payout-item mb-3 border-top pt-2"
+                  >
+                    <div className="d-flex justify-content-between">
+                      <span>{payout.title}</span>
+                      <span className="text-success fw-bold">
+                        +${payout.amount}
+                      </span>
+                    </div>
+                    <small className="text-muted">{payout.date}</small>
                   </div>
-                  <small className="text-muted">{payout.date}</small>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-muted">No payout history available.</div>
+              )}
             </CardBody>
           </Card>
         </Col>
@@ -76,88 +111,55 @@ const EarningsAndPayments = () => {
 
 const RenteeEarningsandPayment = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [earnings, setEarnings] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  useEffect(() => {
+    const fetchEarnings = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        // Try multiple token keys for compatibility
+        const token = localStorage.getItem('token') || localStorage.getItem('vehicleOwnerToken');
+        if (!token) {
+          setError("Not authenticated. Please log in.");
+          setLoading(false);
+          return;
+        }
+        const response = await fetch('http://localhost:5000/api/vehicle-owner/earnings', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error(`Failed to fetch earnings: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setEarnings(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEarnings();
+  }, []);
 
   return (
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <Col
-            xs="12"
-            md="3"
-            lg="2"
-            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-          >
-            <div className="sidebar-header">
-              <h3>Rentee Profile</h3>
-              <i
-                className="ri-menu-line sidebar-toggle d-md-none"
-                onClick={toggleSidebar}
-              ></i>
-            </div>
-            <Nav vertical className="sidebar-nav">
-              <NavItem>
-                <NavLink to="/profile/rentee-profile" className="nav-link">
-                  <i className="ri-user-line"></i> Personal Info
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-vehicle-management"
-                  className="nav-link"
-                >
-                  <i className="ri-briefcase-line"></i> Vehicle Management
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-rental-reservations"
-                  className="nav-link"
-                >
-                  <i className="ri-calendar-line"></i> Rental reservations
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-earnings-and-payments"
-                  className="nav-link"
-                >
-                  <i className="ri-file-text-line"></i> Earnings & Payments
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-maintenance-and-documents"
-                  className="nav-link"
-                >
-                  <i className="ri-settings-3-line"></i> Maintenance & Documents
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-notifications"
-                  className="nav-link"
-                >
-                  <i className="ri-wallet-line"></i> Notifications
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-reviews" className="nav-link">
-                  <i className="ri-wallet-line"></i> Reviews
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-security" className="nav-link">
-                  <i className="ri-wallet-line"></i> Security
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </Col>
+          <RenteeSidebar 
+            sidebarOpen={sidebarOpen} 
+            toggleSidebar={toggleSidebar} 
+          />
 
           <Col xs="12" md="9" lg="10" className="content-area">
             <Row className="mt-4">
               <Col lg="12">
-                <EarningsAndPayments />
+                <EarningsAndPayments earnings={earnings} loading={loading} error={error} />
               </Col>
             </Row>
           </Col>

@@ -1,54 +1,60 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { Link } from "react-router-dom";
-import "../../styles/car-item.css";
 import { useNavigate } from "react-router-dom";
+import "../../styles/car-item.css";
 
 const BoatItem = ({ item, type }) => {
   const navigate = useNavigate();
 
-  const handleBook = (carName, model) => {
-    navigate(`/boats/${carName || model}`);
+  const handleBook = (id) => {
+    navigate(`/boats/${id}`);
   };
 
   return (
     <Col lg="12" className="mb-4">
       <div className="car__item">
         <div className="car__item-img">
-          <img src={item.imgUrl} alt={item.model} className="w-100" />
-          <span className="car-type-badge">{type.toUpperCase()}</span>
+          <img
+            src={
+              item.vehiclepic ||
+              "https://placehold.co/300x200?text=Image+Not+Available"
+            }
+            alt={item.BoatType || "Boat"}
+            className="w-100"
+          />
+          <span className="car-type-badge">
+            {(item.BoatType ? `${item.BoatType.toUpperCase()} BOAT` : type.toUpperCase())}
+          </span>
         </div>
         <div className="car__item-content">
-          <h4 className="car__item-title">{item.carName || item.model}</h4>
-          <div className="car__item-features">
-            <span className="feature-item">
-              <i className="ri-checkbox-circle-line"></i> Free Cancellation
+          <h4 className="car__item-title">
+            {item.Brand} {item.BoatType}
+          </h4>
+
+          <div className="car__item-info d-flex justify-content-between mt-3">
+            <span className="d-flex align-items-center gap-1">
+              <i className="ri-group-line"></i> {item.Capacity || 0} People
             </span>
-            <span className="feature-item">
-              <i className="ri-checkbox-circle-line"></i> Price Guarantee
-            </span>
-          </div>
-          <div className="car__item-details">
-            <span className="detail-item">
-              <i className="ri-car-line"></i> {item.automatic || "Automatic"}
-            </span>
-            <span className="detail-item">
-              <i className="ri-timer-flash-line"></i> {item.speed || "220 km/h"}
-            </span>
-            <span className="detail-item">
-              <i className="ri-map-pin-line"></i> {item.gps || "GPS Enabled"}
+            <span className="d-flex align-items-center gap-1">
+              <i className="ri-settings-2-line"></i> {item.EngineType}
             </span>
           </div>
-          <div className="car__item-rating">
-            <span className="rating-value">{item.rating || "4.7"}</span>
-            <span className="rating-text">Excellent ({item.reviews || "188"} reviews)</span>
+
+          <div className="car__item-info d-flex justify-content-between mt-3">
+            <span className="d-flex align-items-center gap-1">
+              <i className="ri-map-pin-line"></i> {item.Location}
+            </span>
           </div>
+
           <div className="car__item-price">
-            <span className="original-price">${item.originalPrice || "250"}</span>
-            <span className="current-price">${item.price}/day</span>
+            <span className="current-price">${item.Price}/day</span>
           </div>
-          <button className="car__item-btn book-btn" onClick={() => handleBook(item.carName, item.model)}>
-            Book        
+
+          <button
+            className="car__item-btn book-btn"
+            onClick={() => handleBook(item.VehicleID)}
+          >
+            Book{" "}
           </button>
         </div>
       </div>

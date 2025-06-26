@@ -9,10 +9,6 @@ const FindCarForm = () => {
     depart: "",
     return: "",
     vehicleType: "Car",
-    nearbyLocations: false,
-    directRoutes: false,
-    driverAge25to70: false,
-    differentDropoff: false,
     Location: "",
   });
 
@@ -28,16 +24,30 @@ const FindCarForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Build query string from formData
+    
+    // Determine the correct route based on vehicle type
+    const routeMap = {
+      Car: "/cars",
+      Motorcycle: "/motorcycles", 
+      Bicycle: "/bicycle",
+      Boat: "/boats"
+    };
+    
+    const baseRoute = routeMap[formData.vehicleType] || "/cars";
+    
+    // Build query string from formData (excluding vehicleType since it's now in the route)
     const params = new URLSearchParams();
     Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === "boolean") {
-        params.append(key, value ? "1" : "0");
-      } else if (value) {
-        params.append(key, value);
+      if (key !== "vehicleType" && value) {
+        if (typeof value === "boolean") {
+          params.append(key, value ? "1" : "0");
+        } else {
+          params.append(key, value);
+        }
       }
     });
-    const url = `/cars?${params.toString()}`;
+    
+    const url = `${baseRoute}${params.toString() ? `?${params.toString()}` : ""}`;
     console.debug(
       "[FindCarForm] Navigating to:",
       url,
@@ -95,6 +105,7 @@ const FindCarForm = () => {
             >
               <option value="Car">Car</option>
               <option value="Motorcycle">Motorcycle</option>
+              <option value="Bicycle">Bicycle</option>
               <option value="Boat">Boat</option>
             </Input>
           </FormGroup>
@@ -123,68 +134,6 @@ const FindCarForm = () => {
           >
             Search
           </Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="nearbyLocations"
-              name="nearbyLocations"
-              checked={formData.nearbyLocations}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="nearbyLocations" className="form-check-label">
-              Add nearby locations
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="directRoutes"
-              name="directRoutes"
-              checked={formData.directRoutes}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="directRoutes" className="form-check-label">
-              Direct routes only
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="driverAge25to70"
-              name="driverAge25to70"
-              checked={formData.driverAge25to70}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="driverAge25to70" className="form-check-label">
-              Driver age 25 - 70
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="differentDropoff"
-              name="differentDropoff"
-              checked={formData.differentDropoff}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="differentDropoff" className="form-check-label">
-              Drop off at a different location
-            </Label>
-          </FormGroup>
         </Col>
       </Row>
     </Form>

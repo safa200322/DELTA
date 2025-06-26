@@ -17,7 +17,8 @@
   box-shadow: var(--box-shadow);
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
-  max-width: 450px; /* Increased from 300px to make cards wider */
+  max-width: 450px;
+  /* Increased from 300px to make cards wider */
   margin: 0 auto;
 }
 
@@ -65,7 +66,31 @@
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--text-color);
+  margin-bottom: 0.8rem;
+}
+
+/* Brand and Model Display */
+.car__item-brand-model {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--muted-text);
+}
+
+.brand-text,
+.model-text {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 500;
+}
+
+.brand-text i,
+.model-text i {
+  color: var(--primary-color);
+  font-size: 1rem;
 }
 
 /* Features */

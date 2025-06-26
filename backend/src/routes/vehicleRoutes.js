@@ -23,6 +23,7 @@ router.post("/motorcycles", authvehicleowner, vehicleController.addMotorcycle);
 
 router.patch('/:id/approve', adminAuth, vehicleController.approveVehicle);
 router.patch('/:id/reject', adminAuth,vehicleController.rejectVehicle);
+router.patch("/deactivate/:id", authvehicleowner, vehicleController.deactivateVehicle);
 
 //router.put("/:id", adminAuth, vehicleController.updateVehicle);
 router.delete("/admindeletevehicle/:id", adminAuth, vehicleController.deleteVehicle);

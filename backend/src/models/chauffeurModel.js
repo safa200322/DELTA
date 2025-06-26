@@ -149,3 +149,9 @@ exports.getChauffeurById = async (chauffeurId) => {
   const [rows] = await db.query("SELECT * FROM Chauffeur WHERE ChauffeurID = ?", [chauffeurId]);
   return rows[0]; // Return the first matching chauffeur (should be only one)
 };
+
+// Find chauffeur by phone number
+exports.findByPhone = async (phone) => {
+  const [rows] = await db.query('SELECT * FROM Chauffeur WHERE PhoneNumber = ?', [phone]);
+  return rows[0];
+};

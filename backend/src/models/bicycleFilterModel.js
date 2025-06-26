@@ -5,27 +5,42 @@ async function filteredBicycles(filters) {
     SELECT v.*, b.*
     FROM Vehicle v
     JOIN Bicycle b ON v.VehicleID = b.VehicleID
-    WHERE v.status = 'approved'
+    WHERE v.Status = 'Available'
   `;
   const values = [];
 
-  if (filters.type) {
-    query += ` AND b.Type = ?`;
-    values.push(filters.type);
+  if (filters.Brand) {
+    query += ` AND b.Brand = ?`;
+    values.push(filters.Brand);
   }
 
-  if (filters.gears) {
-    query += ` AND b.Gears = ?`;
-    values.push(filters.gears);
+  if (filters.Type) {
+    query += ` AND b.Type = ?`;
+    values.push(filters.Type);
+  }
+
+  if (filters.Material) {
+    query += ` AND b.Material = ?`;
+    values.push(filters.Material);
+  }
+
+  if (filters.Brakes) {
+    query += ` AND b.Brakes = ?`;
+    values.push(filters.Brakes);
+  }
+
+  if (filters.color) {
+    query += ` AND b.color = ?`;
+    values.push(filters.color);
   }
 
   if (filters.minPrice) {
-    query += ` AND v.price >= ?`;
+    query += ` AND v.Price >= ?`;
     values.push(filters.minPrice);
   }
 
   if (filters.maxPrice) {
-    query += ` AND v.price <= ?`;
+    query += ` AND v.Price <= ?`;
     values.push(filters.maxPrice);
   }
 

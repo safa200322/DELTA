@@ -27,11 +27,36 @@ const Login = () => {
       });
       if (response.ok) {
         const data = await response.json();
-        // Store the JWT token in localStorage
+        // Store the JWT token and user type in localStorage
         localStorage.setItem('token', data.token);
-        alert("Login successful!");
-        // Redirect to profile page
-        navigate('/profile/ProfileOverview');
+        localStorage.setItem('userType', data.user.type);
+        localStorage.setItem('userName', data.user.name);
+        localStorage.setItem('userId', data.user.id);
+        
+        // Show success message with specific user type
+        alert(`Login successful as ${data.user.type}!`);
+        
+        // Redirect based on user type
+        if (data.redirectTo) {
+          navigate(data.redirectTo);
+        } else {
+          // Default redirect based on user type
+          switch (data.user.type) {
+            case 'admin':
+              navigate('/admin/dashboard');
+              break;
+            case 'chauffeur':
+              navigate('/chauffeur/dashboard');
+              break;
+            case 'vehicle-owner':
+              navigate('/vehicle-owner/profile');
+              break;
+            case 'user':
+            default:
+              navigate('/profile/ProfileOverview');
+              break;
+          }
+        }
       } else {
         alert("Login failed. Please check your credentials.");
       }
