@@ -38,7 +38,12 @@ const Login = () => {
 
         // Redirect based on user type
         if (data.redirectTo) {
-          navigate(data.redirectTo);
+          // Fix: redirect regular users to ProfileOverview
+          if (data.redirectTo === '/profile') {
+            navigate('/profile/ProfileOverview');
+          } else {
+            navigate(data.redirectTo);
+          }
         } else {
           // Default redirect based on user type
           switch (data.user.type) {
@@ -53,7 +58,7 @@ const Login = () => {
               break;
             case 'user':
             default:
-              navigate('/profile');
+              navigate('/profile/ProfileOverview');
               break;
           }
         }
