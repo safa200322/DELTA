@@ -222,8 +222,42 @@ const CarDetails = () => {
     );
   }
 
-  const handleGoToPayment = () => {
-    navigate("/payment", { state: { carSlug: slug } });
+  const handleGoToPayment = async () => {
+    try {
+      // Example reservation payload, adjust as needed
+      const token = localStorage.getItem("token");
+      const reservationPayload = {
+        vehicleId: singleCarItem?.VehicleID || slug, // adjust field as needed
+        pickupDateTime,
+        dropoffDateTime,
+        pickupLocation,
+        dropoffLocation,
+        // add other required fields for reservation creation
+      };
+      const res = await fetch("http://localhost:5000/api/reservations/create", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(reservationPayload),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Failed to create reservation");
+      }
+      const reservation = await res.json();
+      // Pass ReservationID and VehicleID to payment page
+      navigate("/payment", {
+        state: {
+          carSlug: slug,
+          reservationId: reservation.reservationId, // use correct key from backend response
+          vehicleId: singleCarItem?.VehicleID || slug,
+        },
+      });
+    } catch (err) {
+      alert(err.message || "Failed to create reservation");
+    }
   };
 
   const handleHistoryClick = () => {

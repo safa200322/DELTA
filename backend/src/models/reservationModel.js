@@ -125,3 +125,22 @@ exports.createPayment = async ({
     VehicleType: Type
   };
 };
+
+exports.createReservation = async (reservationData) => {
+  // Adjust field names as needed for your schema
+  const {
+    vehicleId,
+    pickupDateTime,
+    dropoffDateTime,
+    pickupLocation,
+    dropoffLocation,
+    UserID // from controller
+  } = reservationData;
+
+  const [result] = await db.query(
+    `INSERT INTO Reservation (VehicleID, UserID, StartDate, EndDate, PickupLocation, DropoffLocation)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [vehicleId, UserID, pickupDateTime, dropoffDateTime, pickupLocation, dropoffLocation]
+  );
+  return result;
+};

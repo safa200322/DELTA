@@ -24,6 +24,7 @@ import Contact from "./pages/Contact";
 import Signup from "./pages/signup";
 import Login from "./pages/Login";
 import PaymentPage from "./pages/PaymentScreen";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import NotFound from "./pages/NotFound";
 import TimelineCard from "./pages/TimeLineCard";
 import Notifications from "./pages/Notifications";
@@ -80,6 +81,7 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
           <Route path="/payment" element={<PaymentPage />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/chauffeurs" element={<ChauffeurAdmin />} />
           <Route path="/apply-chauffeur" element={<ApplyChauffeur />} />
