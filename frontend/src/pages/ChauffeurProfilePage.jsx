@@ -1,16 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Routes, Route, NavLink, Link } from "react-router-dom";
-import React, { useState, useEffect } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import { Container, Row, Col, Button, Nav, NavItem } from "reactstrap";
-import { Link } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
 
-// Placeholder components for each section
+// Personal Info Section
 const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
-// --- Child Components with props ---
-const PersonalInfo = ({ chauffeur }) => (
   <div className="profile-section">
     <h2>Personal Information</h2>
     {loading ? (
@@ -22,24 +17,12 @@ const PersonalInfo = ({ chauffeur }) => (
         {successMsg && <p className="text-success">{successMsg}</p>}
         {!editMode ? (
           <>
-            <p>
-              <strong>Full Name:</strong> {profile.Name}
-            </p>
-            <p>
-              <strong>Date of Birth:</strong> {profile.Date_of_birth}
-            </p>
-            <p>
-              <strong>Email:</strong> {profile.Email}
-            </p>
-            <p>
-              <strong>Phone:</strong> {profile.PhoneNumber}
-            </p>
-            <p>
-              <strong>Location:</strong> {profile.Location}
-            </p>
-            <Button color="primary" onClick={() => setEditMode(true)}>
-              Edit
-            </Button>
+            <p><strong>Full Name:</strong> {profile.Name}</p>
+            <p><strong>Date of Birth:</strong> {profile.Date_of_birth}</p>
+            <p><strong>Email:</strong> {profile.Email}</p>
+            <p><strong>Phone:</strong> {profile.PhoneNumber}</p>
+            <p><strong>Location:</strong> {profile.Location}</p>
+            <Button color="primary" onClick={() => setEditMode(true)}>Edit</Button>
           </>
         ) : (
           <form onSubmit={handleEditSubmit}>
@@ -63,24 +46,16 @@ const PersonalInfo = ({ chauffeur }) => (
               <label>Location</label>
               <input name="Location" value={editData.Location || ""} onChange={handleEditChange} className="form-control" />
             </div>
-            <Button color="success" type="submit">
-              Save
-            </Button>{" "}
-            <Button color="secondary" onClick={() => setEditMode(false)}>
-              Cancel
-            </Button>
+            <Button color="success" type="submit">Save</Button>{" "}
+            <Button color="secondary" onClick={() => setEditMode(false)}>Cancel</Button>
           </form>
         )}
-    <div className="section-content">
-      <p><strong>Full Name:</strong> {chauffeur?.fullName || "N/A"}</p>
-      <p><strong>Date of Birth:</strong> {chauffeur?.dob || "N/A"}</p>
-      <div className="profile-picture">
-        <Button color="primary">Upload New Picture</Button>
       </div>
     ) : null}
   </div>
 );
 
+// Work & Availability Section
 const WorkAvailability = () => {
   const [status, setStatus] = useState("Available");
   const [assignments, setAssignments] = useState([]);
@@ -113,8 +88,6 @@ const WorkAvailability = () => {
     };
     fetchAssignments();
   }, [actionMsg]);
-const WorkAvailability = ({ chauffeur }) => {
-  const [status, setStatus] = useState(chauffeur?.status || "Available");
 
   const handleStatusChange = () => {
     setStatus((prev) =>
@@ -154,7 +127,6 @@ const WorkAvailability = ({ chauffeur }) => {
         <Button color="primary" onClick={handleStatusChange} className="mb-3">
           Change Status
         </Button>
-        <p><strong>Location:</strong> {chauffeur?.location || "Unknown"}</p>
         <div className="assigned-vehicles">
           <h4>Assigned Reservations</h4>
           {loading ? (
@@ -178,22 +150,13 @@ const WorkAvailability = ({ chauffeur }) => {
             </ul>
           )}
           {actionMsg && <p className="text-success">{actionMsg}</p>}
-          <h4>Assigned Vehicle(s)</h4>
-          <ul>
-            {chauffeur?.vehicles?.map((vehicle, index) => (
-              <li key={index}>
-                {vehicle.name} - <Link to={`/reservation/${vehicle.id}`}>View Reservation</Link>{" "}
-                <Button color="success" size="sm">Accept</Button>{" "}
-                <Button color="danger" size="sm">Reject</Button>
-              </li>
-            )) || <li>No vehicles assigned</li>}
-          </ul>
         </div>
       </div>
     </div>
   );
 };
 
+// Booking History Section
 const BookingHistory = () => (
   <div className="profile-section">
     <h2>Booking History</h2>
@@ -211,6 +174,7 @@ const BookingHistory = () => (
   </div>
 );
 
+// Documents & Verification Section
 const DocumentsVerification = () => (
   <div className="profile-section">
     <h2>Documents & Verification</h2>
@@ -221,6 +185,7 @@ const DocumentsVerification = () => (
   </div>
 );
 
+// Settings Section
 const Settings = () => (
   <div className="profile-section">
     <h2>Settings</h2>
@@ -234,6 +199,7 @@ const Settings = () => (
   </div>
 );
 
+// Payment Info Section
 const PaymentInfo = () => (
   <div className="profile-section">
     <h2>Payment Info</h2>
@@ -248,17 +214,15 @@ const PaymentInfo = () => (
   </div>
 );
 
-// --- Main Page ---
+// Main Page
 const ChauffeurProfilePage = () => {
-  const [chauffeur, setChauffeur] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editData, setEditData] = useState({});
   const [editMode, setEditMode] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -311,23 +275,6 @@ const ChauffeurProfilePage = () => {
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const response = await fetch("http://localhost:5000/api/chauffeurs/chauffeurs/login"); // replace with your API
-        const data = await response.json();
-        setChauffeur(data);
-      } catch (error) {
-        console.error("Error fetching chauffeur data:", error);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (!chauffeur) return <div>No chauffeur data available.</div>;
-
   return (
     <div className="chauffeur-profile">
       <Container fluid>
@@ -340,34 +287,22 @@ const ChauffeurProfilePage = () => {
             </div>
             <Nav vertical className="sidebar-nav">
               <NavItem>
-                <NavLink to="/profile/personal-info" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-user-line"></i> Personal Info
-                </NavLink>
+                <NavLink to="personal-info" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-user-line"></i> Personal Info </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/work-availability" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-briefcase-line"></i> Work & Availability
-                </NavLink>
+                <NavLink to="work-availability" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-briefcase-line"></i> Work & Availability </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/booking-history" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-calendar-line"></i> Booking History
-                </NavLink>
+                <NavLink to="booking-history" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-calendar-line"></i> Booking History </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/documents-verification" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-file-text-line"></i> Documents & Verification
-                </NavLink>
+                <NavLink to="documents-verification" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-file-text-line"></i> Documents & Verification </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/settings" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-settings-3-line"></i> Settings
-                </NavLink>
+                <NavLink to="settings" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-settings-3-line"></i> Settings </NavLink>
               </NavItem>
               <NavItem>
-                <NavLink to="/profile/payment-info" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}>
-                  <i className="ri-wallet-line"></i> Payment Info
-                </NavLink>
+                <NavLink to="payment-info" className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}> <i className="ri-wallet-line"></i> Payment Info </NavLink>
               </NavItem>
             </Nav>
           </Col>
@@ -377,14 +312,11 @@ const ChauffeurProfilePage = () => {
             <Routes>
               <Route path="personal-info" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
               <Route path="work-availability" element={<WorkAvailability />} />
-              <Route path="personal-info" element={<PersonalInfo chauffeur={chauffeur} />} />
-              <Route path="work-availability" element={<WorkAvailability chauffeur={chauffeur} />} />
               <Route path="booking-history" element={<BookingHistory />} />
               <Route path="documents-verification" element={<DocumentsVerification />} />
               <Route path="settings" element={<Settings />} />
               <Route path="payment-info" element={<PaymentInfo />} />
-              <Route path="/" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
-              <Route path="/" element={<PersonalInfo chauffeur={chauffeur} />} />
+              <Route path="*" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
             </Routes>
           </Col>
         </Row>

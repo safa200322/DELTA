@@ -22,7 +22,7 @@ import MotorListing from "./pages/MotorListing";
 import ScooterDetails from "./pages/ScooterDetails";
 import Contact from "./pages/Contact";
 import Signup from "./pages/signup";
-import Login from "./pages/login";
+import Login from "./pages/Login";
 import PaymentPage from "./pages/PaymentScreen";
 import NotFound from "./pages/NotFound";
 import TimelineCard from "./pages/TimeLineCard";
@@ -37,7 +37,6 @@ import PaymentInfo from "./pages/ChauffeurPaymentInfo";
 import UserProfile from "./pages/Rentee/RenteeProfile";
 import RenteeRentalReservations from "./pages/Rentee/RenteeRentalReservations";
 import RenteeEarningsandPayment from "./pages/Rentee/RenteeEarningsandPayments";
-import RenteeMaintaninceandDocuments from "./pages/Rentee/RenteeMaintenanceandDocuments";
 import RenteeNotifications from "./pages/Rentee/RenteeNotifications";
 import RenteeReviews from "./pages/Rentee/RenteeReviews";
 import RenteeSecurity from "./pages/Rentee/RenteeSecurity";
@@ -51,18 +50,13 @@ import PaymentsWallet from "./pages/Profile/PaymentsandWallet";
 import NotificationsProfile from "./pages/Profile/Notifications";
 import AccountSettings from "./pages/Profile/AccountSettings";
 import VehicleManagement from "./pages/VehicleManagement";
-<<<<<<< nersanUpdates
 import ReservationManagement from "./pages/ReservationManagement";
 import PaymentAdminDashboard from "./pages/PaymentManagement";
 import NotificationsDashboard from "./pages/NotificationsDashboard";
 import AccessoriesManagement from "./pages/AccessoriesManagement";
-=======
-import VehicleOwnerSignup from "./pages/VehicleOwnerSignup";
-import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
 import ProfileRedirect from "./pages/Profile/ProfileRedirect";
-import ChauffureProfilePage from "./pages/ChauffeurProfilePage";
+import ChauffeurProfilePage from "./pages/ChauffeurProfilePage";
 
->>>>>>> main
 
 function App() {
   return (
@@ -88,17 +82,12 @@ function App() {
           <Route path="/admin" element={<AdminPanel />} />
           <Route path="/admin/chauffeurs" element={<ChauffeurAdmin />} />
           <Route path="/apply-chauffeur" element={<ApplyChauffeur />} />
-<<<<<<< nersanUpdates
-=======
-          <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignup />} />
-          <Route path="/vehicle-owner-login" element={<VehicleOwnerLogin />} />
-          <Route path="/chauffeur-profile" element={<ChauffureProfilePage />} />
+          <Route path="/chauffeur-profile" element={<ChauffeurProfilePage />} />
 
           {/* Chauffeur Dashboard routes */}
           <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
           {/* Vehicle Owner routes */}
           <Route path="/vehicle-owner/profile" element={<UserProfile />} />
->>>>>>> main
           <Route
             path="/chaffeur-vehicle-management"
             element={<ChaffeurVehicleManagement />}
@@ -123,10 +112,7 @@ function App() {
             path="/profile/rentee-earnings-and-payments"
             element={<RenteeEarningsandPayment />}
           />
-          <Route
-            path="/profile/rentee-maintenance-and-documents"
-            element={<RenteeMaintaninceandDocuments />}
-          />
+          
           <Route
             path="/profile/rentee-notifications"
             element={<RenteeNotifications />}
