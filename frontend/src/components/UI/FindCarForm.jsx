@@ -24,16 +24,30 @@ const FindCarForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Build query string from formData
+    
+    // Determine the correct route based on vehicle type
+    const routeMap = {
+      Car: "/cars",
+      Motorcycle: "/motorcycles", 
+      Bicycle: "/bicycle",
+      Boat: "/boats"
+    };
+    
+    const baseRoute = routeMap[formData.vehicleType] || "/cars";
+    
+    // Build query string from formData (excluding vehicleType since it's now in the route)
     const params = new URLSearchParams();
     Object.entries(formData).forEach(([key, value]) => {
-      if (typeof value === "boolean") {
-        params.append(key, value ? "1" : "0");
-      } else if (value) {
-        params.append(key, value);
+      if (key !== "vehicleType" && value) {
+        if (typeof value === "boolean") {
+          params.append(key, value ? "1" : "0");
+        } else {
+          params.append(key, value);
+        }
       }
     });
-    const url = `/cars?${params.toString()}`;
+    
+    const url = `${baseRoute}${params.toString() ? `?${params.toString()}` : ""}`;
     console.debug(
       "[FindCarForm] Navigating to:",
       url,
@@ -91,6 +105,7 @@ const FindCarForm = () => {
             >
               <option value="Car">Car</option>
               <option value="Motorcycle">Motorcycle</option>
+              <option value="Bicycle">Bicycle</option>
               <option value="Boat">Boat</option>
             </Input>
           </FormGroup>
