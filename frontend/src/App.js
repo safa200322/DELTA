@@ -99,6 +99,12 @@ function App() {
           <Route path="/profile/rentee-notifications" element={<RenteeNotifications />} />
           <Route path="/profile/rentee-reviews" element={<RenteeReviews />} />
           <Route path="/profile/rentee-security" element={<RenteeSecurity />} />
+          <Route path="/profile/ProfileOverview" element={<ProfileOverview />} />
+          <Route path="/profile/MyRentals" element={<MyRentals />} />
+          <Route path="/profile/MyReviews" element={<MyReviews />} />
+          <Route path="/profile/MyPayments" element={<PaymentsWallet />} />
+          <Route path="/profile/NotificationsProfile" element={<NotificationsProfile />} />
+          <Route path="/profile/AccountSettings" element={<AccountSettings />} />
           {/* Remove legacy/duplicate profile routes and keep only the above */}
           {/* Fallback */}
           <Route path="*" element={<NotFound />} />
