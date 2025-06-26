@@ -33,6 +33,18 @@ exports.createPayment = async ({
   if (!vehicleResult.length) throw new Error('Vehicle not found');
   const { Type, Price: VehiclePrice } = vehicleResult[0];
 
+  // 2b. Fetch FuelType from Car table if vehicle is a Car
+  let FuelType = null;
+  if (Type === 'Car') {
+    const [carResult] = await db.query(
+      'SELECT FuelType FROM Car WHERE VehicleID = ?',
+      [VehicleID]
+    );
+    if (carResult.length) {
+      FuelType = carResult[0].FuelType;
+    }
+  }
+
   // 3. Calculate rental duration in days
   const start = new Date(StartDate);
   const end = new Date(EndDate);
