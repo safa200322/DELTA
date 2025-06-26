@@ -19,7 +19,7 @@ async function getFilteredVehicles(filters) {
       color: 'color',
     };
   } else if (filters.type === 'boat') {
-    joinTable = 'Boat';
+    joinTable = 'Boats';
     tableFields = {
       brand: 'Brand',
       model: 'BoatType',
