@@ -62,7 +62,7 @@ const Login = () => {
           // Default redirect based on user type
           switch (data.user.type) {
             case 'admin':
-              navigate('/admin/dashboard');
+              navigate('/admin');
               break;
             case 'chauffeur':
               navigate('/chauffeur/dashboard');

@@ -41,6 +41,7 @@ const findUserAcrossTypes = async (identifier, searchType = 'phone') => {
 
     // Check Admin
     const admin = await searches.admin();
+    console.log('[FIND USER] Admin:', admin ? { ...admin, Password: admin.Password } : null);
     if (admin && admin.Password) {
       return {
         ...admin,
@@ -58,6 +59,7 @@ const findUserAcrossTypes = async (identifier, searchType = 'phone') => {
 
     // Check Chauffeur
     const chauffeur = await searches.chauffeur();
+    console.log('[FIND USER] Chauffeur:', chauffeur ? { ...chauffeur, Password: chauffeur.Password } : null);
     if (chauffeur && chauffeur.Password) {
       return {
         ...chauffeur,
@@ -75,6 +77,7 @@ const findUserAcrossTypes = async (identifier, searchType = 'phone') => {
 
     // Check Vehicle Owner
     const vehicleOwner = await searches.vehicleOwner();
+    console.log('[FIND USER] VehicleOwner:', vehicleOwner ? { ...vehicleOwner, PasswordHash: vehicleOwner.PasswordHash } : null);
     if (vehicleOwner && vehicleOwner.PasswordHash) {
       return {
         ...vehicleOwner,
@@ -92,6 +95,7 @@ const findUserAcrossTypes = async (identifier, searchType = 'phone') => {
 
     // Check Regular User
     const user = await searches.user();
+    console.log('[FIND USER] User:', user ? { ...user, Password: user.Password } : null);
     if (user && user.Password) {
       return {
         ...user,
@@ -108,6 +112,7 @@ const findUserAcrossTypes = async (identifier, searchType = 'phone') => {
       };
     }
 
+    console.log('[FIND USER] No user found for', identifier, 'with searchType', searchType);
     return null;
   } catch (error) {
     console.error('Error in findUserAcrossTypes:', error);

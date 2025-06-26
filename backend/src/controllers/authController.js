@@ -74,12 +74,21 @@ exports.loginUser = async (req, res) => {
     const user = await findUserAcrossTypes(phone, 'phone');
 
     if (!user) {
+      console.log('[UNIFIED LOGIN] No user found for phone:', phone);
       return res.status(401).json({ err: "Invalid credentials" });
     }
+
+    // Log both the input password and the hashed password from DB (if available)
+    console.log('[UNIFIED LOGIN] Comparing passwords:', {
+      inputPassword: pass,
+      hashedPassword: user.password || user.Password || user.hashedPassword || 'N/A',
+      userType: user.type
+    });
 
     // Verify password
     const isValidPassword = await verifyPassword(pass, user);
     if (!isValidPassword) {
+      console.log('[UNIFIED LOGIN] Password mismatch for:', phone, 'type:', user.type);
       return res.status(401).json({ err: "Invalid credentials" });
     }
 
@@ -92,11 +101,13 @@ exports.loginUser = async (req, res) => {
 
     // Determine redirect URL based on user type
     const redirectPaths = {
-      'admin': '/admin/dashboard',
+      'admin': '/admin',
       'chauffeur': '/chauffeur/dashboard',
       'vehicle-owner': '/vehicle-owner/profile',
       'user': '/profile'
     };
+
+    console.log('[UNIFIED LOGIN] Login successful for:', phone, 'type:', user.type);
 
     return res.json({
       msg: `${user.type.charAt(0).toUpperCase() + user.type.slice(1)} login successful`,
@@ -131,21 +142,31 @@ exports.adminLogin = async (req, res) => {
 
     const admin = await adminModel.findByPhone(phone);
     if (!admin || !admin.Password) {
+      console.log('[ADMIN LOGIN] Admin not found or missing password:', phone);
       return res.status(400).json({ err: 'invalid admin' });
     }
 
     if (!admin) {
+      console.log('[ADMIN LOGIN] No admin found for phone:', phone);
       res.status(400).json({ err: "no admin" });
       return;
     }
 
     if (!admin.Password) {
+      console.log('[ADMIN LOGIN] Admin data invalid (no password) for:', phone);
       res.status(500).json({ err: "admin data invalid" });
       return;
     }
 
+    // Log both the input password and the hashed password from DB
+    console.log('[ADMIN LOGIN] Comparing passwords:', {
+      inputPassword: pwd,
+      hashedPassword: admin.Password
+    });
+
     const ok = await bcrypt.compare(pwd, admin.Password);
     if (!ok) {
+      console.log('[ADMIN LOGIN] Password mismatch for:', phone);
       res.status(401).json({ err: "bad pwd" });
       return;
     }
@@ -155,6 +176,8 @@ exports.adminLogin = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '100h' }
     );
+
+    console.log('[ADMIN LOGIN] Admin login successful:', phone);
 
     res.status(200).json({
       msg: "admin ok",
