@@ -51,36 +51,35 @@ async function calculateTotalPrice({ vehicleId, chauffeurId, accessoryId, startD
   };
 }
 
-// Function to create payment record
-exports.createPayment = async (paymentData) => {
-  const query = `
-    INSERT INTO Payment (
-      ReservationID, Status, NameOnCard, CardNumber, ExpiryDate, 
-      CVV, PaymentMethod, TotalPrice, CommissionRate, CommissionAmount, 
-      ChauffeurAmount, OwnerEarning, PaidOut
-    ) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `;
-  
-  const [result] = await db.query(query, [
-    paymentData.ReservationID,
-    paymentData.Status,
-    paymentData.NameOnCard,
-    paymentData.CardNumber,
-    paymentData.ExpiryDate,
-    paymentData.CVV,
-    paymentData.PaymentMethod,
-    paymentData.TotalPrice,
-    paymentData.CommissionRate,
-    paymentData.CommissionAmount,
-    paymentData.ChauffeurAmount,
-    paymentData.OwnerEarning,
-    paymentData.PaidOut
-  ]);
-  return result;
-};
-
 const PaymentModel = {
+  async createPayment(paymentData) {
+    const query = `
+      INSERT INTO Payment (
+        ReservationID, Status, NameOnCard, CardNumber, ExpiryDate, 
+        CVV, PaymentMethod, TotalPrice, CommissionRate, CommissionAmount, 
+        ChauffeurAmount, OwnerEarning, PaidOut
+      ) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+    
+    const [result] = await db.query(query, [
+      paymentData.ReservationID,
+      paymentData.Status,
+      paymentData.NameOnCard,
+      paymentData.CardNumber,
+      paymentData.ExpiryDate,
+      paymentData.CVV,
+      paymentData.PaymentMethod,
+      paymentData.TotalPrice,
+      paymentData.CommissionRate,
+      paymentData.CommissionAmount,
+      paymentData.ChauffeurAmount,
+      paymentData.OwnerEarning,
+      paymentData.PaidOut
+    ]);
+    return result;
+  },
+
   async getUserPayments(userID) {
     const query = `
       SELECT 

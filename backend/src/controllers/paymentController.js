@@ -113,7 +113,7 @@ exports.createPayment = async (req, res) => {
     };
 
     // Insert payment record in the database
-    await paymentModel.createPayment(paymentData);
+    await paymentModel.PaymentModel.createPayment(paymentData);
 
     // Send success response
     res.status(201).json({
