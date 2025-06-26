@@ -112,7 +112,11 @@ const PaymentPage = () => {
   };
 
   const handleBackToDetails = () => {
-    navigate(state?.carSlug ? `/cars/${state.carSlug}` : "/cars");
+    if (state?.vehicleType && state?.vehicleId) {
+      navigate(`/vehicles/${state.vehicleType}/${state.vehicleId}`);
+    } else {
+      navigate("/");
+    }
   };
 
   return (

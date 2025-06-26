@@ -8,8 +8,8 @@ const BoatItem = ({ item, type }) => {
 
   const handleBook = () => {
     const boatId = item.VehicleID || item.id || item.slug;
-    if (boatId && type) {
-      navigate(`/vehicles/${type}/${boatId}`);
+    if (boatId) {
+      navigate(`/vehicles/boat/${boatId}`);
     }
   };
 

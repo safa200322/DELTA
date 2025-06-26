@@ -2,13 +2,13 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/car-item.css";
 
-const BicycleItem = ({ item, type }) => {
+const BicycleItem = ({ item, type = "bicycle" }) => {
   const navigate = useNavigate();
 
   const handleBook = () => {
     const bicycleId = item.VehicleID || item.id || item.slug;
-    if (bicycleId && type) {
-      navigate(`/vehicles/${type}/${bicycleId}`);
+    if (bicycleId) {
+      navigate(`/vehicles/bicycle/${bicycleId}`);
     }
   };
 
