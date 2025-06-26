@@ -24,13 +24,50 @@ const SignUpPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate required fields
+    const { fullName, phone, email, password, confirmPassword, birthday } = formData;
+    if (!fullName || !phone || !email || !password || !confirmPassword || !birthday) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match.");
+      return;
+    }
+    // Validate birthday format (YYYY-MM-DD)
+    if (isNaN(Date.parse(birthday))) {
+      alert("Please enter a valid birthday.");
+      return;
+    }
+    // Check age limit (must be at least 22)
+    const today = new Date();
+    const birthDate = new Date(birthday);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    if (age < 22) {
+      alert("You must be at least 22 years old to rent a car.");
+      return;
+    }
+
+    // Only send required fields to backend
+    const signupData = {
+      fullName,
+      phone,
+      email,
+      password,
+      birthday,
+    };
+
     try {
       const response = await fetch("http://localhost:5000/api/auth/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(signupData),
       });
 
       if (response.ok) {
