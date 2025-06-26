@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Row, Col, Button, Nav, NavItem, NavLink } from "reactstrap";
 import { Link, useLocation } from "react-router-dom";
 import { NavLink as RouterNavLink } from "react-router-dom";
@@ -8,9 +8,42 @@ import "../styles/chauffeur-profile.css";
 const WorkAvailability = () => {
   const [status, setStatus] = useState("Available");
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionMsg, setActionMsg] = useState("");
   const location = useLocation();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      setLoading(true);
+      setError(null);
+      setActionMsg("");
+      try {
+        const token = localStorage.getItem("token");
+        // Decode JWT to get chauffeurId
+        const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
+        const chauffeurId = payload && (payload.id || payload.ChauffeurID);
+        if (!chauffeurId) throw new Error("Invalid token or chauffeur ID");
+        const res = await fetch(
+          `http://localhost:5000/api/chauffeurs/assignments/pending/${chauffeurId}`,
+          {
+            headers: token ? { Authorization: `Bearer ${token}` } : {},
+          }
+        );
+        if (!res.ok) throw new Error("Failed to fetch assignments");
+        const data = await res.json();
+        setAssignments(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, [actionMsg]);
 
   const handleStatusChange = () => {
     setStatus((prev) =>
@@ -20,6 +53,33 @@ const WorkAvailability = () => {
         ? "On a Job"
         : "Available"
     );
+  };
+
+  const handleAssignmentAction = async (reservationId, action) => {
+    setError(null);
+    setActionMsg("");
+    try {
+      const token = localStorage.getItem("token");
+      // Decode JWT to get chauffeurId
+      const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
+      const chauffeurId = payload && (payload.id || payload.ChauffeurID);
+      if (!chauffeurId) throw new Error("Invalid token or chauffeur ID");
+      const res = await fetch(
+        `http://localhost:5000/api/chauffeurs/assignments/respond/${reservationId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ response: action, chauffeurId }),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to update assignment");
+      setActionMsg(`Assignment ${action.toLowerCase()}ed successfully.`);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -116,33 +176,48 @@ const WorkAvailability = () => {
                 >
                   Change Status
                 </Button>
-                <p>
-                  <strong>Location:</strong> Famagusta, North Cyprus
-                </p>
                 <div className="assigned-vehicles">
-                  <h4>Assigned Vehicle(s)</h4>
-                  <ul>
-                    <li>
-                      Vehicle 1: Sedan -{" "}
-                      <Link to="/reservation/1">View Reservation</Link>{" "}
-                      <Button color="success" size="sm" className="me-2">
-                        Accept
-                      </Button>
-                      <Button color="danger" size="sm">
-                        Reject
-                      </Button>
-                    </li>
-                    <li>
-                      Vehicle 2: SUV -{" "}
-                      <Link to="/reservation/2">View Reservation</Link>{" "}
-                      <Button color="success" size="sm" className="me-2">
-                        Accept
-                      </Button>
-                      <Button color="danger" size="sm">
-                        Reject
-                      </Button>
-                    </li>
-                  </ul>
+                  <h4>Assigned Reservations</h4>
+                  {loading ? (
+                    <p>Loading assignments...</p>
+                  ) : error ? (
+                    <p className="text-danger">{error}</p>
+                  ) : assignments.length === 0 ? (
+                    <p>No pending assignments.</p>
+                  ) : (
+                    <ul>
+                      {assignments.map((a) => (
+                        <li key={a.ReservationID}>
+                          Reservation #{a.ReservationID} for {a.RenterName} (
+                          {a.PhoneNumber})
+                          <br />
+                          <strong>From:</strong> {a.StartDate}{" "}
+                          <strong>To:</strong> {a.EndDate}
+                          <br />
+                          <Button
+                            color="success"
+                            size="sm"
+                            className="me-2"
+                            onClick={() =>
+                              handleAssignmentAction(a.ReservationID, "Accepted")
+                            }
+                          >
+                            Accept
+                          </Button>
+                          <Button
+                            color="danger"
+                            size="sm"
+                            onClick={() =>
+                              handleAssignmentAction(a.ReservationID, "Rejected")
+                            }
+                          >
+                            Reject
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {actionMsg && <p className="text-success">{actionMsg}</p>}
                 </div>
               </div>
             </div>

@@ -1,3 +1,5 @@
+import React, { useEffect, useState } from "react";
+import { Routes, Route, NavLink, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import { Container, Row, Col, Button, Nav, NavItem } from "reactstrap";
@@ -5,20 +7,112 @@ import { Link } from "react-router-dom";
 import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
 
+// Placeholder components for each section
+const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
 // --- Child Components with props ---
 const PersonalInfo = ({ chauffeur }) => (
   <div className="profile-section">
     <h2>Personal Information</h2>
+    {loading ? (
+      <p>Loading...</p>
+    ) : error ? (
+      <p className="text-danger">{error}</p>
+    ) : profile ? (
+      <div className="section-content">
+        {successMsg && <p className="text-success">{successMsg}</p>}
+        {!editMode ? (
+          <>
+            <p>
+              <strong>Full Name:</strong> {profile.Name}
+            </p>
+            <p>
+              <strong>Date of Birth:</strong> {profile.Date_of_birth}
+            </p>
+            <p>
+              <strong>Email:</strong> {profile.Email}
+            </p>
+            <p>
+              <strong>Phone:</strong> {profile.PhoneNumber}
+            </p>
+            <p>
+              <strong>Location:</strong> {profile.Location}
+            </p>
+            <Button color="primary" onClick={() => setEditMode(true)}>
+              Edit
+            </Button>
+          </>
+        ) : (
+          <form onSubmit={handleEditSubmit}>
+            <div className="mb-2">
+              <label>Full Name</label>
+              <input name="Name" value={editData.Name || ""} onChange={handleEditChange} className="form-control" />
+            </div>
+            <div className="mb-2">
+              <label>Date of Birth</label>
+              <input name="Date_of_birth" value={editData.Date_of_birth || ""} onChange={handleEditChange} className="form-control" />
+            </div>
+            <div className="mb-2">
+              <label>Email</label>
+              <input name="Email" value={editData.Email || ""} onChange={handleEditChange} className="form-control" />
+            </div>
+            <div className="mb-2">
+              <label>Phone</label>
+              <input name="PhoneNumber" value={editData.PhoneNumber || ""} onChange={handleEditChange} className="form-control" />
+            </div>
+            <div className="mb-2">
+              <label>Location</label>
+              <input name="Location" value={editData.Location || ""} onChange={handleEditChange} className="form-control" />
+            </div>
+            <Button color="success" type="submit">
+              Save
+            </Button>{" "}
+            <Button color="secondary" onClick={() => setEditMode(false)}>
+              Cancel
+            </Button>
+          </form>
+        )}
     <div className="section-content">
       <p><strong>Full Name:</strong> {chauffeur?.fullName || "N/A"}</p>
       <p><strong>Date of Birth:</strong> {chauffeur?.dob || "N/A"}</p>
       <div className="profile-picture">
         <Button color="primary">Upload New Picture</Button>
       </div>
-    </div>
+    ) : null}
   </div>
 );
 
+const WorkAvailability = () => {
+  const [status, setStatus] = useState("Available");
+  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [actionMsg, setActionMsg] = useState("");
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      setLoading(true);
+      setError(null);
+      setActionMsg("");
+      try {
+        const token = localStorage.getItem("token");
+        // Decode JWT to get chauffeurId
+        const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+        const chauffeurId = payload && (payload.id || payload.ChauffeurID);
+        if (!chauffeurId) throw new Error("Invalid token or chauffeur ID");
+        const res = await fetch(`http://localhost:5000/api/chauffeurs/assignments/pending/${chauffeurId}`, {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error("Failed to fetch assignments");
+        const data = await res.json();
+        setAssignments(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAssignments();
+  }, [actionMsg]);
 const WorkAvailability = ({ chauffeur }) => {
   const [status, setStatus] = useState(chauffeur?.status || "Available");
 
@@ -26,6 +120,30 @@ const WorkAvailability = ({ chauffeur }) => {
     setStatus((prev) =>
       prev === "Available" ? "Unavailable" : prev === "Unavailable" ? "On a Job" : "Available"
     );
+  };
+
+  const handleAssignmentAction = async (reservationId, action) => {
+    setError(null);
+    setActionMsg("");
+    try {
+      const token = localStorage.getItem("token");
+      // Decode JWT to get chauffeurId
+      const payload = token ? JSON.parse(atob(token.split('.')[1])) : null;
+      const chauffeurId = payload && (payload.id || payload.ChauffeurID);
+      if (!chauffeurId) throw new Error("Invalid token or chauffeur ID");
+      const res = await fetch(`http://localhost:5000/api/chauffeurs/assignments/respond/${reservationId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ response: action, chauffeurId }),
+      });
+      if (!res.ok) throw new Error("Failed to update assignment");
+      setActionMsg(`Assignment ${action.toLowerCase()}ed successfully.`);
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -38,6 +156,28 @@ const WorkAvailability = ({ chauffeur }) => {
         </Button>
         <p><strong>Location:</strong> {chauffeur?.location || "Unknown"}</p>
         <div className="assigned-vehicles">
+          <h4>Assigned Reservations</h4>
+          {loading ? (
+            <p>Loading assignments...</p>
+          ) : error ? (
+            <p className="text-danger">{error}</p>
+          ) : assignments.length === 0 ? (
+            <p>No pending assignments.</p>
+          ) : (
+            <ul>
+              {assignments.map((a) => (
+                <li key={a.ReservationID}>
+                  Reservation #{a.ReservationID} for {a.RenterName} ({a.PhoneNumber})
+                  <br />
+                  <strong>From:</strong> {a.StartDate} <strong>To:</strong> {a.EndDate}
+                  <br />
+                  <Button color="success" size="sm" onClick={() => handleAssignmentAction(a.ReservationID, "Accepted")}>Accept</Button>{' '}
+                  <Button color="danger" size="sm" onClick={() => handleAssignmentAction(a.ReservationID, "Rejected")}>Reject</Button>
+                </li>
+              ))}
+            </ul>
+          )}
+          {actionMsg && <p className="text-success">{actionMsg}</p>}
           <h4>Assigned Vehicle(s)</h4>
           <ul>
             {chauffeur?.vehicles?.map((vehicle, index) => (
@@ -113,6 +253,61 @@ const ChauffeurProfilePage = () => {
   const [chauffeur, setChauffeur] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [editData, setEditData] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch("http://localhost:5000/api/chauffeurs/me", {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        const data = await res.json();
+        setProfile(data);
+        setEditData(data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleEditChange = (e) => {
+    setEditData({ ...editData, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    setSuccessMsg("");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/chauffeurs/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(editData),
+      });
+      if (!res.ok) throw new Error("Failed to update profile");
+      setSuccessMsg("Profile updated successfully.");
+      setEditMode(false);
+      setProfile(editData);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
@@ -180,12 +375,15 @@ const ChauffeurProfilePage = () => {
           {/* Content Area */}
           <Col xs="12" md="9" lg="10" className="content-area">
             <Routes>
+              <Route path="personal-info" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
+              <Route path="work-availability" element={<WorkAvailability />} />
               <Route path="personal-info" element={<PersonalInfo chauffeur={chauffeur} />} />
               <Route path="work-availability" element={<WorkAvailability chauffeur={chauffeur} />} />
               <Route path="booking-history" element={<BookingHistory />} />
               <Route path="documents-verification" element={<DocumentsVerification />} />
               <Route path="settings" element={<Settings />} />
               <Route path="payment-info" element={<PaymentInfo />} />
+              <Route path="/" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
               <Route path="/" element={<PersonalInfo chauffeur={chauffeur} />} />
             </Routes>
           </Col>

@@ -40,6 +40,7 @@ const motorcycleFilterRoutes = require('./src/routes/motorcycleFilterRoutes');
 const vehicleOwnerRoutes = require('./src/routes/vehicleOwnerRoutes');
 const maintenanceRoutes = require('./src/routes/maintenanceRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
+const reviewRoutes = require("./src/routes/reviewRoutes");
 
 app.use("/api", searchRoutes);
 app.use("/api/auth", authRoutes);
@@ -56,6 +57,7 @@ app.use('/api/motorcycles', motorcycleFilterRoutes);
 app.use('/api/vehicle-owner', vehicleOwnerRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use("/api/reviews", reviewRoutes);
 
 
 app.get('/', (req, res) => {

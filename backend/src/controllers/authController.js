@@ -348,8 +348,8 @@ exports.changePassword = async (req, res) => {
 
     // Get current user using unified lookup
     const user = await findUserAcrossTypes(userId, 'id');
-    if (!user) {
-      return res.status(404).json({ error: "User not found" });
+    if (!user || user.type !== userType) {
+      return res.status(404).json({ error: "User not found or type mismatch" });
     }
 
     // Verify current password using unified utility

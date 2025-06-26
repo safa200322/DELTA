@@ -237,3 +237,59 @@ exports.getPendingAssignments = async (req, res) => {
     res.status(500).json({ error: 'Internal server error', details: err.message });
   }
 };
+
+// Get a single chauffeur by ID
+exports.getChauffeurById = async (req, res) => {
+  const { id } = req.params;
+  if (!id || isNaN(id)) return res.status(400).json({ error: 'Invalid chauffeur ID' });
+  try {
+    const chauffeur = await require('../models/chauffeurModel').getChauffeurById(id);
+    if (!chauffeur) {
+      return res.status(404).json({ error: 'Chauffeur not found' });
+    }
+    res.json(chauffeur);
+  } catch (err) {
+    console.error('DB error while fetching chauffeur by ID:', err);
+    res.status(500).json({ error: 'Internal server error', details: err.message });
+  }
+};
+
+// Get the authenticated chauffeur's own profile
+exports.getOwnProfile = async (req, res) => {
+  try {
+    const chauffeur = await require("../models/chauffeurModel").getChauffeurById(req.chauffeur.id);
+    if (!chauffeur) {
+      return res.status(404).json({ error: "Chauffeur not found" });
+    }
+    res.json(chauffeur);
+  } catch (err) {
+    console.error("DB error while fetching chauffeur profile:", err);
+    res.status(500).json({ error: "Internal server error", details: err.message });
+  }
+};
+
+// Update the authenticated chauffeur's own profile
+exports.updateOwnProfile = async (req, res) => {
+  try {
+    const id = req.chauffeur.id;
+    const fields = req.body;
+    // Only allow updating certain fields for security
+    const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl"];
+    const updates = {};
+    for (const key of allowedFields) {
+      if (fields[key] !== undefined) updates[key] = fields[key];
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
+    const db = require("../models/chauffeurModel");
+    const result = await db.updateChauffeurProfile(id, updates);
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ error: "Chauffeur not found or not updated" });
+    }
+    res.json({ success: true, message: "Profile updated" });
+  } catch (err) {
+    console.error("Error updating chauffeur profile:", err);
+    res.status(500).json({ error: "Server error", details: err.message });
+  }
+};
