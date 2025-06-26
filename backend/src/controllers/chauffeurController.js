@@ -411,3 +411,18 @@ exports.getChauffeurPayout = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', details: err.message });
   }
 };
+
+// Get all Chauffeur payouts for the authenticated chauffeur
+exports.getAllChauffeurPayouts = async (req, res) => {
+  try {
+    const chauffeurId = req.chauffeur?.id || req.chauffeur?.ChauffeurID;
+    if (!chauffeurId) {
+      return res.status(401).json({ message: 'Unauthorized: No chauffeur ID found in token.' });
+    }
+    const payouts = await chauffeurModel.getAllChauffeurPayouts(chauffeurId);
+    res.json({ chauffeurId, payouts });
+  } catch (err) {
+    console.error('Error fetching all chauffeur payouts:', err);
+    res.status(500).json({ message: 'Internal server error', details: err.message });
+  }
+};

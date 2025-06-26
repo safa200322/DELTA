@@ -9,17 +9,13 @@ const uploadLicense = require('../config/multerLicenseConfig');
 
 router.post("/register", chauffeurController.registerChauffeur);
 
-// router.post("/login", chauffeurController.loginChauffeur); // Removed, use unified login
-
-router.patch("/approve/:id", adminAuth, chauffeurController.approveChauffeur);
-
-router.patch("/reject/:id", adminAuth, chauffeurController.rejectChauffeur);
-
-router.patch("/assignments/respond/:reservationId", authChauffeur, chauffeurController.respondToAssignment);
 
 router.post("/assignments/assign/:reservationId", authMiddleware, chauffeurController.assignChauffeur);
 
-router.get("/pending", adminAuth, chauffeurController.getPendingChauffeurs);
+
+router.patch("/assignments/respond/:reservationId", authChauffeur, chauffeurController.respondToAssignment);
+
+
 
 router.get("/assignments/pending/:chauffeurId", authChauffeur, chauffeurController.getPendingAssignments);
 
@@ -37,13 +33,24 @@ router.get("/me/license", authChauffeur, chauffeurController.getLicenseFileUrl);
 // Change password for authenticated chauffeur
 router.put("/me/password", authChauffeur, chauffeurController.changePassword);
 
-// Get a single chauffeur by ID
-router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
 
 // Get booking history for the authenticated chauffeur
 router.get("/bookings/history", authChauffeur, chauffeurController.getBookingHistory);
 
 // Route to get Chauffeur payout for a reservation
 router.get('/payout/:reservationId', authChauffeur, chauffeurController.getChauffeurPayout);
+
+// Route to get all Chauffeur payouts for the authenticated chauffeur
+router.get('/payouts', authChauffeur, chauffeurController.getAllChauffeurPayouts);
+
+router.get("/pending", adminAuth, chauffeurController.getPendingChauffeurs);
+
+router.patch("/approve/:id", adminAuth, chauffeurController.approveChauffeur);
+
+router.patch("/reject/:id", adminAuth, chauffeurController.rejectChauffeur);
+
+router.get("/:id", adminAuth, chauffeurController.getChauffeurById);
+
+
 
 module.exports = router;
