@@ -9,10 +9,6 @@ const FindCarForm = () => {
     depart: "",
     return: "",
     vehicleType: "Car",
-    nearbyLocations: false,
-    directRoutes: false,
-    driverAge25to70: false,
-    differentDropoff: false,
     Location: "",
   });
 
@@ -123,68 +119,6 @@ const FindCarForm = () => {
           >
             Search
           </Button>
-        </Col>
-      </Row>
-      <Row>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="nearbyLocations"
-              name="nearbyLocations"
-              checked={formData.nearbyLocations}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="nearbyLocations" className="form-check-label">
-              Add nearby locations
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="directRoutes"
-              name="directRoutes"
-              checked={formData.directRoutes}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="directRoutes" className="form-check-label">
-              Direct routes only
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="driverAge25to70"
-              name="driverAge25to70"
-              checked={formData.driverAge25to70}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="driverAge25to70" className="form-check-label">
-              Driver age 25 - 70
-            </Label>
-          </FormGroup>
-        </Col>
-        <Col lg="3" md="6" sm="12">
-          <FormGroup check className="mb-2">
-            <Input
-              type="checkbox"
-              id="differentDropoff"
-              name="differentDropoff"
-              checked={formData.differentDropoff}
-              onChange={handleChange}
-              className="form-check-input custom-checkbox"
-            />
-            <Label for="differentDropoff" className="form-check-label">
-              Drop off at a different location
-            </Label>
-          </FormGroup>
         </Col>
       </Row>
     </Form>

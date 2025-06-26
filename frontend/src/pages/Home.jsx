@@ -1,26 +1,68 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
-import HeroSlider from "../components/UI/HeroSlider";
 import Helmet from "../components/Helmet/Helmet";
-import { Container, Row, Col, Button } from "reactstrap";
+import { Container, Row, Col } from "reactstrap";
 import FindCarForm from "../components/UI/FindCarForm";
 import ServicesList from "../components/UI/ServicesList";
-import carData from "../assets/data/carData";
-import boatData from "../assets/data/boatData";
-import motorData from "../assets/data/motorData";
 import CarItem from "../components/UI/CarItem";
 import MotorItem from "../components/UI/MotorItem";
 import BoatItem from "../components/UI/BoatItem";
+import BicycleItem from "../components/UI/BicycleItem";
 import Footer from "../components/Footer/Footer";
 import "../styles/hero-slider.css";
 import "../styles/car-item.css";
 
 const Home = () => {
+  const [vehicles, setVehicles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch vehicles for the Hot Offers section
+    const fetchVehicles = async () => {
+      setLoading(true);
+      try {
+        // Fetch vehicles from different endpoints
+        const [carsResponse, motorcyclesResponse, bicyclesResponse, boatsResponse] = await Promise.all([
+          fetch("http://localhost:5000/api/vehicles/filter"),
+          fetch("http://localhost:5000/api/motorcycles/filtermotor"),
+          fetch("http://localhost:5000/api/bicycles/filterbicycle"),
+          fetch("http://localhost:5000/api/boats/filter")
+        ]);
+        
+        // Process responses
+        const cars = carsResponse.ok ? await carsResponse.json() : [];
+        const motorcycles = motorcyclesResponse.ok ? await motorcyclesResponse.json() : [];
+        const bicycles = bicyclesResponse.ok ? await bicyclesResponse.json() : [];
+        const boats = boatsResponse.ok ? await boatsResponse.json() : [];
+        
+        // Add type property to each vehicle
+        const typedCars = cars.map(car => ({ ...car, Type: 'Car' }));
+        const typedMotorcycles = motorcycles.map(motor => ({ ...motor, Type: 'Motorcycle' }));
+        const typedBicycles = bicycles.map(bicycle => ({ ...bicycle, Type: 'Bicycle' }));
+        const typedBoats = boats.map(boat => ({ ...boat, Type: 'Boat' }));
+        
+        // Combine all vehicles
+        const allVehicles = [...typedCars, ...typedMotorcycles, ...typedBicycles, ...typedBoats];
+        
+        // Get random 10 vehicles or all if less than 10
+        const randomVehicles = allVehicles.sort(() => 0.5 - Math.random()).slice(0, 10);
+        setVehicles(randomVehicles);
+      } catch (error) {
+        console.error("Error fetching vehicles:", error);
+        setVehicles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVehicles();
+  }, []);
+
   const navLinks = [
     { path: "/home", display: "Home" },
     { path: "/about", display: "About" },
     { path: "/cars", display: "Cars" },
-    { path: "/motors", display: "Motors" },
+    { path: "/motorcycles", display: "Motors" },
     { path: "/bicycle", display: "Bicycles" },
     { path: "/boats", display: "Boats" },
     { path: "/contact", display: "Contact" },
@@ -92,26 +134,25 @@ const Home = () => {
               <h6 className="section__subtitle text-primary mb-3">Come with</h6>
               <h2 className="section__title mb-4">Hot Offers</h2>
             </Col>
-            {carData.slice(0, 3).map((item) => (
-              <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                <CarItem item={item} type="car" />
+            
+            {loading ? (
+              <Col lg="12" className="text-center">
+                <p>Loading hot offers...</p>
               </Col>
-            ))}
-            {motorData.slice(0, 3).map((item) => (
-              <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                <MotorItem item={item} type="motor" />
+            ) : vehicles.length > 0 ? (
+              vehicles.map((vehicle) => (
+                <Col lg="4" md="6" sm="12" className="mb-4" key={vehicle.VehicleID}>
+                  {vehicle.Type === 'Car' && <CarItem item={vehicle} type="car" />}
+                  {vehicle.Type === 'Motorcycle' && <MotorItem item={vehicle} type="motor" />}
+                  {vehicle.Type === 'Bicycle' && <BicycleItem item={vehicle} type="bicycle" />}
+                  {vehicle.Type === 'Boat' && <BoatItem item={vehicle} type="boat" />}
+                </Col>
+              ))
+            ) : (
+              <Col lg="12" className="text-center">
+                <p>No vehicles available right now.</p>
               </Col>
-            ))}
-            {boatData.slice(0, 3).map((item) => (
-              <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                <BoatItem item={item} type="boat" />
-              </Col>
-            ))}
-            <Col lg="12" className="text-center mt-4">
-              <Button color="primary !important" className="view-all-btn px-5 py-3 rounded-5" tag={NavLink} to="/cars">
-                View All Cars
-              </Button>
-            </Col>
+            )}
           </Row>
         </Container>
       </section>

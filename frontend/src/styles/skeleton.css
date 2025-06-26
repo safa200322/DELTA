@@ -1,0 +1,62 @@
+/* Skeleton loading styles */
+.skeleton-item {
+  opacity: 0.7;
+}
+
+.skeleton-pulse {
+  background: #e3e3e3;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-img {
+  position: relative;
+  height: 200px;
+  width: 100%;
+  overflow: hidden;
+}
+
+.skeleton-badge {
+  width: 70px;
+  height: 25px;
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  border-radius: 4px;
+  background: #e3e3e3;
+}
+
+.skeleton-title {
+  height: 25px;
+  width: 80%;
+  margin-bottom: 15px;
+}
+
+.skeleton-detail {
+  height: 18px;
+  width: 45%;
+}
+
+.skeleton-price {
+  height: 25px;
+  width: 60%;
+  display: block;
+}
+
+.skeleton-button {
+  height: 40px;
+  width: 100%;
+  margin-top: 15px;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

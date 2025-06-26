@@ -61,61 +61,62 @@ const CarDetails = () => {
   const [singleCarItem, setSingleCarItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [error, setError] = useState(null); // To store any errors
 
   // Check if user is logged in
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuthAndFetchUser = async () => {
       try {
-        // Simulate fetching the logged-in user
-        // In a real app, this would be an API call to check the authentication state
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
 
         if (!token) {
-          // No token found, redirect to login
-          navigate('/login', {
+          navigate("/login", {
             state: {
               redirectTo: `/cars/${slug}`,
-              message: 'Please log in to view vehicle details and make bookings.'
-            }
+              message: "Please log in to view vehicle details and make bookings.",
+            },
           });
           return;
         }
 
-        // Fetch user data
-        // This is a simulation - in a real app you'd make an API call with the token
-        const userData = await fetchUserData(token);
+        // Fetch user data from the backend
+        const response = await fetch("http://localhost:5000/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          // If token is invalid or expired
+          if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("token"); // Clear invalid token
+            navigate("/login", {
+              state: {
+                redirectTo: `/cars/${slug}`,
+                message: "Your session has expired. Please log in again.",
+              },
+            });
+          }
+          throw new Error("Failed to fetch user data");
+        }
+
+        const userData = await response.json();
         setUser(userData);
-      } catch (error) {
-        console.error('Authentication check failed:', error);
-        navigate('/login', {
+      } catch (err) {
+        console.error("Authentication or user fetch failed:", err);
+        setError(err.message);
+        // Optional: redirect to login on any fetch error
+        navigate("/login", {
           state: {
             redirectTo: `/cars/${slug}`,
-            message: 'Your session has expired. Please log in again.'
-          }
+            message: "Could not retrieve your profile. Please log in again.",
+          },
         });
       }
     };
 
-    checkAuth();
+    checkAuthAndFetchUser();
   }, [navigate, slug]);
-
-  // Simulate fetching user data - in a real app this would be an API call
-  const fetchUserData = async (token) => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-
-    // Mock user data - in a real app this would come from your backend
-    return {
-      id: '12345',
-      fullName: 'John Doe',
-      email: 'john.doe@example.com',
-      phone: '+1 (555) 123-4567',
-      address: '123 Main St, New York, NY 10001',
-      driversLicense: 'DL1234567890',
-      dateOfBirth: '01/15/1985',
-      profilePicture: 'https://randomuser.me/api/portraits/men/44.jpg'
-    };
-  };
 
   // Debug navigation state received
   useEffect(() => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Container,
   Row,
@@ -12,74 +12,107 @@ import {
 } from "reactstrap";
 import Helmet from "../components/Helmet/Helmet";
 import CommonSection from "../components/UI/CommonSection";
-import motorData from "../assets/data/motorData";
 import Footer from "../components/Footer/Footer";
 
 import MotorItem from "../components/UI/MotorItem";
+import VehicleSkeletonItem from "../components/UI/VehicleSkeletonItem";
 import "../styles/car-listing.css";
+import "../styles/skeleton.css";
 
-// Fake data for filter options (not used for filtering, just for dropdowns)
-const fakeBrands = ["Honda", "Yamaha", "Kawasaki", "Suzuki", "Harley-Davidson"];
-const fakeTypes = [
-  "Sportbike",
-  "Cruiser",
-  "Naked Bike",
-  "Adventure",
-  "Scooter",
-];
-const fakeEngineSizes = ["125cc", "300cc", "600cc", "1000cc+", "Electric"];
-const fakePriceRange = [0, 500];
-const fakeSeatOptions = [1, 2];
-const fakeTransmissions = ["Manual", "Automatic"];
-const fakeColors = ["Red", "Blue", "Black", "White", "Silver", "Gray"];
-
-const CarListing = () => {
-  const [sortOption, setSortOption] = useState("Select");
+const MotorListing = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sortedMotors, setSortedMotors] = useState(motorData || []);
+  const [allMotors, setAllMotors] = useState([]);
+  const [sortedMotors, setSortedMotors] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Add loading state
 
-  // State for filter selections (interactive but not used for filtering)
+  // State for filter selections
   const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [selectedEngineSize, setSelectedEngineSize] = useState("");
-  const [selectedTransmission, setSelectedTransmission] = useState("");
+  const [selectedEngine, setSelectedEngine] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedSeats, setSelectedSeats] = useState(fakeSeatOptions[0]); // Min seats, like car version
-  const [selectedPrice, setSelectedPrice] = useState(fakePriceRange[1]); // Max price, like car version
+  const [selectedPrice, setSelectedPrice] = useState(500); // Default max price
 
   useEffect(() => {
-    console.log("motorData in CarListing:", motorData);
-    if (!motorData || !Array.isArray(motorData)) {
-      console.error("motorData is invalid or empty:", motorData);
-      setSortedMotors([]);
-      return;
+    const fetchMotors = async () => {
+      setIsLoading(true); // Start loading
+      try {
+        const response = await fetch(
+          "http://localhost:5000/api/motorcycles/filtermotor"
+        );
+        const data = await response.json();
+        setAllMotors(data);
+        setSortedMotors(data);
+      } catch (error) {
+        console.error("Error fetching motors:", error);
+      } finally {
+        setIsLoading(false); // End loading regardless of result
+      }
+    };
+
+    fetchMotors();
+  }, []);
+
+  const { brands, types, engines, colors, maxPrice } = useMemo(() => {
+    const brands = [...new Set(allMotors.map((m) => m.Brand))].sort();
+    const types = [...new Set(allMotors.map((m) => m.Type))].sort();
+    const engines = [...new Set(allMotors.map((m) => m.Engine))].sort(
+      (a, b) => a - b
+    );
+    const colors = [...new Set(allMotors.map((m) => m.color))].sort();
+    const maxPrice = Math.max(...allMotors.map((m) => m.Price), 500);
+    return { brands, types, engines, colors, maxPrice };
+  }, [allMotors]);
+
+  useEffect(() => {
+    setSelectedPrice(maxPrice);
+  }, [maxPrice]);
+
+  useEffect(() => {
+    let filtered = [...allMotors];
+
+    if (selectedBrand) {
+      filtered = filtered.filter(
+        (m) => m.Brand.toLowerCase() === selectedBrand.toLowerCase()
+      );
+    }
+    if (selectedType) {
+      filtered = filtered.filter(
+        (m) => m.Type.toLowerCase() === selectedType.toLowerCase()
+      );
+    }
+    if (selectedEngine) {
+      filtered = filtered.filter((m) => m.Engine === parseInt(selectedEngine));
+    }
+    if (selectedColor) {
+      filtered = filtered.filter(
+        (m) => m.color.toLowerCase() === selectedColor.toLowerCase()
+      );
+    }
+    if (selectedPrice < maxPrice) {
+      filtered = filtered.filter((m) => m.Price <= selectedPrice);
     }
 
-    // Initialize sorted motors with full data
-    setSortedMotors(motorData);
-  }, []); // Empty dependency array, runs once on mount
+    setSortedMotors(filtered);
+  }, [
+    selectedBrand,
+    selectedType,
+    selectedEngine,
+    selectedColor,
+    selectedPrice,
+    allMotors,
+    maxPrice,
+  ]);
 
-  const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
 
-  const handleSort = (option) => {
-    setSortOption(option);
-    let sorted = [...motorData];
-    if (option === "Low to High") {
-      sorted.sort(
-        (a, b) =>
-          parseFloat(a.price?.replace("$", "") || 0) -
-          parseFloat(b.price?.replace("$", "") || 0)
-      );
-    } else if (option === "High to Low") {
-      sorted.sort(
-        (a, b) =>
-          parseFloat(b.price?.replace("$", "") || 0) -
-          parseFloat(a.price?.replace("$", "") || 0)
-      );
-    }
-    setSortedMotors(sorted);
+  const handleResetFilters = () => {
+    setSelectedBrand("");
+    setSelectedType("");
+    setSelectedEngine("");
+    setSelectedColor("");
+    setSelectedPrice(maxPrice);
+    setSortedMotors(allMotors);
   };
 
   return (
@@ -91,27 +124,6 @@ const CarListing = () => {
           <Row className="mb-4">
             <Col lg="12">
               <div className="car-listing-controls d-flex align-items-center justify-content-between flex-wrap gap-3">
-                <div className="sort-section d-flex align-items-center gap-2">
-                  <span className="sort-label d-flex align-items-center gap-2">
-                    <i className="ri-sort-asc"></i> Sort By
-                  </span>
-                  <Dropdown isOpen={dropdownOpen} toggle={toggleDropdown}>
-                    <DropdownToggle caret className="sort-dropdown">
-                      {sortOption}
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem onClick={() => handleSort("Select")}>
-                        Select
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("Low to High")}>
-                        Low to High
-                      </DropdownItem>
-                      <DropdownItem onClick={() => handleSort("High to Low")}>
-                        High to Low
-                      </DropdownItem>
-                    </DropdownMenu>
-                  </Dropdown>
-                </div>
                 <div className="filter-toggle-mobile d-lg-none">
                   <Button
                     color="primary"
@@ -144,7 +156,7 @@ const CarListing = () => {
                       onChange={(e) => setSelectedBrand(e.target.value)}
                     >
                       <option value="">Select Brand</option>
-                      {fakeBrands.map((brand, index) => (
+                      {brands.map((brand, index) => (
                         <option key={index} value={brand.toLowerCase()}>
                           {brand}
                         </option>
@@ -161,7 +173,7 @@ const CarListing = () => {
                       onChange={(e) => setSelectedType(e.target.value)}
                     >
                       <option value="">Select Type</option>
-                      {fakeTypes.map((type, index) => (
+                      {types.map((type, index) => (
                         <option key={index} value={type.toLowerCase()}>
                           {type}
                         </option>
@@ -171,15 +183,15 @@ const CarListing = () => {
 
                   {/* Engine Size Filter */}
                   <div className="filter-group">
-                    <label className="filter-label">Engine Size</label>
+                    <label className="filter-label">Engine Size (cc)</label>
                     <select
                       className="filter-dropdown"
-                      value={selectedEngineSize}
-                      onChange={(e) => setSelectedEngineSize(e.target.value)}
+                      value={selectedEngine}
+                      onChange={(e) => setSelectedEngine(e.target.value)}
                     >
                       <option value="">Select Size</option>
-                      {fakeEngineSizes.map((size, index) => (
-                        <option key={index} value={size.toLowerCase()}>
+                      {engines.map((size, index) => (
+                        <option key={index} value={size}>
                           {size}
                         </option>
                       ))}
@@ -193,8 +205,8 @@ const CarListing = () => {
                       <input
                         type="range"
                         className="price-slider"
-                        min={fakePriceRange[0]}
-                        max={fakePriceRange[1]}
+                        min={0}
+                        max={maxPrice}
                         value={selectedPrice}
                         onChange={(e) =>
                           setSelectedPrice(parseInt(e.target.value))
@@ -206,41 +218,6 @@ const CarListing = () => {
                     </div>
                   </div>
 
-                  {/* Seats Filter */}
-                  <div className="filter-group">
-                    <label className="filter-label">Seats</label>
-                    <input
-                      type="range"
-                      className="seats-slider"
-                      min={Math.min(...fakeSeatOptions)}
-                      max={Math.max(...fakeSeatOptions)}
-                      value={selectedSeats}
-                      onChange={(e) =>
-                        setSelectedSeats(parseInt(e.target.value))
-                      }
-                    />
-                    <span className="seats-range-value">
-                      {selectedSeats} {selectedSeats === 1 ? "Seat" : "Seats"}
-                    </span>
-                  </div>
-
-                  {/* Transmission Filter */}
-                  <div className="filter-group">
-                    <label className="filter-label">Transmission</label>
-                    <select
-                      className="filter-dropdown"
-                      value={selectedTransmission}
-                      onChange={(e) => setSelectedTransmission(e.target.value)}
-                    >
-                      <option value="">Select Transmission</option>
-                      {fakeTransmissions.map((trans, index) => (
-                        <option key={index} value={trans.toLowerCase()}>
-                          {trans}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* Color Filter */}
                   <div className="filter-group">
                     <label className="filter-label">Color</label>
@@ -250,7 +227,7 @@ const CarListing = () => {
                       onChange={(e) => setSelectedColor(e.target.value)}
                     >
                       <option value="">Select Color</option>
-                      {fakeColors.map((color, index) => (
+                      {colors.map((color, index) => (
                         <option key={index} value={color.toLowerCase()}>
                           {color}
                         </option>
@@ -262,7 +239,7 @@ const CarListing = () => {
                   <Button
                     color="secondary"
                     className="reset-filters-btn"
-                    disabled // Disabled, like car version
+                    onClick={handleResetFilters}
                   >
                     Reset Filters
                   </Button>
@@ -273,16 +250,29 @@ const CarListing = () => {
             {/* Motor Cards Column */}
             <Col lg="9">
               <Row>
-                {sortedMotors.length === 0 ? (
-                  <Col lg="12">
-                    <p className="no-cars-text">No motors available.</p>
-                  </Col>
-                ) : (
-                  sortedMotors.map((item) => (
-                    <Col lg="4" md="6" sm="12" className="mb-4" key={item.id}>
-                      <MotorItem item={item} type="motors" />
+                {isLoading ? (
+                  // Show skeletons while loading
+                  Array.from({ length: 6 }).map((_, index) => (
+                    <Col lg="4" md="6" sm="12" className="mb-4" key={index}>
+                      <VehicleSkeletonItem />
                     </Col>
                   ))
+                ) : sortedMotors.length > 0 ? (
+                  sortedMotors.map((item) => (
+                    <Col
+                      lg="4"
+                      md="6"
+                      sm="12"
+                      className="mb-4"
+                      key={item.VehicleID}
+                    >
+                      <MotorItem item={item} />
+                    </Col>
+                  ))
+                ) : (
+                  <Col lg="12" className="text-center">
+                    <p>No motorcycles found.</p>
+                  </Col>
                 )}
               </Row>
             </Col>
@@ -294,4 +284,4 @@ const CarListing = () => {
   );
 };
 
-export default CarListing;
+export default MotorListing;

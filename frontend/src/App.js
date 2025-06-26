@@ -17,7 +17,7 @@ import CarDetails from "./pages/CarDetails";
 import BoatDetails from "./pages/BoatDetails";
 import BoatListing from "./pages/BoatListing";
 import MotorDetails from "./pages/MotorDetails";
-import ScooterListing from "./pages/ScooterListing";
+import BicycleListing from "./pages/BicycleListing";
 import MotorListing from "./pages/MotorListing";
 import ScooterDetails from "./pages/ScooterDetails";
 import Contact from "./pages/Contact";
@@ -52,7 +52,7 @@ import NotificationsProfile from "./pages/Profile/Notifications";
 import AccountSettings from "./pages/Profile/AccountSettings";
 import VehicleManagement from "./pages/VehicleManagement";
 import VehicleOwnerSignup from "./pages/VehicleOwnerSignup";
-import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";  
+import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
 
 function App() {
   return (
@@ -65,9 +65,9 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/cars" element={<CarListing />} />
           <Route path="/cars/:slug" element={<CarDetails />} />
-          <Route path="/motors" element={<MotorListing />} />
-          <Route path="/motors/:slug" element={<MotorDetails />} />
-          <Route path="/bicycle" element={<ScooterListing />} />
+          <Route path="/motorcycles" element={<MotorListing />} />
+          <Route path="/motorcycles/:slug" element={<MotorDetails />} />
+          <Route path="/bicycle" element={<BicycleListing />} />
           <Route path="/bicycle/:slug" element={<ScooterDetails />} />
           <Route path="/boats" element={<BoatListing />} />
           <Route path="/boats/:slug" element={<BoatDetails />} />
@@ -80,6 +80,10 @@ function App() {
           <Route path="/apply-chauffeur" element={<ApplyChauffeur />} />
           <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignup />} />
           <Route path="/vehicle-owner-login" element={<VehicleOwnerLogin />} />
+          {/* Chauffeur Dashboard routes */}
+          <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
+          {/* Vehicle Owner routes */}
+          <Route path="/vehicle-owner/profile" element={<UserProfile />} />
           <Route
             path="/chaffeur-vehicle-management"
             element={<ChaffeurVehicleManagement />}
@@ -128,7 +132,7 @@ function App() {
           <Route path="/profile/payment-info" element={<PaymentInfo />} />
           <Route
             path="/profile"
-            element={<Navigate to="./pages/Rentee/RenteeProfile" />}
+            element={<Navigate to="/profile/rentee-profile" />}
           />
           <Route
             path="/profile/ProfileOverview"

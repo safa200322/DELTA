@@ -62,53 +62,124 @@ exports.registerUser = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-
-    const phone = req.body.phonenumber
-    const pass = req.body.password
+    const phone = req.body.phonenumber;
+    const pass = req.body.password;
 
     if (!phone || !pass) {
-      res.status(400).json({ err: "missing stuff" })
-      return
+      return res.status(400).json({ err: "Missing credentials" });
     }
-    const user = await userModel.findByPhone(phone);
-    if (!user || !user.Password) {
-      return res.status(404).json({ err: 'user not found' });
-    }
-
-    if (!user) {
-      console.log("login fail / user not found:", phone)
-      res.status(404).json({ err: "user gone" })
-      return
-    }
-    if (!user.Password) {
-      console.log('user.Password is missing:', user)
-      return res.status(500).json({ err: 'user data incomplete' })
-    }
-    const same = await bcrypt.compare(pass, user.Password)
-
-
-
-    if (!same) {
-      res.status(401).json({ err: "no match" })
-      return
-    }
-
-    const token = jwt.sign({ id: user.UserID, role: 'user' }, process.env.JWT_SECRET, { expiresIn: '2h' })
-
-    res.json({
-      msg: "ok login",
-      token,
-      user: {
-        id: user.UserID,
-        name: user.Name,
-        phone: user.phonenumber,
-        profilePictureUrl: user.ProfilePictureUrl
+    
+    // Check all possible user types in sequence
+    
+    // Check if user is an admin
+    const admin = await adminModel.findByPhone(phone);
+    if (admin && admin.Password) {
+      const isValidPassword = await bcrypt.compare(pass, admin.Password);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { id: admin.AdminID, role: 'admin', type: 'admin' },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          msg: "Admin login successful",
+          token,
+          user: {
+            id: admin.AdminID,
+            name: admin.Name,
+            type: 'admin',
+            phone: admin.PhoneNumber
+          },
+          redirectTo: '/admin/dashboard'
+        });
       }
-    })
+    }
+    
+    // Check if user is a chauffeur
+    const chauffeurModel = require('../models/chauffeurModel');
+    const chauffeur = await chauffeurModel.findByPhone(phone);
+    if (chauffeur && chauffeur.Password) {
+      const isValidPassword = await bcrypt.compare(pass, chauffeur.Password);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { id: chauffeur.ChauffeurID, role: 'chauffeur', type: 'chauffeur' },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          msg: "Chauffeur login successful",
+          token,
+          user: {
+            id: chauffeur.ChauffeurID,
+            name: chauffeur.Name,
+            type: 'chauffeur',
+            phone: chauffeur.PhoneNumber
+          },
+          redirectTo: '/chauffeur/dashboard'
+        });
+      }
+    }
+    
+    // Check if user is a vehicle owner
+    const vehicleOwnerModel = require('../models/vehicleOwnerModel');
+    const vehicleOwner = await vehicleOwnerModel.getOwnerByPhone(phone);
+    if (vehicleOwner && vehicleOwner.PasswordHash) {
+      const isValidPassword = await bcrypt.compare(pass, vehicleOwner.PasswordHash);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { id: vehicleOwner.OwnerID, role: 'vehicle-owner', type: 'vehicle-owner' },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          msg: "Vehicle Owner login successful",
+          token,
+          user: {
+            id: vehicleOwner.OwnerID,
+            name: vehicleOwner.FullName,
+            type: 'vehicle-owner',
+            phone: vehicleOwner.PhoneNumber
+          },
+          redirectTo: '/vehicle-owner/profile'
+        });
+      }
+    }
+    
+    // Check if user is a regular user
+    const user = await userModel.findByPhone(phone);
+    if (user && user.Password) {
+      const isValidPassword = await bcrypt.compare(pass, user.Password);
+      if (isValidPassword) {
+        const token = jwt.sign(
+          { id: user.UserID, role: 'user', type: 'user' },
+          process.env.JWT_SECRET,
+          { expiresIn: '24h' }
+        );
+        
+        return res.json({
+          msg: "User login successful",
+          token,
+          user: {
+            id: user.UserID,
+            name: user.Name,
+            type: 'user',
+            phone: user.PhoneNumber,
+            profilePictureUrl: user.ProfilePictureUrl
+          },
+          redirectTo: '/profile'
+        });
+      }
+    }
 
+    // If we get here, no valid user was found or password did not match
+    return res.status(401).json({ err: "Invalid credentials" });
+    
   } catch (e) {
-    console.log("err login:", e)
-    res.status(500).json({ err: "server fail" })
+    console.log("Error during login:", e);
+    res.status(500).json({ err: "Server error during login" });
   }
 }
 

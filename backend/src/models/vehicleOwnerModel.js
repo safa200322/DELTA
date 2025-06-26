@@ -26,7 +26,13 @@ const VehicleOwnerModel = {
     const query = 'SELECT * FROM vehicleowner WHERE OwnerID = ?';
     const [rows] = await db.query(query, [id]);
     return rows[0];
-  }
+  },
+
+  async getOwnerByPhone(phone) {
+    const query = 'SELECT * FROM vehicleowner WHERE PhoneNumber = ?';
+    const [rows] = await db.query(query, [phone]);
+    return rows[0];
+  },
 };
 
 module.exports = VehicleOwnerModel;
