@@ -52,6 +52,8 @@ import AccountSettings from "./pages/Profile/AccountSettings";
 import VehicleManagement from "./pages/VehicleManagement";
 import VehicleOwnerSignup from "./pages/VehicleOwnerSignup";
 import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
+import ChauffureProfilePage from "./pages/ChauffeurProfilePage";
+
 
 function App() {
   return (
@@ -79,7 +81,9 @@ function App() {
           <Route path="/apply-chauffeur" element={<ApplyChauffeur />} />
           <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignup />} />
           <Route path="/vehicle-owner-login" element={<VehicleOwnerLogin />} />
-          {/* Chauffeur Dashboard routes */}
+          <Route path="/chauffeur-profile" element={<ChauffureProfilePage />} />
+         
+           {/* Chauffeur Dashboard routes */}
           <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
           {/* Vehicle Owner routes */}
           <Route path="/vehicle-owner/profile" element={<UserProfile />} />
