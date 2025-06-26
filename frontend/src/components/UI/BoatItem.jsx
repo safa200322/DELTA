@@ -16,7 +16,7 @@ const BoatItem = ({ item, type }) => {
         <div className="car__item-img">
           <img
             src={
-              item.vehiclepic ||
+              item.VehiclePic ||
               "https://placehold.co/300x200?text=Image+Not+Available"
             }
             alt={item.BoatType || "Boat"}
