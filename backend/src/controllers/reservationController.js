@@ -21,6 +21,7 @@ exports.createReservation = async (req, res) => {
       message: 'Reservation created successfully',
       reservationId: result.insertId
     });
+    console.log('[RESERVATION] Created:', { reservationId: result.insertId });
   } catch (error) {
     console.error("❌ Error creating reservation:", error);
     res.status(500).json({ error: 'Failed to create reservation', details: error.message });
@@ -32,6 +33,7 @@ exports.getUserReservations = async (req, res) => {
     const userId = req.user.id;
     const reservations = await ReservationModel.getReservationsByUserId(userId);
     res.json(reservations);
+    console.log('[RESERVATION] User reservations:', reservations);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch reservations', details: error.message });
   }
@@ -53,6 +55,7 @@ exports.cancelUserReservation = async (req, res) => {
     }
 
     res.json({ message: 'Reservation cancelled successfully' });
+    console.log('[RESERVATION] Cancelled:', reservationId);
   } catch (error) {
     console.error("❌ Error cancelling reservation:", error);
     res.status(500).json({ error: 'Failed to cancel reservation', details: error.message });

@@ -1,10 +1,46 @@
 const db = require('../db');
 
 async function getFilteredVehicles(filters) {
+  // Determine the table to join based on type
+  let joinTable = 'Car';
+  let tableFields = {
+    brand: 'Brand',
+    model: 'Model',
+    seats: 'Seats',
+    transmission: 'Transmission',
+    color: 'Color',
+  };
+  if (filters.type === 'motorcycle') {
+    joinTable = 'Motorcycle';
+    tableFields = {
+      brand: 'Brand',
+      model: 'Type',
+      engine: 'Engine',
+      color: 'color',
+    };
+  } else if (filters.type === 'boat') {
+    joinTable = 'Boat';
+    tableFields = {
+      brand: 'Brand',
+      model: 'BoatType',
+      capacity: 'Capacity',
+      engineType: 'EngineType',
+    };
+  } else if (filters.type === 'bicycle') {
+    joinTable = 'Bicycle';
+    tableFields = {
+      brand: 'Brand',
+      model: 'BikeType',
+      frame: 'frame_material',
+      wheel: 'wheel_size',
+      color: 'color',
+    };
+  }
+
   let query = `
     SELECT *
     FROM Vehicle
-    JOIN Car ON Vehicle.VehicleID = Car.VehicleID
+    JOIN ${joinTable} ON Vehicle.VehicleID = ${joinTable}.VehicleID
     WHERE Vehicle.Status = 'Available'
   `;
   const values = [];
@@ -14,14 +50,12 @@ async function getFilteredVehicles(filters) {
     values.push(filters.vehicleId);
   }
 
-  if (filters.brand) {
-    query += ` AND Car.Brand = ?`;
-    values.push(filters.brand);
-  }
-
-  if (filters.model) {
-    query += ` AND Car.Model = ?`;
-    values.push(filters.model);
+  // Add dynamic filters for each type
+  for (const key in tableFields) {
+    if (filters[key]) {
+      query += ` AND ${joinTable}.${tableFields[key]} = ?`;
+      values.push(filters[key]);
+    }
   }
 
   if (filters.minPrice) {
@@ -32,21 +66,6 @@ async function getFilteredVehicles(filters) {
   if (filters.maxPrice) {
     query += ` AND Vehicle.Price <= ?`;
     values.push(filters.maxPrice);
-  }
-
-  if (filters.seats) {
-    query += ` AND Car.Seats = ?`;
-    values.push(filters.seats);
-  }
-
-  if (filters.transmission) {
-    query += ` AND Car.Transmission = ?`;
-    values.push(filters.transmission);
-  }
-
-  if (filters.color) {
-    query += ` AND Car.Color = ?`;
-    values.push(filters.color);
   }
 
   const [results] = await db.query(query, values);

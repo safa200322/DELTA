@@ -58,13 +58,11 @@ exports.cancelUserReservation = async (req, res) => {
   }
 };
 
-
-
-
 exports.getAllReservations = async (req, res) => {
   try {
     const reservations = await ReservationModel.getAllReservations();
     res.json(reservations);
+    console.log('[ADMIN RESERVATIONS] All reservations:', reservations);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch all reservations', details: error.message });
   }
@@ -80,6 +78,7 @@ exports.getReservationById = async (req, res) => {
     }
 
     res.json(reservation);
+    console.log('[ADMIN RESERVATIONS] Reservation by ID:', reservation);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch reservation', details: error.message });
   }
@@ -95,6 +94,7 @@ exports.deleteReservation = async (req, res) => {
     }
 
     res.json({ message: 'Reservation deleted successfully' });
+    console.log('[ADMIN RESERVATIONS] Deleted:', reservationId);
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete reservation', details: error.message });
   }

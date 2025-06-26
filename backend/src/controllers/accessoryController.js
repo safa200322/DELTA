@@ -9,6 +9,7 @@ exports.createAccessory = async (req, res) => {
     }
     const result = await accessoryModel.createAccessory({ AccessoryName, VehicleType, Quantity, Price });
     res.status(201).json({ message: "Accessory created", accessoryId: result.insertId });
+    console.log('[ACCESSORY] Created:', { accessoryId: result.insertId });
   } catch (err) {
     res.status(500).json({ message: "Error adding accessory", error: err });
   }
@@ -24,6 +25,7 @@ exports.getAccessoriesForVehicle = async (req, res) => {
     const accessoryQuery = 'SELECT * FROM Accessory WHERE VehicleType = ?';
     const [accessories] = await db.query(accessoryQuery, [vehicleType]);
     res.status(200).json(accessories);
+    console.log('[ACCESSORY] Accessories for vehicle:', accessories);
   } catch (err) {
     res.status(500).json({ message: "Error fetching accessories", error: err });
   }
@@ -37,7 +39,19 @@ exports.deleteAccessory = async (req, res) => {
       return res.status(404).json({ message: "Accessory not found" });
     }
     res.status(200).json({ message: "Accessory deleted successfully" });
+    console.log('[ACCESSORY] Deleted:', accessoryId);
   } catch (err) {
     res.status(500).json({ message: "Error deleting accessory", error: err });
+  }
+};
+
+// Get all accessories (admin)
+exports.getAllAccessories = async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT * FROM Accessory');
+    res.json(rows);
+    console.log('[ADMIN][ACCESSORY] All accessories:', rows);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching accessories', error: err });
   }
 };

@@ -5,8 +5,11 @@ import "../../styles/car-item.css";
 const BicycleItem = ({ item, type }) => {
   const navigate = useNavigate();
 
-  const handleBook = (id) => {
-    navigate(`/bicycle/${id}`);
+  const handleBook = () => {
+    const bicycleId = item.VehicleID || item.id || item.slug;
+    if (bicycleId && type) {
+      navigate(`/vehicles/${type}/${bicycleId}`);
+    }
   };
 
   return (
@@ -32,7 +35,7 @@ const BicycleItem = ({ item, type }) => {
           <span className="current-price">${item.Price}/day</span>
         </div>
 
-        <button className="car__item-btn book-btn" onClick={() => handleBook(item.VehicleID)}>
+        <button className="car__item-btn book-btn" onClick={handleBook}>
           Book
         </button>
       </div>

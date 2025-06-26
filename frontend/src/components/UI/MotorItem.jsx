@@ -5,8 +5,11 @@ import { useNavigate } from "react-router-dom";
 const MotorItem = ({ item, type }) => {
   const navigate = useNavigate();
 
-  const handleBook = (id) => {
-    navigate(`/motorcycles/${id}`);
+  const handleBook = () => {
+    const motorId = item.VehicleID || item.id || item.slug;
+    if (motorId && type) {
+      navigate(`/vehicles/${type}/${motorId}`);
+    }
   };
 
   return (
@@ -39,7 +42,7 @@ const MotorItem = ({ item, type }) => {
           <span className="current-price">${item.Price}/day</span>
         </div>
 
-        <button className="car__item-btn book-btn" onClick={() => handleBook(item.VehicleID)}>
+        <button className="car__item-btn book-btn" onClick={handleBook}>
           Book
         </button>
       </div>

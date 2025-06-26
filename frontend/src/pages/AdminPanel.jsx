@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Container,
@@ -38,59 +38,10 @@ ChartJS.register(
   Legend
 );
 
-// Mock Data
-const MOCK_RESERVATIONS = [
-  {
-    id: 1,
-    user: "Alice",
-    vehicle: "Toyota Corolla",
-    duration: "3 days",
-    status: "pending",
-  },
-  {
-    id: 2,
-    user: "Bob",
-    vehicle: "Honda Civic",
-    duration: "5 days",
-    status: "pending",
-  },
-  {
-    id: 3,
-    user: "Charlie",
-    vehicle: "BMW X3",
-    duration: "7 days",
-    status: "pending",
-  },
-];
-
-const MOCK_PAYMENTS = [
-  { id: 1, user: "Alice", amount: 150, date: "2025-06-20", status: "pending" },
-  { id: 2, user: "Bob", amount: 250, date: "2025-06-18", status: "pending" },
-  {
-    id: 3,
-    user: "Charlie",
-    amount: 350,
-    date: "2025-06-19",
-    status: "pending",
-  },
-];
-
-const MOCK_NOTIFICATIONS = [
-  { id: 1, message: "New reservation made by Alice", type: "info" },
-  { id: 2, message: "Payment received from Bob", type: "success" },
-  { id: 3, message: "New accessory added", type: "info" },
-  { id: 4, message: "Vehicle maintenance scheduled", type: "warning" },
-];
-
-const MOCK_ACCESSORIES = [
-  { id: 1, name: "GPS Navigation", price: 25, category: "Electronics" },
-  { id: 2, name: "Child Safety Seat", price: 15, category: "Safety" },
-  { id: 3, name: "Phone Charger", price: 10, category: "Electronics" },
-];
-
-// Chart Data
-const profitOverviewData = {
-  labels: [
+// Chart Data (dynamic, based on payments)
+const getMonthlyRevenueData = (payments) => {
+  // Group accepted payments by month
+  const months = [
     "Jan",
     "Feb",
     "Mar",
@@ -103,35 +54,35 @@ const profitOverviewData = {
     "Oct",
     "Nov",
     "Dec",
-  ],
-  datasets: [
-    {
-      label: "New Product",
-      data: [
-        150000, 200000, 180000, 220000, 190000, 250000, 230000, 210000, 240000,
-        200000, 220000, 230000,
-      ],
-      backgroundColor: "#4e73df",
-      barPercentage: 0.5,
-    },
-    {
-      label: "Returned Product",
-      data: [
-        120000, 150000, 140000, 160000, 130000, 180000, 170000, 150000, 170000,
-        140000, 160000, 170000,
-      ],
-      backgroundColor: "#a3b1ff",
-      barPercentage: 0.5,
-    },
-  ],
+  ];
+  const monthlyTotals = Array(12).fill(0);
+  payments.forEach((p) => {
+    if (p.status === "accepted") {
+      const date = new Date(p.date);
+      const month = date.getMonth();
+      monthlyTotals[month] += p.amount;
+    }
+  });
+  return {
+    labels: months,
+    datasets: [
+      {
+        label: "Revenue",
+        data: monthlyTotals,
+        backgroundColor: "#4e73df",
+        barPercentage: 0.5,
+      },
+    ],
+  };
 };
 
+// Chart data for inventory overview (real data)
 const inventoryOverviewData = {
-  labels: ["New Product", "Returned Product", "Sold Product"],
+  labels: [],
   datasets: [
     {
-      data: [42.4, 34.7, 22.8],
-      backgroundColor: ["#4e73df", "#f1b44c", "#34c38f"],
+      data: [],
+      backgroundColor: ["#4e73df", "#f1b44c", "#34c38f", "#e74c3c", "#8e44ad", "#16a085"],
       borderWidth: 1,
     },
   ],
@@ -160,15 +111,26 @@ const chartOptions = {
 
 // Helper Components
 const SummaryCard = ({ title, value, subValue, percentage, isPositive }) => (
-  <Card className="dashboard-card summary-card">
+  <Card
+    className="dashboard-card summary-card shadow-lg border-0"
+    style={{
+      background: "linear-gradient(120deg, #256489 0%, #3b8dbd 100%)",
+      color: "#fff",
+      borderRadius: 18,
+      minHeight: 140,
+      boxShadow: "0 4px 24px 0 #25648933, 0 1.5px 4px #0001",
+      border: "none",
+      marginBottom: 0,
+    }}
+  >
     <CardBody>
-      <p className="summary-card-title">{title}</p>
-      <h3 className="summary-card-value">{value}</h3>
-      <div className="d-flex align-items-center summary-card-footer">
-        <span className={`me-2 ${isPositive ? "text-success" : "text-danger"}`}>
+      <p className="summary-card-title" style={{ color: "#e0e6ed", fontWeight: 600, letterSpacing: 1 }}>{title}</p>
+      <h3 className="summary-card-value" style={{ color: "#fff", fontWeight: 700, fontSize: 32 }}>{value}</h3>
+      <div className="d-flex align-items-center summary-card-footer mt-2">
+        <span className={`me-2 ${isPositive ? "text-success" : "text-danger"}`} style={{ fontWeight: 600 }}>
           {percentage}
         </span>
-        <small className="text-muted">{subValue}</small>
+        <small className="text-light" style={{ opacity: 0.85 }}>{subValue}</small>
       </div>
     </CardBody>
   </Card>
@@ -252,27 +214,113 @@ const NotificationCard = ({ notifications, handleRemoveNotification }) => (
 
 // Main Component
 const AdminDashboard = () => {
-  const [reservations, setReservations] = useState(MOCK_RESERVATIONS);
-  const [payments, setPayments] = useState(MOCK_PAYMENTS);
-  const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-  const [accessories, setAccessories] = useState(MOCK_ACCESSORIES);
+  const [reservations, setReservations] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [accessories, setAccessories] = useState([]);
+  const [vehicleInventory, setVehicleInventory] = useState({ total: 0, distribution: [] });
   const [newAccessory, setNewAccessory] = useState({
     name: "",
     price: "",
     category: "",
   });
+  const [loading, setLoading] = useState(true);
 
-  const handleAction = useCallback((setState, id, action) => {
-    setState((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: action } : item))
-    );
+  // Fetch all admin dashboard data from backend
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        console.log('[ADMIN DASHBOARD] Fetching: /api/admin/reservations');
+        console.log('[ADMIN DASHBOARD] Fetching: /api/admin/payments');
+        console.log('[ADMIN DASHBOARD] Fetching: /api/admin/notifications');
+        console.log('[ADMIN DASHBOARD] Fetching: /api/admin/accessories');
+        console.log('[ADMIN DASHBOARD] Fetching: /api/admin/inventory-distribution');
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+        const fetchWithAuth = (url, options = {}) =>
+          fetch(url, {
+            ...options,
+            headers: {
+              ...(options.headers || {}),
+              ...authHeader,
+            },
+            credentials: 'include',
+          });
+        const [resvRes, payRes, notifRes, accRes, inventoryRes] = await Promise.all([
+          fetchWithAuth("http://localhost:5000/api/admin/reservations").then(async (r) => { const data = await r.json(); console.log('[ADMIN DASHBOARD] http://localhost:5000/api/admin/reservations response:', data); return data; }),
+          fetchWithAuth("http://localhost:5000/api/admin/payments").then(async (r) => { const data = await r.json(); console.log('[ADMIN DASHBOARD] http://localhost:5000/api/admin/payments response:', data); return data; }),
+          fetchWithAuth("http://localhost:5000/api/admin/notifications").then(async (r) => { const data = await r.json(); console.log('[ADMIN DASHBOARD] http://localhost:5000/api/admin/notifications response:', data); return data; }),
+          fetchWithAuth("http://localhost:5000/api/admin/accessories").then(async (r) => { const data = await r.json(); console.log('[ADMIN DASHBOARD] http://localhost:5000/api/admin/accessories response:', data); return data; }),
+          fetchWithAuth("http://localhost:5000/api/admin/inventory-distribution").then(async (r) => { const data = await r.json(); console.log('[ADMIN DASHBOARD] /api/admin/inventory-distribution response:', data); return data; }),
+        ]);
+        // Defensive: ensure arrays
+        setReservations(Array.isArray(resvRes) ? resvRes : []);
+        setPayments(Array.isArray(payRes) ? payRes : []);
+        setNotifications(Array.isArray(notifRes) ? notifRes : []);
+        setAccessories(Array.isArray(accRes) ? accRes : []);
+        setVehicleInventory(inventoryRes || { total: 0, distribution: [] });
+      } catch (err) {
+        // Enhanced error handling
+        let errorMsg = '[ADMIN DASHBOARD] Fetch error:';
+        if (err instanceof SyntaxError) {
+          errorMsg += ' Invalid JSON returned from backend.';
+        } else if (err instanceof TypeError) {
+          errorMsg += ' Network error or resource not found.';
+        } else {
+          errorMsg += ' ' + (err.message || err);
+        }
+        console.error(errorMsg, err);
+        setReservations([]);
+        setPayments([]);
+        setNotifications([]);
+        setAccessories([]);
+        setVehicleInventory({ total: 0, distribution: [] });
+        // Optionally, show a user-friendly error message (e.g., setError(errorMsg))
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
-  const handleRemoveNotification = useCallback((id) => {
-    setNotifications((prev) => prev.filter((item) => item.id !== id));
+  // Accept/reject reservation
+  const handleReservationAction = useCallback(async (id, action) => {
+    try {
+      await fetch(`/api/admin/reservations/${id}/${action}`, { method: "POST" });
+      setReservations((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, status: action } : item))
+      );
+    } catch (err) {
+      alert("Failed to update reservation status");
+    }
   }, []);
 
-  const handleAddAccessory = useCallback(() => {
+  // Accept/reject payment
+  const handlePaymentAction = useCallback(async (id, action) => {
+    try {
+      await fetch(`/api/admin/payments/${id}/${action}`, { method: "POST" });
+      setPayments((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, status: action } : item))
+      );
+    } catch (err) {
+      alert("Failed to update payment status");
+    }
+  }, []);
+
+  // Remove notification
+  const handleRemoveNotification = useCallback(async (id) => {
+    try {
+      await fetch(`/api/admin/notifications/${id}`, { method: "DELETE" });
+      setNotifications((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Failed to remove notification");
+    }
+  }, []);
+
+  // Add accessory
+  const handleAddAccessory = useCallback(async () => {
     const { name, price, category } = newAccessory;
     if (!name.trim() || !price || !category.trim()) {
       alert("Please fill in all fields");
@@ -283,126 +331,175 @@ const AdminDashboard = () => {
       alert("Please enter a valid price");
       return;
     }
-    const accessory = {
-      id: Date.now(),
-      name: name.trim(),
-      price: priceNum,
-      category: category.trim(),
-    };
-    setAccessories((prev) => [...prev, accessory]);
-    setNewAccessory({ name: "", price: "", category: "" });
+    try {
+      const token = localStorage.getItem('token');
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch("http://localhost:5000/api/admin/accessories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeader },
+        credentials: 'include',
+        body: JSON.stringify({
+          AccessoryName: name.trim(),
+          VehicleType: category.trim(),
+          Quantity: 1, // Default to 1 for now
+          Price: priceNum,
+        }),
+      });
+      const result = await res.json();
+      // Fetch the new accessory from the DB to get all fields
+      if (result.accessoryId) {
+        const accRes = await fetch("http://localhost:5000/api/admin/accessories", {
+          headers: { ...authHeader },
+          credentials: 'include',
+        });
+        const allAccessories = await accRes.json();
+        const newAcc = allAccessories.find(a => a.AccessoryID === result.accessoryId);
+        setAccessories((prev) => [...prev, newAcc || {
+          id: result.accessoryId,
+          name: name.trim(),
+          price: priceNum,
+          category: category.trim(),
+        }]);
+      }
+      setNewAccessory({ name: "", price: "", category: "" });
+    } catch (err) {
+      alert("Failed to add accessory");
+    }
   }, [newAccessory]);
+
+  // Remove accessory
+  const handleRemoveAccessory = useCallback(async (id) => {
+    try {
+      await fetch(`/api/admin/accessories/${id}`, { method: "DELETE" });
+      setAccessories((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      alert("Failed to remove accessory");
+    }
+  }, []);
 
   const handleInputChange = useCallback((field, value) => {
     setNewAccessory((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  const formatCurrency = (amount) => `$${amount.toFixed(2)}`;
+  const formatCurrency = (amount) => {
+    if (typeof amount !== 'number' || isNaN(amount)) return '$0.00';
+    return `$${amount.toFixed(2)}`;
+  };
   const formatDate = (dateString) => new Date(dateString).toLocaleDateString();
 
   return (
-    <div className="dashboard-wrapper d-flex">
-      <div className="dashboard-sidebar">
+    <div className="dashboard-wrapper d-flex" style={{ minHeight: '100vh', background: 'linear-gradient(120deg, #e0e7ef 0%, #f8fafc 100%)' }}>
+      <div className="dashboard-sidebar d-flex flex-column align-items-center justify-content-center" style={{ minWidth: 90, background: '#085078', color: '#fff', minHeight: '100vh', boxShadow: '2px 0 12px #0001' }}>
         <div className="sidebar-header text-center p-3">
           <img
             src="https://placehold.co/40x40/667fff/ffffff.png?text=L"
             alt="Logo"
             className="mb-2"
+            style={{ borderRadius: 12, background: '#fff' }}
           />
         </div>
-        <ul className="nav flex-column sidebar-nav">
+        <ul className="nav flex-column sidebar-nav" style={{ gap: '18px', marginTop: '32px', width: '100%' }}>
+          {/* Sidebar nav items, centered */}
           <li className="nav-item">
-            <Link className="nav-link active" to="/" end>
-              <span className="sidebar-icon">📊</span>
+            <Link className="nav-link active d-flex justify-content-center align-items-center" to="/" end style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                📊
+              </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link" to="/vehicle-management">
-              <span className="sidebar-icon">🚗</span>
+            <Link className="nav-link d-flex justify-content-center align-items-center" to="/vehicle-management" style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                🚗
+              </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link" to="/chauffeur-management">
-              <span className="sidebar-icon">👤</span>
+            <Link className="nav-link d-flex justify-content-center align-items-center" to="/chauffeur-management" style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                👤
+              </span>
             </Link>
           </li>
-           <li className="nav-item">
-                      <Link className="nav-link active" to="/reservation-management">
-                        <span className="sidebar-icon">📅</span> {/* Reservation Management Icon */}
-                      </Link>
-                    </li>
-            <li className="nav-item">
-                        <Link
-                          to="/payment-admin"
-                          className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-                        >
-                          <span className="sidebar-icon">💰</span> {/* Payment Admin Icon */}
-                        </Link>
-                      </li>
-                       <li className="nav-item">
-                                  <Link
-                                    to="/notifications-Dashboard"
-                                    className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-                                  >
-                                    <span className="sidebar-icon">🔔</span> {/* Notifications Icon */}
-                                  </Link>
-                                </li>
-                      <li className="nav-item">
-                                  <Link
-                                    to="/accessories-management"
-                                    className={({ isActive }) => (isActive ? "nav-link active" : "nav-link")}
-                                  >
-                                    <span className="sidebar-icon">🛠️</span> {/* Accessories Icon */}
-                                  </Link>
-                                </li>
+          <li className="nav-item">
+            <Link className="nav-link active d-flex justify-content-center align-items-center" to="/reservation-management" style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                📅
+              </span>
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/payment-admin" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                💰
+              </span>
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/notifications-Dashboard" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                🔔
+              </span>
+            </Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/accessories-management" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
+                🛠️
+              </span>
+            </Link>
+          </li>
         </ul>
-        <div className="sidebar-footer text-center p-3">
+        <div className="sidebar-footer text-center p-3 mt-auto">
           <img
             src="https://placehold.co/40x40/cccccc/ffffff.png?text=JD"
             alt="Profile"
             className="rounded-circle mb-2"
+            style={{ border: '2px solid #fff', background: '#eee' }}
           />
         </div>
       </div>
-      <div className="dashboard-main-content flex-grow-1 p-3">
-        <Row className="mb-3 g-2">
-          <Col xs={12} sm={6} md={4}>
+      <div className="dashboard-main-content flex-grow-1 d-flex flex-column align-items-center p-4" style={{ minHeight: '100vh' }}>
+        {/* Top summary cards row */}
+        <Row className="mb-4 w-100 justify-content-center" style={{ gap: 24 }}>
+          <Col xs={12} sm={6} md={4} lg={3} className="d-flex justify-content-center">
             <SummaryCard
               title="TOTAL RESERVATIONS"
-              value="3"
-              subValue="2 last month"
-              percentage="50%"
-              isPositive={true}
+              value={reservations.length}
+              subValue={`${reservations.filter(r => r.status === 'accepted').length} accepted`}
+              percentage={reservations.length ? `${Math.round((reservations.filter(r => r.status === 'accepted').length / reservations.length) * 100)}%` : "-"}
+              isPositive={reservations.filter(r => r.status === 'accepted').length >= reservations.length}
             />
           </Col>
-          <Col xs={12} sm={6} md={4}>
+          <Col xs={12} sm={6} md={4} lg={3} className="d-flex justify-content-center">
             <SummaryCard
               title="PENDING PAYMENTS"
-              value="3"
-              subValue="4 last month"
-              percentage="25%"
-              isPositive={false}
+              value={payments.filter(p => p.status === 'pending').length}
+              subValue={`${payments.filter(p => p.status === 'accepted').length} processed`}
+              percentage={payments.length ? `${Math.round((payments.filter(p => p.status === 'pending').length / payments.length) * 100)}%` : "-"}
+              isPositive={payments.filter(p => p.status === 'pending').length >= payments.length}
             />
           </Col>
-          <Col xs={12} sm={6} md={4}>
+          <Col xs={12} sm={6} md={4} lg={3} className="d-flex justify-content-center">
             <SummaryCard
               title="TOTAL REVENUE"
-              value="$750.00"
-              subValue="$600 last month"
-              percentage="25%"
-              isPositive={true}
+              value={`$${payments.reduce((total, payment) => total + (payment.status === 'accepted' ? payment.amount : 0), 0).toFixed(2)}`}
+              subValue={`$${payments.filter(p => p.status === 'accepted').reduce((total, payment) => total + payment.amount, 0).toFixed(2)} processed`}
+              percentage={payments.length ? `${Math.round((payments.filter(p => p.status === 'accepted').length / payments.length) * 100)}%` : "-"}
+              isPositive={payments.filter(p => p.status === 'accepted').length >= payments.length}
             />
           </Col>
         </Row>
-        <Row className="mb-3 g-2">
-          <Col xs={12} lg={6}>
+        {/* Charts and notifications row */}
+        <Row className="mb-4 w-100 justify-content-center" style={{ gap: 24 }}>
+          <Col xs={12} lg={6} className="mb-3 mb-lg-0">
             <ChartCard
               title="PROFIT OVERVIEW"
               dropdownOptions={["2022", "2023", "2024"]}
-              defaultDropdownValue="2022"
+              defaultDropdownValue="2024"
             >
               <Bar
-                data={profitOverviewData}
+                data={getMonthlyRevenueData(payments)}
                 options={{
                   ...chartOptions,
                   scales: {
@@ -425,19 +522,34 @@ const AdminDashboard = () => {
           </Col>
           <Col xs={12} sm={6} lg={3}>
             <ChartCard
-              title="INVENTORY OVERVIEW"
+              title="Vehicle Distribution"
               dropdownOptions={["Last 30 Days", "Last 90 Days", "Last Year"]}
               defaultDropdownValue="Last 30 Days"
               chartId="inventory"
             >
               <Doughnut
-                data={inventoryOverviewData}
+                data={{
+                  labels: vehicleInventory.distribution.map(d => d.type),
+                  datasets: [
+                    {
+                      data: vehicleInventory.distribution.map(d => d.count),
+                      backgroundColor: ["#4e73df", "#f1b44c", "#34c38f", "#e74c3c", "#8e44ad", "#16a085"],
+                      borderWidth: 1,
+                    },
+                  ],
+                }}
                 options={{
                   ...chartOptions,
                   cutout: "70%",
                   plugins: {
                     legend: {
-                      display: false,
+                      display: true,
+                      position: 'bottom',
+                      labels: {
+                        color: '#333',
+                        font: { size: 14 },
+                        padding: 20,
+                      },
                     },
                   },
                 }}
@@ -451,10 +563,11 @@ const AdminDashboard = () => {
             />
           </Col>
         </Row>
-        <Row className="g-2">
+        {/* Management tables row */}
+        <Row className="g-4 w-100 justify-content-center">
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card h-100">
-              <CardHeader>
+            <Card className="dashboard-card h-100 shadow-sm rounded-4">
+              <CardHeader style={{ background: '#f7fafc', borderBottom: '1px solid #e0e0e0', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
                 <h5 className="mb-0">RESERVATION MANAGEMENT</h5>
               </CardHeader>
               <CardBody className="p-0">
@@ -490,25 +603,13 @@ const AdminDashboard = () => {
                         <td>
                           <Button
                             className="btn btn-accept me-2"
-                            onClick={() =>
-                              handleAction(
-                                setReservations,
-                                reservation.id,
-                                "accepted"
-                              )
-                            }
+                            onClick={() => handleReservationAction(reservation.id, "accepted")}
                           >
                             Accept
                           </Button>
                           <Button
                             className="btn btn-reject"
-                            onClick={() =>
-                              handleAction(
-                                setReservations,
-                                reservation.id,
-                                "rejected"
-                              )
-                            }
+                            onClick={() => handleReservationAction(reservation.id, "rejected")}
                           >
                             Reject
                           </Button>
@@ -521,8 +622,8 @@ const AdminDashboard = () => {
             </Card>
           </Col>
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card h-100">
-              <CardHeader>
+            <Card className="dashboard-card h-100 shadow-sm rounded-4">
+              <CardHeader style={{ background: '#f7fafc', borderBottom: '1px solid #e0e0e0', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
                 <h5 className="mb-0">PAYMENT MANAGEMENT</h5>
               </CardHeader>
               <CardBody className="p-0">
@@ -558,17 +659,13 @@ const AdminDashboard = () => {
                         <td>
                           <Button
                             className="btn btn-accept me-2"
-                            onClick={() =>
-                              handleAction(setPayments, payment.id, "accepted")
-                            }
+                            onClick={() => handlePaymentAction(payment.id, "accepted")}
                           >
                             Accept
                           </Button>
                           <Button
                             className="btn btn-reject"
-                            onClick={() =>
-                              handleAction(setPayments, payment.id, "rejected")
-                            }
+                            onClick={() => handlePaymentAction(payment.id, "rejected")}
                           >
                             Reject
                           </Button>
@@ -581,8 +678,8 @@ const AdminDashboard = () => {
             </Card>
           </Col>
           <Col xs={12} lg={6}>
-            <Card className="dashboard-card h-100">
-              <CardHeader>
+            <Card className="dashboard-card h-100 shadow-sm rounded-4">
+              <CardHeader style={{ background: '#f7fafc', borderBottom: '1px solid #e0e0e0', borderTopLeftRadius: 16, borderTopRightRadius: 16 }}>
                 <h5 className="mb-0">ACCESSORIES MANAGEMENT</h5>
               </CardHeader>
               <CardBody>
@@ -628,23 +725,21 @@ const AdminDashboard = () => {
                       <th>Name</th>
                       <th>Price</th>
                       <th>Category</th>
+                      <th>Quantity</th>
                       <th>Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {accessories.map((accessory) => (
-                      <tr key={accessory.id}>
-                        <td>{accessory.name}</td>
-                        <td>{formatCurrency(accessory.price)}</td>
-                        <td>{accessory.category}</td>
+                      <tr key={accessory.AccessoryID}>
+                        <td>{accessory.AccessoryName}</td>
+                        <td>{formatCurrency(accessory.Price)}</td>
+                        <td>{accessory.VehicleType}</td>
+                        <td>{accessory.Quantity}</td>
                         <td>
                           <Button
                             className="btn btn-remove"
-                            onClick={() =>
-                              setAccessories((prev) =>
-                                prev.filter((item) => item.id !== accessory.id)
-                              )
-                            }
+                            onClick={() => handleRemoveAccessory(accessory.AccessoryID)}
                           >
                             Remove
                           </Button>

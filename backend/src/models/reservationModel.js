@@ -42,3 +42,49 @@ exports.createReservation = async (reservationData) => {
 
   return result;
 };
+
+exports.getReservationsByUserId = async (userId) => {
+  // 1. Get all reservations with vehicle type and all Vehicle table fields
+  const [reservations] = await db.query(
+    `SELECT r.*, v.*, v.VehiclePic
+     FROM Reservation r
+     JOIN Vehicle v ON r.VehicleID = v.VehicleID
+     WHERE r.UserID = ?
+     ORDER BY r.StartDate DESC`,
+    [userId]
+  );
+
+  // 2. For each reservation, fetch type-specific details
+  const detailedReservations = await Promise.all(reservations.map(async (reservation) => {
+    let typeTable = null;
+    let typeDetails = {};
+    switch ((reservation.Type || '').toLowerCase()) {
+      case 'car':
+        typeTable = 'car';
+        break;
+      case 'boat':
+        typeTable = 'boat';
+        break;
+      case 'motorcycle':
+        typeTable = 'motorcycle';
+        break;
+      case 'bicycle':
+        typeTable = 'bicycle';
+        break;
+      default:
+        typeTable = null;
+    }
+    if (typeTable) {
+      const [rows] = await db.query(
+        `SELECT * FROM ${typeTable} WHERE VehicleID = ?`,
+        [reservation.VehicleID]
+      );
+      if (rows && rows[0]) {
+        typeDetails = rows[0];
+      }
+    }
+    // Merge: Vehicle fields + type-specific fields + reservation fields
+    return { ...reservation, ...typeDetails };
+  }));
+  return detailedReservations;
+};

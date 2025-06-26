@@ -43,6 +43,10 @@ const vehicleOwnerRoutes = require('./src/routes/vehicleOwnerRoutes');
 const maintenanceRoutes = require('./src/routes/maintenanceRoutes');
 const notificationRoutes = require('./src/routes/notificationRoutes');
 const reviewRoutes = require("./src/routes/reviewRoutes");
+const AdmingetReservationsRoutes = require('./src/routes/AdmingetReservationsRoutes');
+const adminPaymentsRoutes = require('./src/routes/adminPaymentsRoutes');
+const adminNotificationsRoutes = require('./src/routes/adminNotificationsRoutes');
+const adminAccessoriesRoutes = require('./src/routes/adminAccessoriesRoutes');
 
 app.use("/api", searchRoutes);
 app.use("/api/auth", authRoutes);
@@ -60,7 +64,28 @@ app.use('/api/vehicle-owner', vehicleOwnerRoutes);
 app.use('/api/maintenance', maintenanceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use('/api/admin/reservations', AdmingetReservationsRoutes);
+app.use('/api/admin/payments', adminPaymentsRoutes);
+app.use('/api/admin/notifications', adminNotificationsRoutes);
+app.use('/api/admin/accessories', adminAccessoriesRoutes);
 
+// Log every incoming request
+app.use((req, res, next) => {
+  console.log(`[ROUTE LOG] Incoming: ${req.method} ${req.originalUrl}`);
+  // Monkey-patch res.json to log when a route is matched and sends JSON
+  const oldJson = res.json;
+  res.json = function (data) {
+    console.log(`[ROUTE LOG] Matched: ${req.method} ${req.originalUrl}`);
+    return oldJson.call(this, data);
+  };
+  next();
+});
+
+// Not found route (add logging)
+app.use((req, res, next) => {
+  console.warn('[NOT FOUND]', req.method, req.originalUrl);
+  res.status(404).json({ message: 'Endpoint not found', path: req.originalUrl });
+});
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Vehicle Rental System API ');
