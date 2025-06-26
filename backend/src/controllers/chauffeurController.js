@@ -90,6 +90,18 @@ exports.assignChauffeur = async (req, res) => {
     // 2. Mark chauffeur as pending
     await chauffeurModel.setChauffeurAvailability(selectedChauffeur.ChauffeurID, "Pending");
 
+    // 3. Notify user about assigned chauffeur
+    // Get user info for the reservation
+    const userModel = require('../models/userModel');
+    const user = await userModel.findById(reservationData.UserID);
+    await require('../models/notificationModel').createNotification({
+      recipientID: reservationData.UserID,
+      title: 'Chauffeur Assigned',
+      message: `${selectedChauffeur.Name} is your chauffeur.`,
+      type: 'ChauffeurAssignment',
+      broadcastGroup: null
+    });
+
     return res.status(200).json({
       message: "Chauffeur request sent. Awaiting response.",
       chauffeur: {

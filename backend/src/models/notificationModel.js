@@ -22,3 +22,9 @@ exports.createNotification = async ({
     throw error;
   }
 };
+
+// Get all notifications
+exports.getAll = async () => {
+  const [rows] = await db.query('SELECT * FROM Notification ORDER BY NotificationID DESC');
+  return rows;
+};
