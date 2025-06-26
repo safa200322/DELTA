@@ -7,7 +7,7 @@ const CarItem = ({ item, type }) => {
   const navigate = useNavigate();
 
   // Debug: log the image link for each car item
-  console.debug("[CarItem] vehiclepic src:", item.vehiclepic, "for", item.carName || item.model);
+  console.debug("[CarItem] vehiclepic src:", item.VehiclePic, "for", item.carName || item.model);
 
   const handleBook = () => {
     const carId = item.VehicleID;
@@ -32,7 +32,7 @@ const CarItem = ({ item, type }) => {
     <Col lg="12" className="mb-4">
       <div className="car__item">
         <div className="car__item-img">
-          <img src={item.vehiclepic || "https://placehold.co/300x200?text=Image+Not+Available"} alt={item.model} className="w-100" />
+          <img src={item.VehiclePic || "https://placehold.co/300x200?text=Image+Not+Available"} alt={item.model} className="w-100" />
           <span className="car-type-badge">{type.toUpperCase()}</span>
         </div>
         <div className="car__item-content">
