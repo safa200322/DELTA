@@ -1,11 +1,11 @@
+
 const express = require('express');
+const PaymentController = require('../controllers/paymentController');
+const auth = require('../middleware/authMiddleware');
+
 const router = express.Router();
-const paymentController = require('../controllers/paymentController');
 
-// Create a new payment
-router.post('/create', paymentController.createPayment);
+router.post('/create', auth, PaymentController.createPayment);
 
-// Mark owner as paid for a payment
-router.patch('/markOwnerPaid/:paymentId', paymentController.markOwnerPaid);
-
+router.patch('/mark-paid/:paymentId', auth, PaymentController.markOwnerPaid);  
 module.exports = router;

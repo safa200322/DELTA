@@ -1,51 +1,43 @@
+const accessoryModel = require('../models/accessoryModel');
 const db = require('../db');
 
-// ✅ Create a new accessory
-exports.createAccessory = (req, res) => {
-  const { Type, Quantity, Price } = req.body;
-
-  if (!Type || !Quantity || !Price) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
-  const query = 'INSERT INTO Accessory (Type, Quantity, Price) VALUES (?, ?, ?)';
-  db.query(query, [Type, Quantity, Price], (err, result) => {
-    if (err) return res.status(500).json({ message: "Error adding accessory", error: err });
+exports.createAccessory = async (req, res) => {
+  try {
+    const { AccessoryName, VehicleType, Quantity, Price } = req.body;
+    if (!AccessoryName || !VehicleType || !Quantity || !Price) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    const result = await accessoryModel.createAccessory({ AccessoryName, VehicleType, Quantity, Price });
     res.status(201).json({ message: "Accessory created", accessoryId: result.insertId });
-  });
+  } catch (err) {
+    res.status(500).json({ message: "Error adding accessory", error: err });
+  }
 };
 
-// ✅ Get accessories for a vehicle (based on vehicle type)
-exports.getAccessoriesForVehicle = (req, res) => {
-  const vehicleId = req.params.vehicleId;
-
-  const getTypeQuery = 'SELECT Type FROM Vehicle WHERE VehicleID = ?';
-  db.query(getTypeQuery, [vehicleId], (err, result) => {
-    if (err) return res.status(500).json({ message: "Error fetching vehicle type", error: err });
+exports.getAccessoriesForVehicle = async (req, res) => {
+  try {
+    const vehicleId = req.params.vehicleId;
+    const getTypeQuery = 'SELECT VehicleType FROM Vehicle WHERE VehicleID = ?';
+    const [result] = await db.query(getTypeQuery, [vehicleId]);
     if (result.length === 0) return res.status(404).json({ message: "Vehicle not found" });
-
-    const vehicleType = result[0].Type;
-
-    const accessoryQuery = 'SELECT * FROM Accessory WHERE Type = ?';
-    db.query(accessoryQuery, [vehicleType], (err, accessories) => {
-      if (err) return res.status(500).json({ message: "Error fetching accessories", error: err });
-      res.status(200).json(accessories);
-    });
-  });
+    const vehicleType = result[0].VehicleType;
+    const accessoryQuery = 'SELECT * FROM Accessory WHERE VehicleType = ?';
+    const [accessories] = await db.query(accessoryQuery, [vehicleType]);
+    res.status(200).json(accessories);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching accessories", error: err });
+  }
 };
 
-// ✅ Delete accessory
-exports.deleteAccessory = (req, res) => {
-  const accessoryId = req.params.accessoryId;
-
-  const query = 'DELETE FROM Accessory WHERE AccessoryID = ?';
-  db.query(query, [accessoryId], (err, result) => {
-    if (err) return res.status(500).json({ message: "Error deleting accessory", error: err });
-
+exports.deleteAccessory = async (req, res) => {
+  try {
+    const accessoryId = req.params.accessoryId;
+    const result = await accessoryModel.deleteAccessory(accessoryId);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Accessory not found" });
     }
-
     res.status(200).json({ message: "Accessory deleted successfully" });
-  });
+  } catch (err) {
+    res.status(500).json({ message: "Error deleting accessory", error: err });
+  }
 };
