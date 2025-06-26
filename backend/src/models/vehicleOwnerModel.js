@@ -87,28 +87,21 @@ const VehicleOwnerModel = {
     const query = `
       SELECT 
         vo.TotalEarnings,
-        COALESCE(monthly.MonthlyEarnings, 0) as MonthlyEarnings,
-        COUNT(r.ReservationID) as TotalRentals,
-        COALESCE(AVG(p.Amount), 0) as AverageRental
+        COALESCE(SUM(CASE 
+          WHEN MONTH(r.StartDate) = MONTH(CURRENT_DATE())
+          AND YEAR(r.StartDate) = YEAR(CURRENT_DATE())
+          AND p.Status = 'Completed'
+          THEN p.Amount 
+          ELSE 0 
+        END), 0) as MonthlyEarnings,
+        COUNT(CASE WHEN p.Status = 'Completed' THEN r.ReservationID END) as TotalRentals,
+        COALESCE(AVG(CASE WHEN p.Status = 'Completed' THEN p.Amount END), 0) as AverageRental
       FROM vehicleowner vo
       LEFT JOIN Vehicle v ON vo.OwnerID = v.ownerID
       LEFT JOIN Reservation r ON v.VehicleID = r.VehicleID
       LEFT JOIN Payment p ON r.ReservationID = p.ReservationID
-      LEFT JOIN (
-        SELECT 
-          v2.ownerID,
-          SUM(p2.Amount) as MonthlyEarnings
-        FROM Vehicle v2
-        LEFT JOIN Reservation r2 ON v2.VehicleID = r2.VehicleID
-        LEFT JOIN Payment p2 ON r2.ReservationID = p2.ReservationID
-        WHERE MONTH(r2.StartDate) = MONTH(CURRENT_DATE())
-        AND YEAR(r2.StartDate) = YEAR(CURRENT_DATE())
-        AND p2.Status = 'Completed'
-        GROUP BY v2.ownerID
-      ) monthly ON vo.OwnerID = monthly.ownerID
       WHERE vo.OwnerID = ?
-      AND (p.Status = 'Completed' OR p.Status IS NULL)
-      GROUP BY vo.OwnerID
+      GROUP BY vo.OwnerID, vo.TotalEarnings
     `;
     const [rows] = await db.query(query, [ownerId]);
     return rows[0] || { TotalEarnings: 0, MonthlyEarnings: 0, TotalRentals: 0, AverageRental: 0 };

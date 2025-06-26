@@ -37,7 +37,6 @@ import PaymentInfo from "./pages/ChauffeurPaymentInfo";
 import UserProfile from "./pages/Rentee/RenteeProfile";
 import RenteeRentalReservations from "./pages/Rentee/RenteeRentalReservations";
 import RenteeEarningsandPayment from "./pages/Rentee/RenteeEarningsandPayments";
-import RenteeMaintaninceandDocuments from "./pages/Rentee/RenteeMaintenanceandDocuments";
 import RenteeNotifications from "./pages/Rentee/RenteeNotifications";
 import RenteeReviews from "./pages/Rentee/RenteeReviews";
 import RenteeSecurity from "./pages/Rentee/RenteeSecurity";
@@ -107,10 +106,6 @@ function App() {
           <Route
             path="/profile/rentee-earnings-and-payments"
             element={<RenteeEarningsandPayment />}
-          />
-          <Route
-            path="/profile/rentee-maintenance-and-documents"
-            element={<RenteeMaintaninceandDocuments />}
           />
           <Route
             path="/profile/rentee-notifications"

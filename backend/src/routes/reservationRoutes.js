@@ -7,6 +7,10 @@ router.post('/create', authenticateToken, reservationController.createReservatio
 router.get('/my', authenticateToken, reservationController.getUserReservations);
 router.delete('/cancel/:id', authenticateToken, reservationController.cancelUserReservation);
 
+// Vehicle owner routes
+const vehicleOwnerAuth = require('../middleware/vehicleOwnerAuth');
+router.get('/my-vehicles', vehicleOwnerAuth, reservationController.getVehicleOwnerReservations);
+
 // Admin
 const adminAuth = require('../middleware/adminAuth');
 router.get('/', adminAuth, reservationController.getAllReservations);

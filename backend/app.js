@@ -38,6 +38,8 @@ const boatFilterRoutes = require('./src/routes/boatFilterRoutes');
 const bicycleFilterRoutes = require("./src/routes/bicycleFilterRoutes");
 const motorcycleFilterRoutes = require('./src/routes/motorcycleFilterRoutes');
 const vehicleOwnerRoutes = require('./src/routes/vehicleOwnerRoutes');
+const maintenanceRoutes = require('./src/routes/maintenanceRoutes');
+const notificationRoutes = require('./src/routes/notificationRoutes');
 
 app.use("/api", searchRoutes);
 app.use("/api/auth", authRoutes);
@@ -52,6 +54,8 @@ app.use('/api/boats', boatFilterRoutes);
 app.use('/api/bicycles', bicycleFilterRoutes);
 app.use('/api/motorcycles', motorcycleFilterRoutes);
 app.use('/api/vehicle-owner', vehicleOwnerRoutes);
+app.use('/api/maintenance', maintenanceRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 
 app.get('/', (req, res) => {

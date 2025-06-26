@@ -174,7 +174,7 @@
 
 /* Earnings Card */
 .earnings-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
   color: white;
   border-radius: 10px;
   padding: 1.5rem;
@@ -183,32 +183,55 @@
 .earnings-card .section-title {
   color: white;
   font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .earn-box {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   padding: 1rem;
   text-align: center;
   flex: 1;
+  backdrop-filter: blur(10px);
 }
 
 .earn-box h3 {
   margin: 0;
   font-size: 1.5rem;
   font-weight: bold;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .earn-box p {
   margin: 0;
   font-size: 0.9rem;
-  opacity: 0.9;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
 }
 
 .payout-item {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 0.75rem;
+  color: white;
+}
+
+.recent-payouts h6 {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.recent-payouts .text-muted {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.recent-payouts .text-success {
+  color: #2ecc71 !important;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Account Settings */
@@ -216,13 +239,39 @@
   border: 1px solid #dee2e6;
   border-radius: 10px;
   padding: 1.5rem;
+  background: #f8f9fa;
+}
+
+.account-settings-card .section-title {
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .account-box {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: white;
+  border: 1px solid #e9ecef !important;
 }
 
 .account-box:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.account-box h6 {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.account-box p {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.account-box .btn {
+  font-weight: 500;
+  text-transform: uppercase;
+  font-size: 0.8rem;
 }

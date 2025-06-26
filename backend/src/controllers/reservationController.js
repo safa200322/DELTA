@@ -59,9 +59,6 @@ exports.cancelUserReservation = async (req, res) => {
   }
 };
 
-
-
-
 exports.getAllReservations = async (req, res) => {
   try {
     const reservations = await ReservationModel.getAllReservations();
@@ -98,5 +95,16 @@ exports.deleteReservation = async (req, res) => {
     res.json({ message: 'Reservation deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete reservation', details: error.message });
+  }
+};
+
+exports.getVehicleOwnerReservations = async (req, res) => {
+  try {
+    const ownerID = req.user.id;
+    const reservations = await ReservationModel.getReservationsByVehicleOwner(ownerID);
+    res.json(reservations);
+  } catch (error) {
+    console.error("❌ Error fetching vehicle owner reservations:", error);
+    res.status(500).json({ error: 'Failed to fetch reservations', details: error.message });
   }
 };

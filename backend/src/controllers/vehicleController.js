@@ -198,9 +198,57 @@ exports.rejectVehicle = async (req, res) => {
 exports.deleteVehicle = async (req, res) => {
   try {
     const vehicleID = req.params.id;
+    
+    // If user is authenticated as vehicle owner, verify ownership
+    if (req.user && req.user.id) {
+      const vehicle = await vehicleModel.getVehicleById(vehicleID);
+      if (!vehicle) {
+        return res.status(404).json({ error: 'Vehicle not found' });
+      }
+      if (vehicle.ownerID && vehicle.ownerID !== req.user.id) {
+        return res.status(403).json({ error: 'Unauthorized: Vehicle does not belong to you' });
+      }
+    }
+    
     await vehicleModel.deleteVehicle(vehicleID);
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+exports.deactivateVehicle = async (req, res) => {
+  try {
+    const vehicleID = req.params.id;
+    const ownerID = req.user.id;
+    
+    console.log('Deactivate request - vehicleID:', vehicleID, 'ownerID:', ownerID, 'type:', typeof ownerID);
+    
+    // First verify the vehicle belongs to the owner
+    const vehicle = await vehicleModel.getVehicleById(vehicleID);
+    console.log('Retrieved vehicle:', vehicle);
+    
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Vehicle not found' });
+    }
+    
+    // Convert both to strings for comparison to handle type mismatches
+    const vehicleOwnerID = String(vehicle.ownerID);
+    const requestOwnerID = String(ownerID);
+    
+    console.log('Comparing ownerIDs - vehicle:', vehicleOwnerID, 'request:', requestOwnerID);
+    
+    if (vehicleOwnerID !== requestOwnerID) {
+      return res.status(403).json({ 
+        error: 'Unauthorized: Vehicle not found or does not belong to you',
+        debug: { vehicleOwnerID, requestOwnerID }
+      });
+    }
+    
+    await vehicleModel.updateVehicleStatus(vehicleID, 'Maintenance');
+    res.status(200).json({ message: 'Vehicle deactivated successfully' });
+  } catch (err) {
+    console.error('Deactivate vehicle error:', err);
     res.status(500).json({ error: err.message });
   }
 };

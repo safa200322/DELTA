@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
-import { Container, Row, Col, Nav, NavItem } from "reactstrap";
+import { Container, Row, Col } from "reactstrap";
 import "../../styles/user-profile.css";
 import ChaffeurVehicleManagement from "../../pages/ChauffeurWorkAvailability";
+import RenteeSidebar from "../../components/RenteeSidebar";
 
 const RenteeReviews = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -37,77 +37,10 @@ const RenteeReviews = () => {
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <Col
-            xs="12"
-            md="3"
-            lg="2"
-            className={`sidebar ${sidebarOpen ? "sidebar-open" : ""}`}
-          >
-            <div className="sidebar-header">
-              <h3>Rentee Profile</h3>
-              <i
-                className="ri-menu-line sidebar-toggle d-md-none"
-                onClick={toggleSidebar}
-              ></i>
-            </div>
-            <Nav vertical className="sidebar-nav">
-              <NavItem>
-                <NavLink to="/profile/rentee-profile" className="nav-link">
-                  <i className="ri-user-line"></i> Personal Info
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-vehicle-management"
-                  className="nav-link"
-                >
-                  <i className="ri-briefcase-line"></i> Vehicle Management
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-rental-reservations"
-                  className="nav-link"
-                >
-                  <i className="ri-calendar-line"></i> Rental reservations
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-earnings-and-payments"
-                  className="nav-link"
-                >
-                  <i className="ri-file-text-line"></i> Earnings & Payments
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-maintenance-and-documents"
-                  className="nav-link"
-                >
-                  <i className="ri-settings-3-line"></i> Maintenance & Documents
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink
-                  to="/profile/rentee-notifications"
-                  className="nav-link"
-                >
-                  <i className="ri-wallet-line"></i> Notifications
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-reviews" className="nav-link">
-                  <i className="ri-wallet-line"></i> Reviews
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink to="/profile/rentee-security" className="nav-link">
-                  <i className="ri-wallet-line"></i> Security
-                </NavLink>
-              </NavItem>
-            </Nav>
-          </Col>
+          <RenteeSidebar 
+            sidebarOpen={sidebarOpen} 
+            toggleSidebar={toggleSidebar} 
+          />
 
           <Col xs="12" md="9" lg="10" className="content-area">
             <Row className="mt-4">
