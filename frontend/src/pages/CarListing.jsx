@@ -94,9 +94,9 @@ const CarListing = () => {
       return { brands, models, transmissions, colors, seatOptions, maxPrice };
     }, [allCars]);
 
-    useEffect(() => {
-      setSelectedPrice(maxPrice);
-    }, [maxPrice]);
+  useEffect(() => {
+    setSelectedPrice(maxPrice);
+  }, [maxPrice]);
 
 
   // useEffect to apply filters when filter states change
@@ -130,7 +130,7 @@ const CarListing = () => {
       );
     }
     if (selectedPrice < maxPrice) {
-        filtered = filtered.filter((car) => car.Price <= selectedPrice);
+      filtered = filtered.filter((car) => car.Price <= selectedPrice);
     }
 
 

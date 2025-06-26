@@ -133,12 +133,12 @@ const verifyPassword = async (plainPassword, user) => {
  */
 const updatePassword = async (user, hashedPassword) => {
   const db = require('../db');
-  
+
   const passwordField = user.type === 'vehicle-owner' ? 'PasswordHash' : 'Password';
-  
+
   const query = `UPDATE ${user.tableName} SET ${passwordField} = ? WHERE ${user.idField} = ?`;
   const [result] = await db.execute(query, [hashedPassword, user.id]);
-  
+
   return result.affectedRows > 0;
 };
 
@@ -149,10 +149,10 @@ const updatePassword = async (user, hashedPassword) => {
  */
 const deleteUser = async (user) => {
   const db = require('../db');
-  
+
   const query = `DELETE FROM ${user.tableName} WHERE ${user.idField} = ?`;
   const [result] = await db.execute(query, [user.id]);
-  
+
   return result.affectedRows > 0;
 };
 
@@ -164,9 +164,9 @@ const deleteUser = async (user) => {
  */
 const updateUserProfile = async (user, profileData) => {
   const db = require('../db');
-  
+
   const { name, email, phone } = profileData;
-  
+
   // Define field mappings for each user type
   const fieldMappings = {
     admin: { name: 'Name', email: 'Email', phone: 'PhoneNumber' },
@@ -174,15 +174,15 @@ const updateUserProfile = async (user, profileData) => {
     'vehicle-owner': { name: 'FullName', email: 'Email', phone: 'PhoneNumber' },
     user: { name: 'Name', email: 'Email', phone: 'PhoneNumber' }
   };
-  
+
   const fields = fieldMappings[user.type];
   if (!fields) {
     throw new Error(`Unknown user type: ${user.type}`);
   }
-  
+
   const updateFields = [];
   const updateValues = [];
-  
+
   if (name) {
     updateFields.push(`${fields.name} = ?`);
     updateValues.push(name);
@@ -195,16 +195,16 @@ const updateUserProfile = async (user, profileData) => {
     updateFields.push(`${fields.phone} = ?`);
     updateValues.push(phone);
   }
-  
+
   if (updateFields.length === 0) {
     return false; // No fields to update
   }
-  
+
   updateValues.push(user.id);
-  
+
   const query = `UPDATE ${user.tableName} SET ${updateFields.join(', ')} WHERE ${user.idField} = ?`;
   const [result] = await db.execute(query, updateValues);
-  
+
   return result.affectedRows > 0;
 };
 
@@ -216,7 +216,7 @@ const updateUserProfile = async (user, profileData) => {
  */
 const updateProfilePicture = async (user, profilePictureUrl) => {
   const db = require('../db');
-  
+
   // Define profile picture field for each user type
   const profilePictureFields = {
     admin: 'ProfilePictureUrl', // Assuming this exists or will be added
@@ -224,15 +224,15 @@ const updateProfilePicture = async (user, profilePictureUrl) => {
     'vehicle-owner': 'ProfileImage',
     user: 'ProfilePictureUrl'
   };
-  
+
   const pictureField = profilePictureFields[user.type];
   if (!pictureField) {
     throw new Error(`Profile picture not supported for user type: ${user.type}`);
   }
-  
+
   const query = `UPDATE ${user.tableName} SET ${pictureField} = ? WHERE ${user.idField} = ?`;
   const [result] = await db.execute(query, [profilePictureUrl, user.id]);
-  
+
   return result.affectedRows > 0;
 };
 

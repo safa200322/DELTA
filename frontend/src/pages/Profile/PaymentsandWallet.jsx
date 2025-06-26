@@ -26,7 +26,7 @@ const PaymentsWallet = () => {
       if (response.ok) {
         const data = await response.json();
         setPayments(data);
-        
+
         // Calculate total spent
         const total = data.reduce((sum, payment) => sum + (payment.TotalPrice || payment.Amount || 0), 0);
         setTotalSpent(total);
@@ -297,7 +297,7 @@ const PaymentsWallet = () => {
             <Col lg="8">
               <div className="payment-section">
                 <h3 className="section-title">Payments & Wallet</h3>
-                
+
                 {/* Wallet Summary */}
                 <div className="wallet-summary">
                   <div className="summary-card">
@@ -333,35 +333,35 @@ const PaymentsWallet = () => {
                             {payment.Status}
                           </span>
                         </div>
-                        
+
                         <div className="payment-info-grid">
                           <div className="payment-info-item">
                             <strong>Amount Paid:</strong> {formatCurrency(payment.TotalPrice || payment.Amount)}
                           </div>
-                          
+
                           {payment.OwnerName && (
                             <div className="payment-info-item">
                               <strong>Paid To:</strong> {payment.OwnerName}
                               {payment.OwnerPhone && ` (${payment.OwnerPhone})`}
                             </div>
                           )}
-                          
+
                           <div className="payment-info-item">
                             <strong>Rental Period:</strong> {formatDate(payment.StartDate)} - {formatDate(payment.EndDate)}
                           </div>
-                          
+
                           <div className="payment-info-item">
                             <strong>Pickup:</strong> {payment.PickupLocation}
                           </div>
-                          
+
                           <div className="payment-info-item">
                             <strong>Dropoff:</strong> {payment.DropoffLocation}
                           </div>
-                          
+
                           <div className="payment-info-item">
                             <strong>Payment Method:</strong> {payment.PaymentMethod || 'Card'}
                           </div>
-                          
+
                           {payment.ChauffeurName && (
                             <div className="payment-info-item">
                               <strong>Chauffeur:</strong> {payment.ChauffeurName}
@@ -372,14 +372,14 @@ const PaymentsWallet = () => {
                               )}
                             </div>
                           )}
-                          
+
                           {payment.CardNumber && (
                             <div className="payment-info-item">
                               <strong>Card:</strong> **** **** **** {payment.CardNumber.slice(-4)}
                             </div>
                           )}
                         </div>
-                        
+
                         {/* Cost Breakdown */}
                         {payment.TotalPrice && (
                           <div className="cost-breakdown">

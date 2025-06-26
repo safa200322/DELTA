@@ -6,7 +6,7 @@ const ProfileRedirect = () => {
 
   useEffect(() => {
     const userType = localStorage.getItem('userType');
-    
+
     switch (userType) {
       case 'user':
         navigate('/profile/ProfileOverview');

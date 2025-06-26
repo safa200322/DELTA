@@ -417,15 +417,15 @@
   .payment-info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .wallet-summary {
     grid-template-columns: 1fr;
   }
-  
+
   .payment-card {
     flex-direction: column;
   }
-  
+
   .payment-header {
     flex-direction: column;
     align-items: flex-start;
@@ -669,15 +669,15 @@
   .payment-info-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .wallet-summary {
     grid-template-columns: 1fr;
   }
-  
+
   .payment-card {
     flex-direction: column;
   }
-  
+
   .payment-header {
     flex-direction: column;
     align-items: flex-start;

@@ -9,7 +9,7 @@ exports.getVehicleMaintenance = async (req, res) => {
     // Verify the vehicle belongs to the owner
     const vehicle = await VehicleOwnerModel.getVehiclesByOwner(ownerId);
     const ownedVehicle = vehicle.find(v => v.VehicleID == vehicleId);
-    
+
     if (!ownedVehicle) {
       return res.status(403).json({ message: 'Vehicle not found or unauthorized' });
     }
@@ -31,7 +31,7 @@ exports.addMaintenance = async (req, res) => {
     // Verify the vehicle belongs to the owner
     const vehicles = await VehicleOwnerModel.getVehiclesByOwner(ownerId);
     const ownedVehicle = vehicles.find(v => v.VehicleID == vehicleId);
-    
+
     if (!ownedVehicle) {
       return res.status(403).json({ message: 'Vehicle not found or unauthorized' });
     }
@@ -48,7 +48,7 @@ exports.addMaintenance = async (req, res) => {
     };
 
     const result = await MaintenanceModel.createMaintenance(maintenanceData);
-    
+
     res.status(201).json({
       message: 'Maintenance record created successfully',
       maintenanceId: result.insertId
@@ -84,7 +84,7 @@ exports.updateMaintenance = async (req, res) => {
 
     const vehicles = await VehicleOwnerModel.getVehiclesByOwner(ownerId);
     const ownedVehicle = vehicles.find(v => v.VehicleID == maintenance.VehicleID);
-    
+
     if (!ownedVehicle) {
       return res.status(403).json({ message: 'Unauthorized' });
     }
@@ -115,7 +115,7 @@ exports.deleteMaintenance = async (req, res) => {
 
     const vehicles = await VehicleOwnerModel.getVehiclesByOwner(ownerId);
     const ownedVehicle = vehicles.find(v => v.VehicleID == maintenance.VehicleID);
-    
+
     if (!ownedVehicle) {
       return res.status(403).json({ message: 'Unauthorized' });
     }

@@ -1,4 +1,55 @@
 const db = require('../db');
+const vehicleModel = require('../models/vehicleModel');
+const accessoryModel = require('../models/accessoryModel');
+
+const COMMISSION_RATES = {
+  car: 0.15,
+  boat: 0.20,
+  motorcycle: 0.12,
+  bicycle: 0.05
+};
+
+const FUEL_PRICE = {
+  Petrol: 50,
+  Diesel: 60,
+  Electric: 20,
+  Hybrid: 50
+};
+
+function calculateDays(startDate, endDate) {
+  return Math.max(1, Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)));
+}
+
+function calculateChauffeurAmount(startDate, endDate) {
+  const dailyRate = 40; // $40 per day for chauffeur
+  const days = calculateDays(startDate, endDate);
+  return days * dailyRate;
+}
+
+async function calculateTotalPrice({ vehicleId, chauffeurId, accessoryId, startDate, endDate }) {
+  const vehicle = await vehicleModel.getVehicleById(vehicleId);
+  const vehiclePrice = vehicle.Price;
+  const vehicleType = vehicle.Type;
+  const fuelType = vehicle.FuelType;
+
+  const accessoryPrice = accessoryId ? await accessoryModel.getAccessoryPrice(accessoryId) : 0;
+  const chauffeurAmount = chauffeurId ? calculateChauffeurAmount(startDate, endDate) : 0;
+
+  const commissionRate = COMMISSION_RATES[vehicleType] || 0;
+  const commissionAmount = vehiclePrice * commissionRate;
+  const fuelPrice = FUEL_PRICE[fuelType] || 0;
+
+  const days = calculateDays(startDate, endDate);
+  const totalPrice = (days * vehiclePrice) + accessoryPrice + chauffeurAmount + fuelPrice;
+  const ownerEarnings = vehiclePrice - commissionAmount - fuelPrice;
+
+  return {
+    totalPrice,
+    commissionAmount,
+    ownerEarnings,
+    chauffeurAmount
+  };
+}
 
 const PaymentModel = {
   async createPayment(paymentData) {
@@ -7,27 +58,24 @@ const PaymentModel = {
       PaymentMethod, TotalPrice, CommissionRate, CommissionAmount, OwnerEarning, PaidOut, ChauffeurAmount
     } = paymentData;
 
-    const [result] = await db.execute(
-      `INSERT INTO Payment 
-        (ReservationID, Amount, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod, 
-         TotalPrice, CommissionRate, CommissionAmount, OwnerEarning, PaidOut, ChauffeurAmount)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
+    const query = `
+      INSERT INTO Payment (
         ReservationID, Amount, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod,
         TotalPrice, CommissionRate, CommissionAmount, OwnerEarning, PaidOut, ChauffeurAmount
-      ]
-    );
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const [result] = await db.execute(query, [
+      ReservationID, Amount, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod,
+      TotalPrice, CommissionRate, CommissionAmount, OwnerEarning, PaidOut, ChauffeurAmount
+    ]);
     return result;
   },
 
   async getUserPayments(userID) {
     const query = `
       SELECT 
-        p.*,
-        r.StartDate,
-        r.EndDate,
-        r.PickupLocation,
-        r.DropoffLocation,
+        p.*, r.StartDate, r.EndDate, r.PickupLocation, r.DropoffLocation,
         CASE 
           WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
           WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
@@ -35,10 +83,7 @@ const PaymentModel = {
           WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
           ELSE 'Unknown Vehicle'
         END as VehicleDetails,
-        v.Type as VehicleType,
-        v.VehiclePic,
-        vo.FullName as OwnerName,
-        vo.PhoneNumber as OwnerPhone,
+        v.Type as VehicleType, v.VehiclePic, vo.FullName as OwnerName, vo.PhoneNumber as OwnerPhone,
         ch.Name as ChauffeurName
       FROM Payment p
       JOIN Reservation r ON p.ReservationID = r.ReservationID
@@ -57,12 +102,10 @@ const PaymentModel = {
   },
 
   async markOwnerPaid(paymentId) {
-    const [result] = await db.execute(
-      `UPDATE Payment SET PaidOut = 1 WHERE PaymentID = ?`,
-      [paymentId]
-    );
+    const query = `UPDATE Payment SET PaidOut = 1 WHERE PaymentID = ?`;
+    const [result] = await db.execute(query, [paymentId]);
     return result;
   }
 };
 
-module.exports = PaymentModel;
+module.exports = { PaymentModel, calculateTotalPrice, calculateChauffeurAmount };

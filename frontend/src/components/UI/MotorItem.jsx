@@ -17,22 +17,22 @@ const MotorItem = ({ item, type }) => {
       </div>
       <div className="car__item-content">
         <h4 className="car__item-title">{item.Brand} {item.Type}</h4>
-        
+
         <div className="car__item-info d-flex justify-content-between mt-3">
-            <span className="d-flex align-items-center gap-1">
-              <i className="ri-timer-flash-line"></i> {item.Engine} cc
-            </span>
-            <span className="d-flex align-items-center gap-1">
-              <i className="ri-calendar-line"></i> {item.Year}
-            </span>
+          <span className="d-flex align-items-center gap-1">
+            <i className="ri-timer-flash-line"></i> {item.Engine} cc
+          </span>
+          <span className="d-flex align-items-center gap-1">
+            <i className="ri-calendar-line"></i> {item.Year}
+          </span>
         </div>
         <div className="car__item-info d-flex justify-content-between mt-3">
-             <span className="d-flex align-items-center gap-1">
-                <i className="ri-paint-brush-line"></i> {item.color}
-            </span>
-            <span className="d-flex align-items-center gap-1">
-              <i className="ri-map-pin-line"></i> {item.Location}
-            </span>
+          <span className="d-flex align-items-center gap-1">
+            <i className="ri-paint-brush-line"></i> {item.color}
+          </span>
+          <span className="d-flex align-items-center gap-1">
+            <i className="ri-map-pin-line"></i> {item.Location}
+          </span>
         </div>
 
         <div className="car__item-price">

@@ -14,7 +14,7 @@ const BoatListing = () => {
   const [displayedBoats, setDisplayedBoats] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Add loading state
-  
+
   // Filter states
   const [selectedPrice, setSelectedPrice] = useState(1000);
   const [selectedCapacity, setSelectedCapacity] = useState(20);
@@ -66,26 +66,26 @@ const BoatListing = () => {
   // Apply filters
   useEffect(() => {
     let filtered = [...allBoats];
-    
+
     if (selectedBoatType) {
-      filtered = filtered.filter(boat => 
+      filtered = filtered.filter(boat =>
         boat.BoatType && boat.BoatType.toLowerCase() === selectedBoatType.toLowerCase());
     }
-    
+
     if (selectedBrand) {
-      filtered = filtered.filter(boat => 
+      filtered = filtered.filter(boat =>
         boat.Brand && boat.Brand.toLowerCase() === selectedBrand.toLowerCase());
     }
-    
+
     if (selectedEngineType) {
-      filtered = filtered.filter(boat => 
+      filtered = filtered.filter(boat =>
         boat.EngineType && boat.EngineType.toLowerCase() === selectedEngineType.toLowerCase());
     }
-    
+
     if (selectedCapacity < maxCapacity) {
       filtered = filtered.filter(boat => boat.Capacity <= selectedCapacity);
     }
-    
+
     if (selectedPrice < maxPrice) {
       filtered = filtered.filter(boat => boat.Price <= selectedPrice);
     }
@@ -95,7 +95,7 @@ const BoatListing = () => {
 
   const toggleDropdown = () => setDropdownOpen((prev) => !prev);
   const toggleFilterPanel = () => setIsFilterOpen((prev) => !prev);
-  
+
   const handleResetFilters = () => {
     setSelectedPrice(maxPrice);
     setSelectedCapacity(maxCapacity);
@@ -126,42 +126,42 @@ const BoatListing = () => {
               <Collapse isOpen={isFilterOpen} className="d-lg-block filter-panel">
                 <div className="filter-panel-content">
                   <h5 className="filter-title">Filters</h5>
-                  
+
                   <div className="filter-group">
                     <label className="filter-label">Price ($/day)</label>
                     <div className="price-range-inputs">
-                      <input 
-                        type="range" 
-                        className="price-slider" 
-                        min={0} 
-                        max={maxPrice} 
-                        value={selectedPrice} 
-                        onChange={(e) => setSelectedPrice(parseInt(e.target.value))} 
+                      <input
+                        type="range"
+                        className="price-slider"
+                        min={0}
+                        max={maxPrice}
+                        value={selectedPrice}
+                        onChange={(e) => setSelectedPrice(parseInt(e.target.value))}
                       />
                       <span className="price-range-value">
                         $0 - ${selectedPrice}
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="filter-group">
                     <label className="filter-label">Capacity (People)</label>
-                    <input 
-                      type="range" 
-                      className="seats-slider" 
-                      min={1} 
-                      max={maxCapacity} 
-                      value={selectedCapacity} 
-                      onChange={(e) => setSelectedCapacity(parseInt(e.target.value))} 
+                    <input
+                      type="range"
+                      className="seats-slider"
+                      min={1}
+                      max={maxCapacity}
+                      value={selectedCapacity}
+                      onChange={(e) => setSelectedCapacity(parseInt(e.target.value))}
                     />
                     <span className="seats-range-value">{selectedCapacity} People</span>
                   </div>
-                  
+
                   <div className="filter-group">
                     <label className="filter-label">Boat Type</label>
-                    <select 
-                      className="filter-dropdown" 
-                      value={selectedBoatType} 
+                    <select
+                      className="filter-dropdown"
+                      value={selectedBoatType}
                       onChange={(e) => setSelectedBoatType(e.target.value)}
                     >
                       <option value="">Select Type</option>
@@ -172,12 +172,12 @@ const BoatListing = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="filter-group">
                     <label className="filter-label">Brand</label>
-                    <select 
-                      className="filter-dropdown" 
-                      value={selectedBrand} 
+                    <select
+                      className="filter-dropdown"
+                      value={selectedBrand}
                       onChange={(e) => setSelectedBrand(e.target.value)}
                     >
                       <option value="">Select Brand</option>
@@ -188,12 +188,12 @@ const BoatListing = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   <div className="filter-group">
                     <label className="filter-label">Engine Type</label>
-                    <select 
-                      className="filter-dropdown" 
-                      value={selectedEngineType} 
+                    <select
+                      className="filter-dropdown"
+                      value={selectedEngineType}
                       onChange={(e) => setSelectedEngineType(e.target.value)}
                     >
                       <option value="">Select Engine Type</option>
@@ -204,7 +204,7 @@ const BoatListing = () => {
                       ))}
                     </select>
                   </div>
-                  
+
                   <Button color="secondary" className="reset-filters-btn" onClick={handleResetFilters}>
                     Reset Filters
                   </Button>

@@ -14,23 +14,23 @@ const VehicleSkeletonItem = () => {
         <div className="car__item-content">
           {/* Skeleton for title */}
           <div className="skeleton-title skeleton-pulse"></div>
-          
+
           {/* Skeleton for info rows */}
           <div className="car__item-info d-flex justify-content-between mt-3">
             <span className="skeleton-detail skeleton-pulse"></span>
             <span className="skeleton-detail skeleton-pulse"></span>
           </div>
-          
+
           <div className="car__item-info d-flex justify-content-between mt-3">
             <span className="skeleton-detail skeleton-pulse"></span>
             <span className="skeleton-detail skeleton-pulse"></span>
           </div>
-          
+
           {/* Skeleton for price */}
           <div className="car__item-price">
             <span className="skeleton-price skeleton-pulse"></span>
           </div>
-          
+
           {/* Skeleton for button */}
           <div className="skeleton-button skeleton-pulse"></div>
         </div>

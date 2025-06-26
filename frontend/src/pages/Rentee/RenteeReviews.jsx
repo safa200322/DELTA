@@ -37,9 +37,9 @@ const RenteeReviews = () => {
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <RenteeSidebar 
-            sidebarOpen={sidebarOpen} 
-            toggleSidebar={toggleSidebar} 
+          <RenteeSidebar
+            sidebarOpen={sidebarOpen}
+            toggleSidebar={toggleSidebar}
           />
 
           <Col xs="12" md="9" lg="10" className="content-area">

@@ -9,7 +9,7 @@ const BoatPricingEngine = require('../models/BoatPricingEngine');
 const pricingboat = new BoatPricingEngine();
 const MotorcyclePricingEngine = require('../models/MotorcyclePricingEngine');
 const pricingmotorcycle = new MotorcyclePricingEngine();
-const  BicyclePricingEngine = require('../models/BicyclePricingEngine');
+const BicyclePricingEngine = require('../models/BicyclePricingEngine');
 const pricingBicycle = new BicyclePricingEngine();
 
 
@@ -129,7 +129,7 @@ exports.addBicycle = async (req, res) => {
   }
 
   try {
-    const price =  pricingBicycle.calculatePrice({ Type, Gears }, Location);
+    const price = pricingBicycle.calculatePrice({ Type, Gears }, Location);
 
     const [vehicleResult] = await vehicleModel.insertVehicle('Bicycle', Location, price, ownerId, vehiclepic);
     const vehicleId = vehicleResult.insertId;
@@ -198,26 +198,26 @@ exports.rejectVehicle = async (req, res) => {
 exports.deleteVehicle = async (req, res) => {
   try {
     const vehicleID = req.params.id;
-    
+
     // If user is authenticated as vehicle owner, verify ownership
     if (req.user && req.user.id) {
       const vehicle = await vehicleModel.getVehicleById(vehicleID);
       if (!vehicle) {
         return res.status(404).json({ error: 'Vehicle not found' });
       }
-      
+
       // Debug logging to check data types and values
       console.log('Delete vehicle ownership check:');
       console.log('vehicle.ownerID:', vehicle.ownerID, 'type:', typeof vehicle.ownerID);
       console.log('req.user.id:', req.user.id, 'type:', typeof req.user.id);
       console.log('req.user:', req.user);
-      
+
       // Convert both to numbers for comparison
       if (vehicle.ownerID && parseInt(vehicle.ownerID) !== parseInt(req.user.id)) {
         return res.status(403).json({ error: 'Unauthorized: Vehicle does not belong to you' });
       }
     }
-    
+
     await vehicleModel.deleteVehicle(vehicleID);
     res.status(200).json({ message: 'Vehicle deleted successfully' });
   } catch (err) {
@@ -230,30 +230,30 @@ exports.deactivateVehicle = async (req, res) => {
   try {
     const vehicleID = req.params.id;
     const ownerID = req.user.id;
-    
+
     console.log('Deactivate request - vehicleID:', vehicleID, 'ownerID:', ownerID, 'type:', typeof ownerID);
-    
+
     // First verify the vehicle belongs to the owner
     const vehicle = await vehicleModel.getVehicleById(vehicleID);
     console.log('Retrieved vehicle:', vehicle);
-    
+
     if (!vehicle) {
       return res.status(404).json({ error: 'Vehicle not found' });
     }
-    
+
     // Convert both to strings for comparison to handle type mismatches
     const vehicleOwnerID = String(vehicle.ownerID);
     const requestOwnerID = String(ownerID);
-    
+
     console.log('Comparing ownerIDs - vehicle:', vehicleOwnerID, 'request:', requestOwnerID);
-    
+
     if (vehicleOwnerID !== requestOwnerID) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Unauthorized: Vehicle not found or does not belong to you',
         debug: { vehicleOwnerID, requestOwnerID }
       });
     }
-    
+
     await vehicleModel.updateVehicleStatus(vehicleID, 'Maintenance');
     res.status(200).json({ message: 'Vehicle deactivated successfully' });
   } catch (err) {

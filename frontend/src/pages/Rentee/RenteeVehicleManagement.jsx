@@ -41,15 +41,15 @@ const VehicleManagement = () => {
   const checkAuth = () => {
     const token = localStorage.getItem('token') || localStorage.getItem('vehicleOwnerToken');
     const userRole = localStorage.getItem('userRole');
-    
+
     if (!token) {
       return { isAuthenticated: false, message: 'Not authenticated. Please log in as a vehicle owner.' };
     }
-    
+
     if (userRole && userRole !== 'vehicle_owner') {
       return { isAuthenticated: false, message: 'Access denied. Please log in as a vehicle owner.' };
     }
-    
+
     return { isAuthenticated: true, token };
   };
 
@@ -317,8 +317,8 @@ const VehicleManagement = () => {
       </h5>
 
       {vehicles.length === 0 ? (
-        <Alert color="info" style={{ 
-          backgroundColor: '#e3f2fd', 
+        <Alert color="info" style={{
+          backgroundColor: '#e3f2fd',
           border: '1px solid #1976d2',
           color: '#0d47a1'
         }}>
@@ -394,8 +394,8 @@ const VehicleManagement = () => {
                         {brand} {model}
                       </h4>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                        <p className="mb-0" style={{ 
-                          color: '#424242', 
+                        <p className="mb-0" style={{
+                          color: '#424242',
                           fontSize: '15px',
                           display: 'flex',
                           alignItems: 'center'
@@ -404,8 +404,8 @@ const VehicleManagement = () => {
                           <strong>Type:</strong> <span className="ms-2">{vehicle.Type}</span>
                         </p>
                         {vehicle.Color && (
-                          <p className="mb-0" style={{ 
-                            color: '#424242', 
+                          <p className="mb-0" style={{
+                            color: '#424242',
                             fontSize: '15px',
                             display: 'flex',
                             alignItems: 'center'
@@ -415,8 +415,8 @@ const VehicleManagement = () => {
                           </p>
                         )}
                         {vehicle.Price && (
-                          <p className="mb-0" style={{ 
-                            color: '#2e7d32', 
+                          <p className="mb-0" style={{
+                            color: '#2e7d32',
                             fontSize: '18px',
                             fontWeight: '600',
                             display: 'flex',
@@ -427,8 +427,8 @@ const VehicleManagement = () => {
                           </p>
                         )}
                         {vehicle.Location && (
-                          <p className="mb-0" style={{ 
-                            color: '#424242', 
+                          <p className="mb-0" style={{
+                            color: '#424242',
                             fontSize: '15px',
                             display: 'flex',
                             alignItems: 'center'
@@ -477,10 +477,10 @@ const VehicleManagement = () => {
                         isOpen={dropdownOpen[vehicle.VehicleID] || false}
                         toggle={() => toggleDropdown(vehicle.VehicleID)}
                       >
-                        <DropdownToggle 
-                          caret 
-                          color="danger" 
-                          size="sm" 
+                        <DropdownToggle
+                          caret
+                          color="danger"
+                          size="sm"
                           disabled={actionLoading}
                           style={{
                             borderRadius: '8px',
@@ -620,9 +620,9 @@ const RenteeVehicleManagement = () => {
     <section style={{ marginTop: "10px" }}>
       <Container fluid>
         <Row>
-          <RenteeSidebar 
-            sidebarOpen={sidebarOpen} 
-            toggleSidebar={toggleSidebar} 
+          <RenteeSidebar
+            sidebarOpen={sidebarOpen}
+            toggleSidebar={toggleSidebar}
           />
 
           <Col xs="12" md="9" lg="10" className="content-area">

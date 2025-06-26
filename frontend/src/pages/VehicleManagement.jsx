@@ -171,11 +171,11 @@ const VehicleManagement = () => {
 
   const handleAddVehicle = async (e) => {
     e.preventDefault();
-    
+
     try {
       const token = localStorage.getItem('token');
       const endpoint = `http://localhost:5000/api/vehicles/${vehicleType.toLowerCase()}s`;
-      
+
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
@@ -226,29 +226,29 @@ const VehicleManagement = () => {
 
   // Calculate stats
   const stats = [
-    { 
-      label: "Total Vehicles", 
-      value: vehicles.length, 
-      icon: "🚗", 
-      color: "#4e73df" 
+    {
+      label: "Total Vehicles",
+      value: vehicles.length,
+      icon: "🚗",
+      color: "#4e73df"
     },
-    { 
-      label: "Available", 
-      value: vehicles.filter(v => v.Status === 'Available').length, 
-      icon: "✅", 
-      color: "#34c38f" 
+    {
+      label: "Available",
+      value: vehicles.filter(v => v.Status === 'Available').length,
+      icon: "✅",
+      color: "#34c38f"
     },
-    { 
-      label: "Rented", 
-      value: vehicles.filter(v => v.Status === 'Rented').length, 
-      icon: "📅", 
-      color: "#f1b44c" 
+    {
+      label: "Rented",
+      value: vehicles.filter(v => v.Status === 'Rented').length,
+      icon: "📅",
+      color: "#f1b44c"
     },
-    { 
-      label: "Maintenance", 
-      value: vehicles.filter(v => v.Status === 'Maintenance').length, 
-      icon: "🛠️", 
-      color: "#74788d" 
+    {
+      label: "Maintenance",
+      value: vehicles.filter(v => v.Status === 'Maintenance').length,
+      icon: "🛠️",
+      color: "#74788d"
     },
   ];
 
@@ -652,9 +652,9 @@ const VehicleManagement = () => {
                       <div className="d-flex align-items-center">
                         <img
                           src={
-                            vehicle.vehiclepic 
-                              ? vehicle.vehiclepic.startsWith('http') 
-                                ? vehicle.vehiclepic 
+                            vehicle.vehiclepic
+                              ? vehicle.vehiclepic.startsWith('http')
+                                ? vehicle.vehiclepic
                                 : `http://localhost:5000${vehicle.vehiclepic}`
                               : "https://via.placeholder.com/50x40?text=No+Image"
                           }
