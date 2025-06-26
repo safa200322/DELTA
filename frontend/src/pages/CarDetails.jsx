@@ -80,7 +80,7 @@ const CarDetails = () => {
         }
 
         // Fetch user data from the backend
-        const response = await fetch("http://localhost:5000/api/users/profile", {
+        const response = await fetch("http://localhost:5000/api/auth/users/profile", {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -396,7 +396,7 @@ const CarDetails = () => {
           <Row className="mb-4">
             <Col lg="6">
               <img
-                src={singleCarItem.vehiclepic || singleCarItem.imgUrl || "https://via.placeholder.com/500x300?text=No+Image"}
+                src={singleCarItem.VehiclePic || singleCarItem.imgUrl || "https://via.placeholder.com/500x300?text=No+Image"}
                 alt={singleCarItem.carName || singleCarItem.Model || 'Vehicle'}
                 className="w-100"
               />
@@ -495,7 +495,7 @@ const CarDetails = () => {
               <div className="details-box p-4 h-100">
                 <div className="d-flex align-items-center gap-4 mb-4">
                   <img
-                    src={singleCarItem.vehiclepic || singleCarItem.imgUrl || "https://via.placeholder.com/150x100?text=No+Image"}
+                    src={singleCarItem.VehiclePic || singleCarItem.imgUrl || "https://via.placeholder.com/150x100?text=No+Image"}
                     alt={singleCarItem.carName || singleCarItem.Model || 'Vehicle'}
                     className="vehicle-image"
                     style={{ maxWidth: "150px", height: "auto" }}

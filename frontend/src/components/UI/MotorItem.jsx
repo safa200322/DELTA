@@ -12,7 +12,7 @@ const MotorItem = ({ item, type }) => {
   return (
     <div className="car__item">
       <div className="car__item-img">
-        <img src={item.vehiclepic || "https://placehold.co/300x200?text=Image+Not+Available"} alt={item.Type} className="w-100" />
+        <img src={item.VehiclePic || "https://placehold.co/300x200?text=Image+Not+Available"} alt={item.Type} className="w-100" />
         <span className="car-type-badge">{item.Type?.toUpperCase()}</span>
       </div>
       <div className="car__item-content">

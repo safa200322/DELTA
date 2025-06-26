@@ -17,7 +17,7 @@ exports.createPayment = async ({
   CVV,
   PaymentMethod
 }) => {
-  // 1. Fetch Reservation info
+
   const [reservationResult] = await db.query(
     'SELECT StartDate, EndDate, AccessoryID, ChauffeurID FROM Reservation WHERE ReservationID = ?',
     [ReservationID]
@@ -32,14 +32,12 @@ exports.createPayment = async ({
   );
   if (!vehicleResult.length) throw new Error('Vehicle not found');
   const { Type, Price: VehiclePrice } = vehicleResult[0];
-  console.log('Fetched vehicle:', { Type, VehiclePrice });
 
   // 3. Calculate rental duration in days
   const start = new Date(StartDate);
   const end = new Date(EndDate);
   const timeDiff = Math.abs(end - start);
   const dayCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
-  console.log(`[PaymentModel] Rental period: ${StartDate} to ${EndDate} (${dayCount} days)`);
 
   // 4. Fetch Accessory price (if applicable)
   let accessoryPrice = 0;
@@ -50,21 +48,13 @@ exports.createPayment = async ({
     );
     if (accessoryResult.length) {
       accessoryPrice = accessoryResult[0].Price;
-      console.log(`[PaymentModel] AccessoryID ${accessoryFromDB} price: $${accessoryPrice}`);
-    } else {
-      console.log(`[PaymentModel] AccessoryID ${accessoryFromDB} not found, price set to $0`);
     }
-  } else {
-    console.log('[PaymentModel] No accessory selected');
   }
 
   // 5. Calculate Chauffeur cost (if applicable)
   let chauffeurAmount = 0;
   if (chauffeurFromDB) {
     chauffeurAmount = 40 * dayCount;
-    console.log(`[PaymentModel] Chauffeur selected: $40 x ${dayCount} days = $${chauffeurAmount}`);
-  } else {
-    console.log('[PaymentModel] No chauffeur selected');
   }
 
   // 6. Calculate totals
@@ -73,12 +63,6 @@ exports.createPayment = async ({
   const commissionAmount = baseRental * commissionRate;
   const totalPrice = baseRental + accessoryPrice + chauffeurAmount;
   const ownerEarning = baseRental - commissionAmount;
-  console.log(`[PaymentModel] Vehicle type: ${Type}, Price per day: $${VehiclePrice}`);
-  console.log(`[PaymentModel] Base rental: $${VehiclePrice} x ${dayCount} days = $${baseRental}`);
-  console.log(`[PaymentModel] Commission rate: ${commissionRate * 100}%`);
-  console.log(`[PaymentModel] Commission amount: $${commissionAmount}`);
-  console.log(`[PaymentModel] Total price (base + accessory + chauffeur): $${baseRental} + $${accessoryPrice} + $${chauffeurAmount} = $${totalPrice}`);
-  console.log(`[PaymentModel] Owner earning (base - commission): $${baseRental} - $${commissionAmount} = $${ownerEarning}`);
 
   // 7. Insert into Payment with status 'Pending'
   const [insertResult] = await db.query(

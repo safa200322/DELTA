@@ -1,127 +1,127 @@
-// src/models/reservationModel.js
 const db = require('../db');
 
-const ReservationModel = {
-  async createReservation(data) {
-    const {
-      UserID,
-      VehicleID,
-      LicenseID,
-      ChauffeurID,
-      StartDate,
-      EndDate,
-      PickupLocation,
-      DropoffLocation,
-      AccessoryID
-    } = data;
-
-    const query = `
-      INSERT INTO Reservation (
-        UserID, VehicleID, ChauffeurID,
-        StartDate, EndDate, PickupLocation, DropoffLocation, AccessoryID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const values = [
-      UserID,
-      VehicleID,
-      ChauffeurID || null,
-      StartDate,
-      EndDate,
-      PickupLocation,
-      DropoffLocation,
-      AccessoryID || null
-    ];
-
-    const [result] = await db.query(query, values);
-    return result;
-  },
-
-  async getAllReservations() {
-    const [rows] = await db.query('SELECT * FROM Reservation');
-    return rows;
-  },
-
-  async getReservationById(ReservationID) {
-    const [rows] = await db.query('SELECT * FROM Reservation WHERE ReservationID = ?', [ReservationID]);
-    return rows[0];
-  },
-
-  async deleteReservation(ReservationID) {
-    const [result] = await db.query('DELETE FROM Reservation WHERE ReservationID = ?', [ReservationID]);
-    return result;
-  },
-
-  async getReservationsByUserId(UserID) {
-    const query = `
-      SELECT 
-        r.*,
-        CASE 
-          WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
-          WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
-          WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' - ', b.BoatType)
-          WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
-          ELSE 'Unknown Vehicle'
-        END as VehicleDetails,
-        v.Type as VehicleType,
-        v.VehiclePic,
-        v.Location as VehicleLocation,
-        vo.FullName as OwnerName,
-        vo.PhoneNumber as OwnerPhone,
-        ch.Name as ChauffeurName,
-        ch.PhoneNumber as ChauffeurPhone
-      FROM Reservation r
-      JOIN Vehicle v ON r.VehicleID = v.VehicleID
-      LEFT JOIN VehicleOwner vo ON v.OwnerID = vo.OwnerID
-      LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
-      LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
-      LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
-      LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
-      LEFT JOIN Chauffeur ch ON r.ChauffeurID = ch.ChauffeurID
-      WHERE r.UserID = ?
-      ORDER BY r.StartDate DESC
-    `;
-    const [rows] = await db.query(query, [UserID]);
-    return rows;
-  },
-
-  async cancelReservationByUser(ReservationID, UserID) {
-    const [result] = await db.query(
-      'DELETE FROM Reservation WHERE ReservationID = ? AND UserID = ?',
-      [ReservationID, UserID]
-    );
-    return result;
-  },
-
-  async getReservationsByVehicleOwner(ownerID) {
-    const query = `
-      SELECT 
-        r.*,
-        CASE 
-          WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model)
-          WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' - ', m.Type)
-          WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' - ', b.BoatType)
-          WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
-          ELSE 'Unknown Vehicle'
-        END as VehicleDetails,
-        v.Type as VehicleType,
-        v.VehiclePic,
-        u.Name as CustomerName,
-        u.Email as CustomerEmail,
-        u.PhoneNumber as CustomerPhone
-      FROM Reservation r
-      JOIN Vehicle v ON r.VehicleID = v.VehicleID
-      JOIN User u ON r.UserID = u.UserID
-      LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
-      LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
-      LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
-      LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
-      WHERE v.OwnerID = ?
-      ORDER BY r.StartDate DESC
-    `;
-    const [rows] = await db.query(query, [ownerID]);
-    return rows;
-  }
+// Commission rates by vehicle type
+const COMMISSION_RATES = {
+  Car: 0.15,
+  boats: 0.20,
+  Motorcycle: 0.12,
+  Bicycle: 0.05
 };
 
-module.exports = ReservationModel;
+// Fuel prices by fuel type
+const FUEL_PRICE = {
+  Petrol: 50,
+  Diesel: 60,
+  Electric: 20,
+  Hybrid: 50
+};
+
+exports.createPayment = async ({
+  ReservationID,
+  VehicleID,
+  AccessoryID,
+  ChauffeurID,
+  NameOnCard,
+  CardNumber,
+  ExpiryDate,
+  CVV,
+  PaymentMethod
+}) => {
+  // 1. Get reservation info
+  const [reservationResult] = await db.query(
+    'SELECT StartDate, EndDate, AccessoryID, ChauffeurID FROM Reservation WHERE ReservationID = ?',
+    [ReservationID]
+  );
+  if (!reservationResult.length) throw new Error('Reservation not found');
+  const { StartDate, EndDate, AccessoryID: accessoryFromDB, ChauffeurID: chauffeurFromDB } = reservationResult[0];
+
+  // 2. Get vehicle info including FuelType
+  const [vehicleResult] = await db.query(
+    'SELECT Type, Price, FuelType FROM Vehicle WHERE VehicleID = ?',
+    [VehicleID]
+  );
+  if (!vehicleResult.length) throw new Error('Vehicle not found');
+  const { Type, Price: VehiclePrice, FuelType } = vehicleResult[0];
+
+  // 3. Calculate rental duration
+  const start = new Date(StartDate);
+  const end = new Date(EndDate);
+  const timeDiff = Math.abs(end - start);
+  const dayCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+
+  // 4. Get accessory price if any
+  let accessoryPrice = 0;
+  if (accessoryFromDB) {
+    const [accessoryResult] = await db.query(
+      'SELECT Price FROM Accessory WHERE AccessoryID = ?',
+      [accessoryFromDB]
+    );
+    if (accessoryResult.length) {
+      accessoryPrice = accessoryResult[0].Price;
+    }
+  }
+
+  // 5. Calculate chauffeur price
+  let chauffeurAmount = 0;
+  if (chauffeurFromDB) {
+    chauffeurAmount = 40 * dayCount;
+  }
+
+  // 6. Get fuel cost from FUEL_PRICE map
+  const fuelCost = FUEL_PRICE[FuelType] || 0;
+
+  // 7. Calculate totals
+  const baseRental = VehiclePrice * dayCount;
+  const commissionRate = COMMISSION_RATES[Type];
+  const commissionAmount = baseRental * commissionRate;
+  const totalPrice = baseRental + accessoryPrice + chauffeurAmount + fuelCost;
+  const ownerEarning = baseRental - commissionAmount;
+
+  // 8. Insert Payment with status 'Pending'
+  const [insertResult] = await db.query(
+    `INSERT INTO Payment 
+    (ReservationID, Status, NameOnCard, CardNumber, ExpiryDate, CVV, PaymentMethod,
+     TotalPrice, CommissionAmount, OwnerEarning, ChauffeurAmount)
+     VALUES (?, 'Pending', ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      ReservationID,
+      NameOnCard,
+      CardNumber,
+      ExpiryDate,
+      CVV,
+      PaymentMethod,
+      totalPrice,
+      commissionAmount,
+      ownerEarning,
+      chauffeurAmount
+    ]
+  );
+
+  const paymentId = insertResult.insertId;
+
+  // 9. Mark payment as 'Paid'
+  await db.query(
+    `UPDATE Payment SET Status = 'Paid' WHERE PaymentID = ?`,
+    [paymentId]
+  );
+
+  // 10. Update reservation status to 'Reserved'
+  await db.query(
+    `UPDATE Reservation SET Status = 'Reserved' WHERE ReservationID = ?`,
+    [ReservationID]
+  );
+
+  // 11. Return summary
+  return {
+    PaymentID: paymentId,
+    TotalPrice: totalPrice,
+    AccessoryPrice: accessoryPrice,
+    ChauffeurAmount: chauffeurAmount,
+    FuelType,
+    FuelCost: fuelCost,
+    CommissionAmount: commissionAmount,
+    OwnerEarning: ownerEarning,
+    DayCount: dayCount,
+    VehicleType: Type
+  };
+};

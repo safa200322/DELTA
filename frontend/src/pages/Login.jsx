@@ -51,7 +51,31 @@ const Login = () => {
         alert(`Login successful as ${data.user.type}!`);
 
         // Redirect based on user type
-        navigate('/profile/ProfileOverview');
+        if (data.redirectTo) {
+          // Fix: redirect regular users to ProfileOverview
+          if (data.redirectTo === '/profile') {
+            navigate('/profile/ProfileOverview');
+          } else {
+            navigate(data.redirectTo);
+          }
+        } else {
+          // Default redirect based on user type
+          switch (data.user.type) {
+            case 'admin':
+              navigate('/admin/dashboard');
+              break;
+            case 'chauffeur':
+              navigate('/chauffeur/dashboard');
+              break;
+            case 'vehicle-owner':
+              navigate('/profile/rentee-profile'); // or '/profile/rentee-vehicle-management' if that's the main dashboard
+              break;
+            case 'user':
+            default:
+              navigate('/profile/ProfileOverview');
+              break;
+          }
+        }
       } else {
         const errorText = await response.text();
         console.error('Login failed:', errorText);
