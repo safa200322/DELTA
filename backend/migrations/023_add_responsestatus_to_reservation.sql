@@ -1,3 +1,0 @@
--- Migration: Add ResponseStatus column to Reservation table
-ALTER TABLE Reservation
-ADD COLUMN ResponseStatus VARCHAR(20) DEFAULT 'Pending';
