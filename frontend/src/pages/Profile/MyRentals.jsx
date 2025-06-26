@@ -321,18 +321,41 @@ const MyRentals = () => {
                   reservations.map((reservation) => {
                     const status = getStatusClass(reservation.StartDate, reservation.EndDate);
                     const canCancel = status === 'pending';
+                    // Vehicle details
+                    const vehicleType = reservation.Type || reservation.VehicleType || 'Vehicle';
+                    const brand = reservation.Brand || reservation.brand || '';
+                    const model = reservation.Model || reservation.model || '';
+                    const vehicleName = brand && model ? `${brand} ${model}` : model || brand || '';
+                    const vehiclePrice = reservation.Price || reservation.price || '';
+                    const vehiclePic = reservation.VehiclePic || reservation.vehiclePic || "https://via.placeholder.com/150?text=Vehicle";
 
                     return (
                       <div key={reservation.ReservationID} className="rental-card">
                         <img
-                          src={reservation.VehiclePic || "https://via.placeholder.com/150?text=Vehicle"}
-                          alt={reservation.VehicleDetails}
+                          src={vehiclePic}
+                          alt={vehicleName || vehicleType}
                           className="rental-image"
                         />
                         <div className="rental-details">
                           <h4 className="rental-vehicle">
-                            {reservation.VehicleDetails || `${reservation.VehicleType} Vehicle`}
+                            {vehicleName ? `${vehicleName} (${vehicleType})` : vehicleType}
                           </h4>
+                          <p className="rental-info">
+                            <strong>Price per day:</strong> {vehiclePrice ? `$${vehiclePrice}` : 'N/A'}
+                          </p>
+                          {/* Type-specific details */}
+                          {vehicleType.toLowerCase() === 'car' && reservation.FuelType && (
+                            <p className="rental-info"><strong>Fuel:</strong> {reservation.FuelType}</p>
+                          )}
+                          {vehicleType.toLowerCase() === 'boat' && reservation.Length && (
+                            <p className="rental-info"><strong>Length:</strong> {reservation.Length}m</p>
+                          )}
+                          {vehicleType.toLowerCase() === 'motorcycle' && reservation.EngineCC && (
+                            <p className="rental-info"><strong>Engine:</strong> {reservation.EngineCC}cc</p>
+                          )}
+                          {vehicleType.toLowerCase() === 'bicycle' && reservation.BikeType && (
+                            <p className="rental-info"><strong>Bike Type:</strong> {reservation.BikeType}</p>
+                          )}
                           <p className="rental-info">
                             <strong>Rental Period:</strong>{" "}
                             {formatDate(reservation.StartDate)} - {formatDate(reservation.EndDate)}

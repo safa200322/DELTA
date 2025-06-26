@@ -60,6 +60,7 @@ import ChauffeurProfilePage from "./pages/ChauffeurProfilePage";
 import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
 import VehicleOwnerSignUp from "./pages/VehicleOwnerSignup";
 import BicycleListing from "./pages/BicycleListing";
+import VehicleDetails from "./pages/VehicleDetails";
 
 function App() {
   return (
@@ -107,6 +108,7 @@ function App() {
           <Route path="/profile/MyPayments" element={<PaymentsWallet />} />
           <Route path="/profile/NotificationsProfile" element={<NotificationsProfile />} />
           <Route path="/profile/AccountSettings" element={<AccountSettings />} />
+          <Route path="/vehicles/:type/:slug" element={<VehicleDetails />} />
           {/* Remove legacy/duplicate profile routes and keep only the above */}
           {/* Fallback */}
           <Route path="*" element={<NotFound />} />
