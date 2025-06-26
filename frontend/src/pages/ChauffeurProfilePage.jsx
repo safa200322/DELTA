@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import { Container, Row, Col, Button, Nav, NavItem } from "reactstrap";
 import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
 import ChauffeurBookingHistory from "./ChauffeurBookingHistory";
+import DocumentsVerification from "./ChauffeurDocumentsVerification";
 
 // Personal Info Section
 const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
@@ -156,17 +157,6 @@ const WorkAvailability = () => {
     </div>
   );
 };
-
-// Documents & Verification Section
-const DocumentsVerification = () => (
-  <div className="profile-section">
-    <h2>Documents & Verification</h2>
-    <div className="section-content">
-      <p><strong>Driving License:</strong> Uploaded (License #DL123456)</p>
-      <Button color="primary">Upload New Document</Button>
-    </div>
-  </div>
-);
 
 // Settings Section
 const Settings = () => (
