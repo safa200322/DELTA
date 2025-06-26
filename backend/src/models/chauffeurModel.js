@@ -247,14 +247,16 @@ exports.getChauffeurPayoutByReservation = async (reservationId) => {
   return rows.length ? rows[0].ChauffeurAmount : null;
 };
 
-// Fetch all Chauffeur payouts for a given ChauffeurID
+// Fetch all Chauffeur payouts and total earnings for a given ChauffeurID
 exports.getAllChauffeurPayouts = async (chauffeurId) => {
   const query = `
-    SELECT p.PaymentID, p.ReservationID, p.ChauffeurAmount, p.TotalPrice, p.Status
+    SELECT p.PaymentID, p.ReservationID, p.ChauffeurAmount, p.Status
     FROM Payment p
     JOIN Reservation r ON p.ReservationID = r.ReservationID
     WHERE r.ChauffeurID = ?
   `;
   const [rows] = await db.query(query, [chauffeurId]);
-  return rows;
+  // Calculate total earnings
+  const totalEarnings = rows.reduce((sum, row) => sum + (row.ChauffeurAmount || 0), 0);
+  return { payouts: rows, totalEarnings };
 };

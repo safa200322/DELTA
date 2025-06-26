@@ -419,8 +419,8 @@ exports.getAllChauffeurPayouts = async (req, res) => {
     if (!chauffeurId) {
       return res.status(401).json({ message: 'Unauthorized: No chauffeur ID found in token.' });
     }
-    const payouts = await chauffeurModel.getAllChauffeurPayouts(chauffeurId);
-    res.json({ chauffeurId, payouts });
+    const { payouts, totalEarnings } = await chauffeurModel.getAllChauffeurPayouts(chauffeurId);
+    res.json({ chauffeurId, payouts, totalEarnings });
   } catch (err) {
     console.error('Error fetching all chauffeur payouts:', err);
     res.status(500).json({ message: 'Internal server error', details: err.message });
