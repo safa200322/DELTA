@@ -1,28 +1,27 @@
-const NotificationModel = require('../models/Notification');
+const notificationModel = require('../models/notificationModel');
 
-// Admin creates a new notification
 exports.createNotification = async (req, res) => {
   try {
-    const { title, message, type, userId } = req.body;
-    const notification = await NotificationModel.create({ title, message, type, userId });
-    res.status(201).json(notification);
-    console.log('[NOTIFICATION] Created:', notification);
-  } catch (error) {
-    console.error('Create notification error:', error);
-    res.status(500).json({ message: 'Error creating notification', error: error.message });
-  }
-};
+    const {
+      recipientID,
+      title,
+      message,
+      type,
+      broadcastGroup
+    } = req.body;
 
-// Public: Get all notifications (optionally filter by userId)
-exports.getAllNotifications = async (req, res) => {
-  try {
-    const { userId } = req.query;
-    const notifications = await NotificationModel.findAll({ userId });
-    res.json(notifications);
-    console.log('[NOTIFICATION] All notifications:', notifications);
-  } catch (error) {
-    console.error('Get all notifications error:', error);
-    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
+    const notificationId = await notificationModel.createNotification({
+      recipientID,
+      title,
+      message,
+      type,
+      broadcastGroup
+    });
+
+    res.status(201).json({ message: ' Notification created', notificationId });
+  } catch (err) {
+    console.error(" Controller error:", err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
@@ -36,6 +35,17 @@ exports.getMyNotifications = async (req, res) => {
   } catch (error) {
     console.error('Get user notifications error:', error);
     res.status(500).json({ message: 'Error fetching user notifications', error: error.message });
+  }
+};
+
+// Get all notifications (admin)
+exports.getAllNotifications = async (req, res) => {
+  try {
+    const notifications = await notificationModel.getAll();
+    res.json(notifications);
+  } catch (error) {
+    console.error('[ADMIN][NOTIFICATION] Get all error:', error);
+    res.status(500).json({ message: 'Error fetching notifications', error: error.message });
   }
 };
 
