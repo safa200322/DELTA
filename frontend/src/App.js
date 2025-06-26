@@ -56,7 +56,9 @@ import NotificationsDashboard from "./pages/NotificationsDashboard";
 import AccessoriesManagement from "./pages/AccessoriesManagement";
 import ProfileRedirect from "./pages/Profile/ProfileRedirect";
 import ChauffeurProfilePage from "./pages/ChauffeurProfilePage";
-
+import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
+import VehicleOwnerSignUp from "./pages/VehicleOwnerSignup";
+import BicycleListing from "./pages/BicycleListing";
 
 function App() {
   return (
@@ -69,9 +71,8 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/cars" element={<CarListing />} />
           <Route path="/cars/:slug" element={<CarDetails />} />
-          <Route path="/motors" element={<MotorListing />} />
-          <Route path="/motors/:slug" element={<MotorDetails />} />
-          <Route path="/bicycle" element={<ScooterListing />} />
+          <Route path="/motorcycles" element={<MotorListing />} />
+          <Route path="/bicycle" element={<BicycleListing />} />
           <Route path="/bicycle/:slug" element={<ScooterDetails />} />
           <Route path="/boats" element={<BoatListing />} />
           <Route path="/boats/:slug" element={<BoatDetails />} />
@@ -85,77 +86,21 @@ function App() {
           <Route path="/chauffeur-profile" element={<ChauffeurProfilePage />} />
 
           {/* Chauffeur Dashboard routes */}
-          <Route path="/chauffeur/dashboard" element={<PersonalInfo />} />
           <Route path="/chauffeur/dashboard/*" element={<ChauffeurProfilePage />} />
           {/* Vehicle Owner routes */}
           <Route path="/vehicle-owner/profile" element={<UserProfile />} />
-          <Route
-            path="/chaffeur-vehicle-management"
-            element={<ChaffeurVehicleManagement />}
-          />
-          <Route
-            path="/chauffeur-management"
-            element={<ChauffeurManagement />}
-          />
-          <Route path="/timeline" element={<TimelineCard />} />
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/reviews" element={<ReviewList />} />
+          <Route path="/vehicle-owner/login" element={<VehicleOwnerLogin />} />
+          <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignUp />} />
+          {/* Rentee profile and dashboard */}
           <Route path="/profile/rentee-profile" element={<UserProfile />} />
-          <Route
-            path="/profile/rentee-vehicle-management"
-            element={<RenteeVehicleManagement />}
-          />
-          <Route
-            path="/profile/rentee-rental-reservations"
-            element={<RenteeRentalReservations />}
-          />
-          <Route
-            path="/profile/rentee-earnings-and-payments"
-            element={<RenteeEarningsandPayment />}
-          />
-
-          <Route
-            path="/profile/rentee-notifications"
-            element={<RenteeNotifications />}
-          />
+          <Route path="/profile/rentee-vehicle-management" element={<RenteeVehicleManagement />} />
+          <Route path="/profile/rentee-rental-reservations" element={<RenteeRentalReservations />} />
+          <Route path="/profile/rentee-earnings-and-payments" element={<RenteeEarningsandPayment />} />
+          <Route path="/profile/rentee-notifications" element={<RenteeNotifications />} />
           <Route path="/profile/rentee-reviews" element={<RenteeReviews />} />
           <Route path="/profile/rentee-security" element={<RenteeSecurity />} />
-          <Route path="/profile/personal-info" element={<PersonalInfo />} />
-          <Route
-            path="/profile/work-availability"
-            element={<WorkAvailability />}
-          />
-          <Route path="/profile/booking-history" element={<BookingHistory />} />
-          <Route
-            path="/profile/documents-verification"
-            element={<DocumentsVerification />}
-          />
-          <Route path="/profile/settings" element={<Settings />} />
-          <Route path="/profile/payment-info" element={<PaymentInfo />} />
-          <Route
-            path="/profile"
-            element={<Navigate to="./pages/Rentee/RenteeProfile" />}
-          />
-          <Route
-            path="/profile/ProfileOverview"
-            element={<ProfileOverview />}
-          />
-          <Route path="/profile/MyRentals" element={<MyRentals />} />
-          <Route path="/profile/MyReviews" element={<MyReviews />} />
-          <Route path="/profile/MyPayments" element={<PaymentsWallet />} />
-          <Route
-            path="/profile/NotificationsProfile"
-            element={<NotificationsProfile />}
-          />
-          <Route
-            path="/profile/AccountSettings"
-            element={<AccountSettings />}
-          />
-          <Route path="/vehicle-management" element={<VehicleManagement />} />
-          <Route path="/reservation-management" element={<ReservationManagement />} />
-          <Route path="/payment-admin" element={<PaymentAdminDashboard />} />
-          <Route path="/notifications-Dashboard" element={<NotificationsDashboard />} />
-          <Route path="/accessories-management" element={< AccessoriesManagement />} />
+          {/* Remove legacy/duplicate profile routes and keep only the above */}
+          {/* Fallback */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

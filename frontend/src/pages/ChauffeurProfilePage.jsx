@@ -5,6 +5,7 @@ import "remixicon/fonts/remixicon.css";
 import "../styles/chauffeur-profile.css";
 import ChauffeurBookingHistory from "./ChauffeurBookingHistory";
 import DocumentsVerification from "./ChauffeurDocumentsVerification";
+import ChauffeurSettings from "./ChauffeurSettings";
 
 // Personal Info Section
 const PersonalInfo = ({ profile, loading, error, successMsg, editMode, setEditMode, editData, handleEditChange, handleEditSubmit }) => (
@@ -158,20 +159,6 @@ const WorkAvailability = () => {
   );
 };
 
-// Settings Section
-const Settings = () => (
-  <div className="profile-section">
-    <h2>Settings</h2>
-    <div className="section-content">
-      <h4>Password & Security</h4>
-      <Button color="primary" className="mb-3">Change Password</Button>
-      <h4>Account Management</h4>
-      <Button color="danger">Delete Account</Button>{" "}
-      <Button color="warning">Deactivate Account</Button>
-    </div>
-  </div>
-);
-
 // Payment Info Section
 const PaymentInfo = () => (
   <div className="profile-section">
@@ -287,7 +274,7 @@ const ChauffeurProfilePage = () => {
               <Route path="work-availability" element={<WorkAvailability />} />
               <Route path="booking-history" element={<ChauffeurBookingHistory />} />
               <Route path="documents-verification" element={<DocumentsVerification />} />
-              <Route path="settings" element={<Settings />} />
+              <Route path="settings" element={<ChauffeurSettings />} />
               <Route path="payment-info" element={<PaymentInfo />} />
               <Route path="*" element={<PersonalInfo profile={profile} loading={loading} error={error} successMsg={successMsg} editMode={editMode} setEditMode={setEditMode} editData={editData} handleEditChange={handleEditChange} handleEditSubmit={handleEditSubmit} />} />
             </Routes>

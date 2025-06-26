@@ -370,3 +370,26 @@ exports.getBookingHistory = async (req, res) => {
     res.status(500).json({ message: 'Internal server error', details: err.message });
   }
 };
+
+// Change password for authenticated chauffeur
+exports.changePassword = async (req, res) => {
+  try {
+    const chauffeurId = req.chauffeur?.id || req.chauffeur?.ChauffeurID;
+    const { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ message: "Password is required" });
+    }
+    // Hash new password
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+    // Update password in DB
+    const [result] = await require('../models/chauffeurModel').updateChauffeurPassword(chauffeurId, hashedPassword);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Chauffeur not found" });
+    }
+    res.json({ message: "Password updated successfully" });
+  } catch (err) {
+    console.error('Error changing password:', err);
+    res.status(500).json({ message: 'Internal server error', details: err.message });
+  }
+};
