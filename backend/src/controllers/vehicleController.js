@@ -65,15 +65,19 @@ exports.addBoat = async (req, res) => {
     EngineType,
     Brand,
     BoatType,
-    Location
+    Location,
+    vehiclepic
   } = req.body;
+
+  const ownerId = req.user && (req.user.ownerID || req.user.id);
 
   if (
     Capacity == null ||
     !EngineType ||
     !Brand ||
     !BoatType ||
-    !Location
+    !Location ||
+    !ownerId
   ) {
     return res.status(400).json({ message: "Missing required fields" });
   }
@@ -90,7 +94,9 @@ exports.addBoat = async (req, res) => {
     const [vehicleResult] = await vehicleModel.insertVehicle(
       'boats',
       Location,
-      price
+      price,
+      ownerId,
+      vehiclepic
     );
     const vehicleId = vehicleResult.insertId;
 
@@ -115,16 +121,17 @@ exports.addBoat = async (req, res) => {
 };
 
 exports.addBicycle = async (req, res) => {
-  const { Type, Gears, Location } = req.body;
+  const { Type, Gears, Location, vehiclepic } = req.body;
+  const ownerId = req.user && (req.user.ownerID || req.user.id);
 
-  if (!Type || !Gears || !Location) {
+  if (!Type || !Gears || !Location || !ownerId) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
     const price =  pricingBicycle.calculatePrice({ Type, Gears }, Location);
 
-    const [vehicleResult] = await vehicleModel.insertVehicle('Bicycle', Location, price);
+    const [vehicleResult] = await vehicleModel.insertVehicle('Bicycle', Location, price, ownerId, vehiclepic);
     const vehicleId = vehicleResult.insertId;
 
     await bicycleModel.insertBicycle(vehicleId, { Type, Gears });
@@ -141,16 +148,17 @@ exports.addBicycle = async (req, res) => {
 };
 
 exports.addMotorcycle = async (req, res) => {
-  const { Brand, Engine, Year, Type, Location, color } = req.body;
+  const { Brand, Engine, Year, Type, Location, color, vehiclepic } = req.body;
+  const ownerId = req.user && (req.user.ownerID || req.user.id);
 
-  if (!Brand || !Engine || !Year || !Type || !Location || !color) {
+  if (!Brand || !Engine || !Year || !Type || !Location || !color || !ownerId) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
   try {
     const price = pricingmotorcycle.calculatePrice({ Brand, Engine, Year, Type }, Location);
 
-    const [vehicleResult] = await vehicleModel.insertVehicle('Motorcycle', Location, price);
+    const [vehicleResult] = await vehicleModel.insertVehicle('Motorcycle', Location, price, ownerId, vehiclepic);
     const vehicleId = vehicleResult.insertId;
 
     await motorcycleModel.insertMotorcycle(vehicleId, { Brand, Engine, Year, Type, color });

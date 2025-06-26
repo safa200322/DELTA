@@ -1,0 +1,228 @@
+/* Vehicle Management Component Styles */
+.vehicle-management-container {
+  padding: 1rem;
+}
+
+.vehicle-management-header {
+  border-bottom: 2px solid #f8f9fa;
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.vehicle-management-title {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.title-icon {
+  margin-right: 0.5rem;
+}
+
+/* Stats Cards */
+.stat-card {
+  border: none;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  font-size: 18px;
+  color: white;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 0;
+}
+
+/* Filters */
+.filters-card {
+  background: #f8f9fa;
+  border: none;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.filter-label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.custom-dropdown-toggle {
+  background: white;
+  border: 1px solid #dee2e6;
+  color: #495057;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  min-width: 120px;
+  text-align: left;
+}
+
+.custom-dropdown-toggle:focus {
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.vehicle-search-input {
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  min-width: 250px;
+}
+
+/* Vehicles Table */
+.vehicles-table {
+  font-size: 0.9rem;
+}
+
+.vehicles-table th {
+  background: #f8f9fa;
+  border-top: none;
+  font-weight: 600;
+  color: #495057;
+  padding: 1rem 0.75rem;
+}
+
+.vehicles-table td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+}
+
+.vehicle-thumbnail {
+  border: 1px solid #dee2e6;
+}
+
+.action-buttons .btn {
+  padding: 0.25rem 0.5rem;
+  margin-right: 0.25rem;
+}
+
+/* Loading and Error States */
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filters-card .d-flex {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  
+  .filter-group {
+    margin-bottom: 1rem;
+  }
+  
+  .vehicle-search-input {
+    min-width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  .vehicles-table {
+    font-size: 0.8rem;
+  }
+  
+  .vehicle-thumbnail {
+    width: 40px !important;
+    height: 32px !important;
+  }
+}
+
+/* Profile Picture Upload */
+.profile-pic-container .cursor-pointer:hover {
+  background-color: #0056b3 !important;
+}
+
+/* Modal Improvements */
+.modal-header {
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.modal-footer {
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+/* Earnings Card */
+.earnings-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.earnings-card .section-title {
+  color: white;
+  font-weight: 600;
+}
+
+.earn-box {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  flex: 1;
+}
+
+.earn-box h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.earn-box p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+.payout-item {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.75rem;
+}
+
+/* Account Settings */
+.account-settings-card {
+  border: 1px solid #dee2e6;
+  border-radius: 10px;
+  padding: 1.5rem;
+}
+
+.account-box {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.account-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
