@@ -53,7 +53,38 @@ const ReservationModel = {
   },
 
   async getReservationsByUserId(UserID) {
-    const [rows] = await db.query('SELECT * FROM Reservation WHERE UserID = ?', [UserID]);
+    const query = `
+      SELECT 
+        r.ReservationID,
+        r.StartDate,
+        r.EndDate,
+        r.PickupLocation,
+        r.DropoffLocation,
+        v.VehicleID,
+        v.Type as VehicleType,
+        v.Status as VehicleStatus,
+        v.VehiclePic,
+        CASE 
+          WHEN v.Type = 'Car' THEN CONCAT(c.Brand, ' ', c.Model, ' - ', c.Year)
+          WHEN v.Type = 'Motorcycle' THEN CONCAT(m.Brand, ' ', m.Engine, 'cc - ', m.Year)
+          WHEN v.Type = 'boats' THEN CONCAT(b.Brand, ' ', b.BoatType)
+          WHEN v.Type = 'Bicycle' THEN CONCAT('Bicycle - ', bi.Type)
+          ELSE 'Unknown Vehicle'
+        END as VehicleDetails,
+        vo.FullName as OwnerName,
+        vo.PhoneNumber as OwnerPhone,
+        'active' as Status
+      FROM Reservation r
+      JOIN Vehicle v ON r.VehicleID = v.VehicleID
+      LEFT JOIN VehicleOwner vo ON v.OwnerID = vo.OwnerID
+      LEFT JOIN Car c ON v.VehicleID = c.VehicleID AND v.Type = 'Car'
+      LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID AND v.Type = 'Motorcycle'
+      LEFT JOIN boats b ON v.VehicleID = b.VehicleID AND v.Type = 'boats'
+      LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID AND v.Type = 'Bicycle'
+      WHERE r.UserID = ?
+      ORDER BY r.StartDate DESC
+    `;
+    const [rows] = await db.query(query, [UserID]);
     return rows;
   },
 

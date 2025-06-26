@@ -1,51 +1,149 @@
-import React from "react";
-import { NavLink } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Nav, NavItem } from "reactstrap";
 import "../../styles/user-profile.css";
 
 const MyRentals = () => {
-  const reservations = [
-    {
-      id: 1,
-      vehiclePhoto: "https://i.pravatar.cc/150?img=5",
-      vehicleDetails: "Toyota Camry - Sedan",
-      rentalPeriod: "June 18, 2025 - June 20, 2025",
-      pickupInfo: "Pickup: Delta Garage, 10:00 AM",
-      returnInfo: "Return: Delta Garage, 10:00 AM",
-      status: "completed",
-      ownerContact: "John Doe, +90 500 111 2222",
-    },
-    {
-      id: 2,
-      vehiclePhoto: "https://i.pravatar.cc/150?img=6",
-      vehicleDetails: "Honda CR-V - SUV",
-      rentalPeriod: "June 21, 2025 - June 23, 2025",
-      pickupInfo: "Pickup: City Center, 12:00 PM",
-      returnInfo: "Return: City Center, 12:00 PM",
-      status: "pending",
-      ownerContact: "Jane Smith, +90 500 333 4444",
-    },
-    {
-      id: 3,
-      vehiclePhoto: "https://i.pravatar.cc/150?img=7",
-      vehicleDetails: "Ford Focus - Compact",
-      rentalPeriod: "June 15, 2025 - June 17, 2025",
-      pickupInfo: "Pickup: Airport, 8:00 AM",
-      returnInfo: "Return: Airport, 8:00 AM",
-      status: "cancelled",
-      ownerContact: "Mike Johnson, +90 500 555 6666",
-    },
-  ];
+  const navigate = useNavigate();
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const handleCancel = (id) => {
-    alert(`Reservation ${id} cancelled!`);
-    // Add cancellation logic here
+  useEffect(() => {
+    fetchReservations();
+  }, []);
+
+  const fetchReservations = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      const response = await fetch('http://localhost:5000/api/reservations/my', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          localStorage.removeItem('token');
+          navigate('/login');
+          return;
+        }
+        throw new Error('Failed to fetch reservations');
+      }
+
+      const data = await response.json();
+      setReservations(data);
+    } catch (error) {
+      console.error('Error fetching reservations:', error);
+      setError('Failed to load reservations');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = async (reservationId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/reservations/cancel/${reservationId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        alert('Reservation cancelled successfully!');
+        fetchReservations(); // Refresh the list
+      } else {
+        alert('Failed to cancel reservation');
+      }
+    } catch (error) {
+      console.error('Error cancelling reservation:', error);
+      alert('Error cancelling reservation');
+    }
   };
 
   const handleNotAvailable = (id) => {
     alert(`Vehicle from reservation ${id} marked as NOT AVAILABLE!`);
     // Add logic to mark vehicle as not available here
   };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const getStatusClass = (startDate, endDate) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (now < start) return 'status-pending';
+    if (now >= start && now <= end) return 'status-active';
+    return 'status-completed';
+  };
+
+  const getStatusText = (startDate, endDate) => {
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (now < start) return 'Upcoming';
+    if (now >= start && now <= end) return 'Active';
+    return 'Completed';
+  };
+
+  if (loading) {
+    return (
+      <div className="user-profile-page">
+        <div className="sidebar">
+          <h3 className="sidebar-title">User Profile</h3>
+          {/* Sidebar nav items here */}
+        </div>
+        <div className="main-content">
+          <Container fluid>
+            <Row className="justify-content-center">
+              <Col lg="8">
+                <div className="loading-spinner">Loading your rentals...</div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="user-profile-page">
+        <div className="sidebar">
+          <h3 className="sidebar-title">User Profile</h3>
+          {/* Sidebar nav items here */}
+        </div>
+        <div className="main-content">
+          <Container fluid>
+            <Row className="justify-content-center">
+              <Col lg="8">
+                <div className="error-message">Error: {error}</div>
+              </Col>
+            </Row>
+          </Container>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-profile-page">
@@ -117,68 +215,61 @@ const MyRentals = () => {
             <Col lg="8">
               <div className="rental-section">
                 <h3 className="section-title">My Rentals</h3>
-                {reservations.map((reservation) => (
-                  <div key={reservation.id} className="rental-card">
-                    <img
-                      src={reservation.vehiclePhoto}
-                      alt={reservation.vehicleDetails}
-                      className="rental-image"
-                    />
-                    <div className="rental-details">
-                      <h4 className="rental-vehicle">
-                        {reservation.vehicleDetails}
-                      </h4>
-                      <p className="rental-info">
-                        <strong>Rental Period:</strong>{" "}
-                        {reservation.rentalPeriod}
-                      </p>
-                      <p className="rental-info">
-                        <strong>Pickup:</strong> {reservation.pickupInfo}
-                      </p>
-                      <p className="rental-info">
-                        <strong>Return:</strong> {reservation.returnInfo}
-                      </p>
-                      <p className="rental-info">
-                        <strong>Status:</strong>{" "}
-                        {reservation.status === "completed" ? (
-                          <span className="status-completed">
-                            {reservation.status}
+                {reservations.length === 0 ? (
+                  <div className="no-rentals">
+                    <p>You don't have any rentals yet.</p>
+                  </div>
+                ) : (
+                  reservations.map((reservation) => (
+                    <div key={reservation.ReservationID} className="rental-card">
+                      <img
+                        src={reservation.VehiclePic || "https://via.placeholder.com/150?text=Vehicle"}
+                        alt={reservation.VehicleDetails}
+                        className="rental-image"
+                      />
+                      <div className="rental-details">
+                        <h4 className="rental-vehicle">
+                          {reservation.VehicleDetails}
+                        </h4>
+                        <p className="rental-info">
+                          <strong>Rental Period:</strong>{" "}
+                          {formatDate(reservation.StartDate)} - {formatDate(reservation.EndDate)}
+                        </p>
+                        <p className="rental-info">
+                          <strong>Pickup:</strong> {reservation.PickupLocation}
+                        </p>
+                        <p className="rental-info">
+                          <strong>Return:</strong> {reservation.DropoffLocation}
+                        </p>
+                        <p className="rental-info">
+                          <strong>Status:</strong>{" "}
+                          <span className={getStatusClass(reservation.StartDate, reservation.EndDate)}>
+                            {getStatusText(reservation.StartDate, reservation.EndDate)}
                           </span>
-                        ) : reservation.status === "pending" ? (
-                          <span className="status-pending">
-                            {reservation.status}
-                          </span>
-                        ) : (
-                          <span className="status-cancelled">
-                            {reservation.status}
-                          </span>
-                        )}
-                      </p>
-                      <p className="rental-info">
-                        <strong>Owner Contact:</strong>{" "}
-                        {reservation.ownerContact}
-                      </p>
-                      <div className="rental-actions">
-                        <button
-                          className="btn-cancel"
-                          onClick={() => handleCancel(reservation.id)}
-                          disabled={
-                            reservation.status === "cancelled" ||
-                            reservation.status === "completed"
-                          }
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          className="btn-not-available"
-                          onClick={() => handleNotAvailable(reservation.id)}
-                        >
-                          Mark NOT AVAILABLE
-                        </button>
+                        </p>
+                        <p className="rental-info">
+                          <strong>Owner Contact:</strong>{" "}
+                          {reservation.OwnerName ? `${reservation.OwnerName}, ${reservation.OwnerPhone}` : 'Not available'}
+                        </p>
+                        <div className="rental-actions">
+                          <button
+                            className="btn-cancel"
+                            onClick={() => handleCancel(reservation.ReservationID)}
+                            disabled={getStatusText(reservation.StartDate, reservation.EndDate) === 'Completed'}
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            className="btn-not-available"
+                            onClick={() => handleNotAvailable(reservation.ReservationID)}
+                          >
+                            Mark NOT AVAILABLE
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </Col>
           </Row>
