@@ -158,7 +158,7 @@ exports.findByPhone = async (phone) => {
 
 // Update chauffeur profile fields
 exports.updateChauffeurProfile = async (id, updates) => {
-  const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl"];
+  const allowedFields = ["Name", "PhoneNumber", "Email", "Location", "Date_of_birth", "ProfilePictureUrl", "LicenseFileUrl"];
   // Convert Date_of_birth to YYYY-MM-DD if present
   if (updates.Date_of_birth) {
     const d = new Date(updates.Date_of_birth);
@@ -179,4 +179,22 @@ exports.updateChauffeurProfile = async (id, updates) => {
     [...values, id]
   );
   return result;
+};
+
+// Update only the LicenseFileUrl for a chauffeur
+exports.updateChauffeurLicenseFile = async (chauffeurId, fileUrl) => {
+  const [result] = await db.query(
+    "UPDATE Chauffeur SET LicenseFileUrl = ? WHERE ChauffeurID = ?",
+    [fileUrl, chauffeurId]
+  );
+  return result;
+};
+
+// Get the license file URL for a chauffeur
+exports.getChauffeurLicenseFileUrl = async (chauffeurId) => {
+  const [rows] = await db.query(
+    "SELECT LicenseFileUrl FROM Chauffeur WHERE ChauffeurID = ?",
+    [chauffeurId]
+  );
+  return rows[0]?.LicenseFileUrl || null;
 };

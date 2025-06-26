@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const chauffeurModel = require("../models/chauffeurModel");
 const jwt = require('jsonwebtoken');
+const path = require('path');
 
 exports.registerChauffeur = async (req, res) => {
   const { Name, PhoneNumber, Email, Password, LicenseNumber, Location, Date_of_birth } = req.body;
@@ -291,5 +292,32 @@ exports.updateOwnProfile = async (req, res) => {
   } catch (err) {
     console.error("Error updating chauffeur profile:", err);
     res.status(500).json({ error: "Server error", details: err.message });
+  }
+};
+
+exports.uploadLicenseFile = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: 'No file uploaded' });
+  }
+  const fileUrl = `/uploads/licenses/${req.file.filename}`;
+  try {
+    await chauffeurModel.updateChauffeurLicenseFile(req.user.id, fileUrl);
+    res.status(200).json({ message: 'License uploaded successfully', fileUrl });
+  } catch (err) {
+    console.error('Error saving license file URL:', err);
+    res.status(500).json({ message: 'Failed to save license file URL' });
+  }
+};
+
+exports.getLicenseFileUrl = async (req, res) => {
+  try {
+    const fileUrl = await chauffeurModel.getChauffeurLicenseFileUrl(req.user.id);
+    if (!fileUrl) {
+      return res.status(404).json({ message: 'No license file found' });
+    }
+    res.status(200).json({ fileUrl });
+  } catch (err) {
+    console.error('Error retrieving license file URL:', err);
+    res.status(500).json({ message: 'Failed to retrieve license file URL' });
   }
 };
