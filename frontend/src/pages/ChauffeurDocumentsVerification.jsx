@@ -128,8 +128,8 @@ const DocumentsVerification = () => {
             {existingUrl
               ? "Uploaded"
               : uploadSuccess
-              ? "Uploaded"
-              : "Not Uploaded"}
+                ? "Uploaded"
+                : "Not Uploaded"}
           </p>
           {existingUrl && (
             <div style={{ marginBottom: 10 }}>
@@ -181,8 +181,8 @@ const DocumentsVerification = () => {
             {uploading
               ? <Spinner size="sm" />
               : existingUrl
-              ? "Replace Document"
-              : "Upload Document"}
+                ? "Replace Document"
+                : "Upload Document"}
           </Button>
           {error && (
             <Alert color="danger" className="mt-2">

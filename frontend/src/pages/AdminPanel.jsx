@@ -578,8 +578,8 @@ const AdminDashboard = () => {
                               reservation.status === "accepted"
                                 ? "success"
                                 : reservation.status === "rejected"
-                                ? "danger"
-                                : "warning"
+                                  ? "danger"
+                                  : "warning"
                             }
                           >
                             {reservation.status}
@@ -634,8 +634,8 @@ const AdminDashboard = () => {
                               payment.status === "accepted"
                                 ? "success"
                                 : payment.status === "rejected"
-                                ? "danger"
-                                : "warning"
+                                  ? "danger"
+                                  : "warning"
                             }
                           >
                             {payment.status}
