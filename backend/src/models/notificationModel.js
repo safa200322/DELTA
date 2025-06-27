@@ -28,3 +28,9 @@ exports.getAll = async () => {
   const [rows] = await db.query('SELECT * FROM Notification ORDER BY NotificationID DESC');
   return rows;
 };
+
+// Get notifications for a specific user
+exports.findByUserId = async (userId) => {
+  const [rows] = await db.query('SELECT * FROM Notification WHERE RecipientID = ? ORDER BY NotificationID DESC', [userId]);
+  return rows;
+};

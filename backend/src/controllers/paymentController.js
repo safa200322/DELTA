@@ -79,3 +79,26 @@ exports.rejectPayment = async (req, res) => {
     res.status(500).json({ message: 'Error rejecting payment', error: error.message });
   }
 };
+
+// Get all payments for the authenticated user (rentee)
+exports.getMyPayments = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    // Step 1: Get all ReservationIDs for this user
+    const [reservations] = await require('../db').query('SELECT ReservationID FROM Reservation WHERE UserID = ?', [userId]);
+    const reservationIds = reservations.map(r => r.ReservationID);
+    if (reservationIds.length === 0) {
+      return res.json([]); // No reservations, so no payments
+    }
+    // Step 2: Get all payments for these reservations
+    const [payments] = await require('../db').query(
+      `SELECT * FROM Payment WHERE ReservationID IN (${reservationIds.map(() => '?').join(',')})`,
+      reservationIds
+    );
+    res.json(payments);
+    console.log('[PAYMENT][USER] My payments:', payments);
+  } catch (error) {
+    console.error('[PAYMENT][USER] Get my payments error:', error);
+    res.status(500).json({ message: 'Error fetching your payments', error: error.message });
+  }
+};
