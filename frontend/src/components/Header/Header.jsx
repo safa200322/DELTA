@@ -84,12 +84,12 @@ const Header = () => {
         fontFamily: 'Inter, Arial, sans-serif',
         letterSpacing: 0.1,
         fontWeight: 500,
-        minHeight: 72,
+        minHeight: 48, // Reduced from 72 to 48 for thinner header
       }}
       aria-label="Main site header"
     >
       <Container fluid style={{ maxWidth: 1440, padding: '0 32px' }}>
-        <Row className="align-items-center" style={{ minHeight: 72 }}>
+        <Row className="align-items-center" style={{ minHeight: 48 }}>
           {/* Branding */}
           <Col xs="12" md="2" lg="2" className="d-flex align-items-center" style={{ minWidth: 180 }}>
             <Link
@@ -106,7 +106,7 @@ const Header = () => {
           </Col>
 
           {/* Navigation */}
-          <Col xs="12" md="7" lg="7" className="d-none d-md-flex align-items-center justify-content-center" style={{ height: 72 }}>
+          <Col xs="12" md="7" lg="7" className="d-none d-md-flex align-items-center justify-content-center" style={{ height: 48 }}>
             <Nav className="navigation" ref={navRef} style={{ gap: 8 }} aria-label="Main navigation">
               <div className="menu d-flex gap-2" style={{ alignItems: 'center' }}>
                 {navLinksToShow.map((item, index) => (

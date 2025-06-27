@@ -137,7 +137,7 @@ const ProfileOverview = () => {
     <div className="user-profile-page" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e6f0fa 0%, #fafdff 100%)' }}>
       {/* Sidebar */}
       <div className="sidebar" style={{ background: '#185abc', minHeight: '100vh', padding: '32px 0 0 0', boxShadow: '2px 0 16px rgba(24,90,188,0.08)' }}>
-        <h3 className="sidebar-title" style={{ color: '#fff', fontWeight: 700, marginBottom: 32, textAlign: 'center', letterSpacing: 1 }}>Personal Info</h3>
+        <h3 className="sidebar-title" style={{ color: '#fff', fontWeight: 700, marginBottom: 32, textAlign: 'center', letterSpacing: 1, fontSize: 28, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Personal Info</h3>
         <Nav vertical className="sidebar-nav" style={{ gap: 8 }}>
           <NavItem>
             <NavLink to="/profile/ProfileOverview" className="nav-link" activeClassName="active" style={{ color: '#fff', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4, background: '#2563eb' }}>

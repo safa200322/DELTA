@@ -155,18 +155,21 @@ const RenteeRentalReservations = () => {
   }, []);
 
   return (
-    <section style={{ marginTop: "10px" }}>
+    <section style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e6f0fa 0%, #fafdff 100%)', padding: '0' }}>
       <Container fluid>
         <Row>
           <RenteeSidebar
             sidebarOpen={sidebarOpen}
             toggleSidebar={toggleSidebar}
+            style={{ background: '#185abc', minHeight: '100vh', padding: '32px 0 0 0', boxShadow: '2px 0 16px rgba(24,90,188,0.08)' }}
           />
 
-          <Col xs="12" md="9" lg="10" className="content-area">
-            <Row className="mt-4">
+          <Col xs="12" md="9" lg="10" className="content-area" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'transparent' }}>
+            <Row className="mt-4 justify-content-center">
               <Col lg="12">
-                <ReservationList reservations={reservations} loading={loading} error={error} />
+                <div style={{ width: '100%', maxWidth: 1200 }}>
+                  <ReservationList reservations={reservations} loading={loading} error={error} />
+                </div>
               </Col>
             </Row>
           </Col>
