@@ -262,10 +262,6 @@ const UserProfile = () => {
                             {user.Availability || "Available"}
                           </span>
                         </p>
-                        <p className="mb-0 mt-1">
-                          <strong>Member since:</strong>{" "}
-                          {new Date(user.CreatedAt).toLocaleDateString()}
-                        </p>
                       </div>
                       <Button
                         color="primary"

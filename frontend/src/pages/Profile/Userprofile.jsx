@@ -252,10 +252,7 @@ const ProfileOverview = () => {
                         <span className="split-panel-value">{formatDate(user.birthday)}</span>
                       </div>
                     )}
-                    <div className="split-panel-detail-row">
-                      <span className="split-panel-label">Member since:</span>
-                      <span className="split-panel-value">January 2024</span>
-                    </div>
+                    
                   </div>
                 </div>
               </div>

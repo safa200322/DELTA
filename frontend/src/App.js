@@ -111,6 +111,10 @@ function App() {
           {/* Remove legacy/duplicate profile routes and keep only the above */}
           {/* Fallback */}
           <Route path="*" element={<NotFound />} />
+          <Route path="/admin/accessories" element={<AccessoriesManagement />} />
+          <Route path="/admin/notifications-dashboard" element={<NotificationsDashboard />} />
+          <Route path="/admin/payments-dashboard" element={<PaymentAdminDashboard />} />
+          <Route path="/admin/reservations-dashboard" element={<ReservationManagement />} />
         </Routes>
       </Router>
     </DataProvider>
