@@ -182,13 +182,17 @@ exports.approveVehicle = async (req, res) => {
     // Notify owner
     const vehicle = await vehicleModel.getVehicleById(vehicleID);
     if (vehicle && vehicle.ownerID) {
-      await require('../models/notificationModel').createNotification({
-        recipientID: vehicle.ownerID,
-        title: 'Vehicle Accepted',
-        message: 'Your vehicle got accepted.',
-        type: 'VehicleStatus',
-        broadcastGroup: null
-      });
+      try {
+        await require('../models/notificationModel').createNotification({
+          recipientID: vehicle.ownerID,
+          title: 'Vehicle Accepted',
+          message: 'Your vehicle got accepted.',
+          type: 'VehicleStatus',
+          broadcastGroup: null
+        });
+      } catch (notifyErr) {
+        console.error('Notification creation failed (approve):', notifyErr);
+      }
     }
     res.status(200).json({ message: 'Vehicle approved successfully' });
   } catch (err) {
@@ -203,13 +207,17 @@ exports.rejectVehicle = async (req, res) => {
     // Notify owner
     const vehicle = await vehicleModel.getVehicleById(vehicleID);
     if (vehicle && vehicle.ownerID) {
-      await require('../models/notificationModel').createNotification({
-        recipientID: vehicle.ownerID,
-        title: 'Vehicle Rejected',
-        message: 'Your vehicle got rejected.',
-        type: 'VehicleStatus',
-        broadcastGroup: null
-      });
+      try {
+        await require('../models/notificationModel').createNotification({
+          recipientID: vehicle.ownerID,
+          title: 'Vehicle Rejected',
+          message: 'Your vehicle got rejected.',
+          type: 'VehicleStatus',
+          broadcastGroup: null
+        });
+      } catch (notifyErr) {
+        console.error('Notification creation failed (reject):', notifyErr);
+      }
     }
     res.status(200).json({ message: 'Vehicle rejected successfully' });
   } catch (err) {
