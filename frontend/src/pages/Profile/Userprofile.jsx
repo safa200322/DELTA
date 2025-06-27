@@ -231,10 +231,7 @@ const ProfileOverview = () => {
                         <span className="split-panel-value" style={{ color: '#222', fontWeight: 500 }}>{formatDate(user.birthday)}</span>
                       </div>
                     )}
-                    <div className="split-panel-detail-row" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                      <span className="split-panel-label" style={{ color: '#7ea7e6', fontWeight: 500, minWidth: 90 }}>Member since:</span>
-                      <span className="split-panel-value" style={{ color: '#222', fontWeight: 500 }}>January 2024</span>
-                    </div>
+                    
                   </div>
                 </div>
               </div>

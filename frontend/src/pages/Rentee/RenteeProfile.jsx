@@ -211,37 +211,36 @@ const UserProfile = () => {
                       style={{ display: "none" }}
                     />
                   </div>
-                  <div className="profile-info flex-grow-1">
-                    <h2
-                      className="fw-bold mb-1"
-                      style={{ fontSize: "2rem", color: "#222" }}
-                    >
-                      {user.FullName}
-                    </h2>
-                    <div className="d-flex flex-wrap gap-3 align-items-center mb-2">
-                      <span className="text-muted">
-                        <i className="ri-mail-line me-1"></i> {user.Email}
-                      </span>
-                      <span className="text-muted">
-                        <i className="ri-phone-line me-1"></i> {user.PhoneNumber}
-                      </span>
+                  <div className="profile-info">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <h3 className="mb-2">{user.FullName}</h3>
+                        <p className="mb-1">
+                          <strong>Email:</strong> {user.Email}
+                        </p>
+                        <p className="mb-1">
+                          <strong>Phone:</strong> {user.PhoneNumber}
+                        </p>
+                        <p className="mb-1">
+                          <strong>National ID:</strong> {user.NationalID}
+                        </p>
+                        <p className="mb-0">
+                          <strong>Status:</strong>{" "}
+                          <span className="badge bg-success">
+                            {user.Availability || "Available"}
+                          </span>
+                        </p>
+                      </div>
+                      <Button
+                        color="primary"
+                        size="sm"
+                        onClick={toggleEditProfile}
+                        className="ms-3"
+                      >
+                        <i className="ri-edit-line me-1"></i>
+                        Edit Profile
+                      </Button>
                     </div>
-                    <div className="d-flex flex-wrap gap-3 align-items-center mb-2">
-                      <span className="text-muted">
-                        <i className="ri-id-card-line me-1"></i> {user.NationalID}
-                      </span>
-                      <span className="badge bg-success ms-2">
-                        {user.Availability || "Available"}
-                      </span>
-                    </div>
-                    <Button
-                      color="primary"
-                      size="sm"
-                      onClick={toggleEditProfile}
-                      className="mt-2 px-4 rounded-pill shadow-sm"
-                    >
-                      <i className="ri-edit-line me-1"></i> Edit Profile
-                    </Button>
                   </div>
                 </div>
                 <div className="earnings-card shadow-sm p-4 bg-white rounded-4 mb-4">

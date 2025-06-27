@@ -399,51 +399,36 @@ const AdminDashboard = () => {
           />
         </div>
         <ul className="nav flex-column sidebar-nav" style={{ gap: '18px', marginTop: '32px', width: '100%' }}>
-          {/* Sidebar nav items, centered */}
           <li className="nav-item">
-            <Link className="nav-link active d-flex justify-content-center align-items-center" to="/" end style={{ height: 56 }}>
+            <Link className="nav-link active d-flex justify-content-center align-items-center" to="/admin" end style={{ height: 56 }}>
               <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
                 📊
               </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link d-flex justify-content-center align-items-center" to="/vehicle-management" style={{ height: 56 }}>
-              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
-                🚗
-              </span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link d-flex justify-content-center align-items-center" to="/chauffeur-management" style={{ height: 56 }}>
-              <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
-                👤
-              </span>
-            </Link>
-          </li>
-          <li className="nav-item">
-            <Link className="nav-link active d-flex justify-content-center align-items-center" to="/reservation-management" style={{ height: 56 }}>
+            <Link className="nav-link d-flex justify-content-center align-items-center" to="/admin/reservations-dashboard" style={{ height: 56 }}>
               <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
                 📅
               </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/payment-admin" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+            <Link to="/admin/payments-dashboard" className="nav-link d-flex justify-content-center align-items-center" style={{ height: 56 }}>
               <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
                 💰
               </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/notifications-Dashboard" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+            <Link to="/admin/notifications-dashboard" className="nav-link d-flex justify-content-center align-items-center" style={{ height: 56 }}>
               <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
                 🔔
               </span>
             </Link>
           </li>
           <li className="nav-item">
-            <Link to="/accessories-management" className={({ isActive }) => (isActive ? "nav-link active d-flex justify-content-center align-items-center" : "nav-link d-flex justify-content-center align-items-center")} style={{ height: 56 }}>
+            <Link to="/admin/accessories" className="nav-link d-flex justify-content-center align-items-center" style={{ height: 56 }}>
               <span className="sidebar-icon" style={{ fontSize: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', width: 48, height: 48 }}>
                 🛠️
               </span>
