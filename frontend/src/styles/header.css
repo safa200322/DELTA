@@ -1,6 +1,6 @@
 .header {
   background: #005566;
-  padding: 1rem 0;
+  padding: 0.5rem 0; /* Reduced padding for thinner header */
   width: 100vw;
   z-index: 1000;
 }

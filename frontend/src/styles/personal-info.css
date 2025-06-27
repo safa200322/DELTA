@@ -7,33 +7,38 @@
 
 /* Sidebar */
 .sidebar {
-  width: 250px;
+  width: 180px; /* Reduced from 250px for a thinner sidebar */
   background-color: #005566;
   color: white;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  padding: 20px 15px;
+  padding: 12px 8px; /* Less padding for a thinner look */
   overflow-y: auto;
   z-index: 1000;
+  border-top-right-radius: 18px; /* Rounded for aesthetics */
+  border-bottom-right-radius: 18px;
+  box-shadow: 2px 0 8px #0001;
 }
 
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 
 .sidebar-header h3 {
   margin: 0;
-  font-size: 1.4rem;
+  font-size: 1.1rem; /* Smaller title */
   color: white;
+  font-weight: 700;
+  letter-spacing: 0.5px;
 }
 
 .sidebar-toggle {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: white;
   cursor: pointer;
 }
@@ -47,17 +52,18 @@
 .nav-link {
   display: flex;
   align-items: center;
-  padding: 12px 15px;
+  padding: 8px 10px; /* Thinner nav items */
   color: white;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   border-radius: 6px;
   transition: background 0.3s;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .nav-link i {
-  margin-right: 10px;
+  margin-right: 8px;
+  font-size: 1.1rem;
 }
 
 .nav-link:hover,
@@ -69,7 +75,7 @@
 
 /* Content */
 .content-area {
-  margin-left: 250px;
+  margin-left: 180px; /* Match new sidebar width */
   padding: 2rem;
   display: flex;
   justify-content: center;
@@ -99,6 +105,11 @@
   .sidebar {
     position: relative;
     width: 100%;
-    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+  }
+  .content-area {
+    margin-left: 0;
+    padding: 1rem;
   }
 }
