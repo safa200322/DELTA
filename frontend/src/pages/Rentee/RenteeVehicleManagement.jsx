@@ -21,7 +21,7 @@ import {
 } from "reactstrap";
 import "../../styles/user-profile.css";
 import RenteeSidebar from "../../components/RenteeSidebar";
-import VehicleOwnerProfileEdit from "../../components/VehicleOwnerProfileEdit";
+import AddVehicleModal from "../../components/AddVehicleModal";
 
 const VehicleManagement = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -314,6 +314,15 @@ const VehicleManagement = () => {
       <h5 className="section-title mb-3" style={{ color: '#1976d2', fontWeight: '600' }}>
         <i className="ri-car-line me-2 text-primary"></i>
         My Vehicles ({vehicles.length})
+        <Button
+          color="primary"
+          size="sm"
+          className="ms-3 rounded-pill px-4 shadow-sm"
+          style={{ fontWeight: 500, fontSize: 15 }}
+          onClick={() => setAddVehicleModal(true)}
+        >
+          <i className="ri-add-line me-1"></i> Add Vehicle
+        </Button>
       </h5>
 
       {vehicles.length === 0 ? (
@@ -331,12 +340,6 @@ const VehicleManagement = () => {
           }}>
             Add Your First Vehicle
           </Button>
-          <VehicleOwnerProfileEdit
-            isOpen={addVehicleModal}
-            toggle={() => setAddVehicleModal(false)}
-            currentUser={currentUser}
-            onProfileUpdate={() => { setAddVehicleModal(false); fetchVehicles(); }}
-          />
         </Alert>
       ) : (
         <Row>
@@ -608,6 +611,14 @@ const VehicleManagement = () => {
           </Button>
         </ModalFooter>
       </Modal>
+
+      {/* Add Vehicle Modal */}
+      <AddVehicleModal
+        isOpen={addVehicleModal}
+        toggle={() => setAddVehicleModal(false)}
+        currentUser={currentUser}
+        onVehicleAdded={fetchVehicles}
+      />
     </div>
   );
 };

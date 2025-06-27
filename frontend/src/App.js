@@ -61,6 +61,7 @@ import VehicleOwnerLogin from "./pages/VehicleOwnerLogin";
 import VehicleOwnerSignUp from "./pages/VehicleOwnerSignup";
 import BicycleListing from "./pages/BicycleListing";
 import VehicleDetails from "./pages/VehicleDetails";
+import RenteeProfile from "./pages/Rentee/RenteeProfile";
 
 function App() {
   return (
@@ -93,7 +94,7 @@ function App() {
           <Route path="/vehicle-owner/login" element={<VehicleOwnerLogin />} />
           <Route path="/vehicle-owner-signup" element={<VehicleOwnerSignUp />} />
           {/* Rentee profile and dashboard */}
-          <Route path="/profile/rentee-profile" element={<UserProfile />} />
+          <Route path="/profile/rentee-profile" element={<RenteeProfile />} />
           <Route path="/profile/rentee-vehicle-management" element={<RenteeVehicleManagement />} />
           <Route path="/profile/rentee-rental-reservations" element={<RenteeRentalReservations />} />
           <Route path="/profile/rentee-earnings-and-payments" element={<RenteeEarningsandPayment />} />

@@ -72,7 +72,7 @@ const EarningsAndPayments = ({ earnings, loading, error }) => {
             <CardBody>
               <h6 className="mb-3">Average Rental</h6>
               <h3 className="text-secondary">
-                ${(earnings.AverageRental || 0).toFixed(2)}
+                {Number(earnings.AverageRental || 0).toFixed(2)}
               </h3>
             </CardBody>
           </Card>

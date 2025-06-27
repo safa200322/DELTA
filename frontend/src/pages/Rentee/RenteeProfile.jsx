@@ -18,9 +18,9 @@ const UserProfile = () => {
   const toggleEditProfile = () => setEditProfileModal(!editProfileModal);
 
   const handleProfileUpdate = (updatedData) => {
-    setUser(prev => ({
+    setUser((prev) => ({
       ...prev,
-      ...updatedData
+      ...updatedData,
     }));
   };
 
@@ -168,51 +168,14 @@ const UserProfile = () => {
           <RenteeSidebar
             sidebarOpen={sidebarOpen}
             toggleSidebar={toggleSidebar}
-            title="Vehicle Owner Profile"
-            customNavItems={[
-              {
-                to: "/vehicle-owner/profile",
-                icon: "ri-user-line",
-                label: "Personal Info"
-              },
-              {
-                to: "/profile/rentee-vehicle-management",
-                icon: "ri-briefcase-line",
-                label: "Vehicle Management"
-              },
-              {
-                to: "/profile/rentee-rental-reservations",
-                icon: "ri-calendar-line",
-                label: "Rental Reservations"
-              },
-              {
-                to: "/profile/rentee-earnings-and-payments",
-                icon: "ri-file-text-line",
-                label: "Earnings & Payments"
-              },
-              {
-                to: "/profile/rentee-notifications",
-                icon: "ri-notification-line",
-                label: "Notifications"
-              },
-              {
-                to: "/profile/rentee-reviews",
-                icon: "ri-star-line",
-                label: "Reviews"
-              },
-              {
-                to: "/profile/rentee-security",
-                icon: "ri-shield-line",
-                label: "Security"
-              }
-            ]}
+            title="Rentee Profile"
           />
 
           <Col xs="12" md="9" lg="10" className="content-area">
-            <Row className="mt-4">
-              <Col lg="8">
-                <div className="profile-card d-flex align-items-center gap-4 mb-4">
-                  <div className="profile-pic-container position-relative">
+            <Row className="mt-4 justify-content-center">
+              <Col lg="7">
+                <div className="profile-card shadow p-4 mb-4 bg-white rounded-4 d-flex align-items-center gap-4 flex-wrap flex-md-nowrap">
+                  <div className="profile-pic-container position-relative mx-auto mx-md-0">
                     <img
                       src={
                         user.ProfileImage
@@ -220,18 +183,23 @@ const UserProfile = () => {
                           : "https://i.pravatar.cc/150?img=3"
                       }
                       alt="Profile"
-                      className="profile-pic"
+                      className="profile-pic border border-2 border-primary"
                       style={{
-                        width: "100px",
-                        height: "100px",
+                        width: 110,
+                        height: 110,
                         borderRadius: "50%",
                         objectFit: "cover",
+                        background: "#f8f9fa",
                       }}
                     />
                     <label
                       htmlFor="profilePictureUpload"
-                      className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 cursor-pointer"
-                      style={{ cursor: "pointer", fontSize: "12px" }}
+                      className="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2 shadow-sm"
+                      style={{
+                        cursor: "pointer",
+                        fontSize: 13,
+                        border: "2px solid #fff",
+                      }}
                     >
                       <i className="ri-camera-line"></i>
                     </label>
@@ -243,132 +211,136 @@ const UserProfile = () => {
                       style={{ display: "none" }}
                     />
                   </div>
-                  <div className="profile-info">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <h3 className="mb-2">{user.FullName}</h3>
-                        <p className="mb-1">
-                          <strong>Email:</strong> {user.Email}
-                        </p>
-                        <p className="mb-1">
-                          <strong>Phone:</strong> {user.PhoneNumber}
-                        </p>
-                        <p className="mb-1">
-                          <strong>National ID:</strong> {user.NationalID}
-                        </p>
-                        <p className="mb-0">
-                          <strong>Status:</strong>{" "}
-                          <span className="badge bg-success">
-                            {user.Availability || "Available"}
-                          </span>
-                        </p>
-                        <p className="mb-0 mt-1">
-                          <strong>Member since:</strong>{" "}
-                          {new Date(user.CreatedAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <Button
-                        color="primary"
-                        size="sm"
-                        onClick={toggleEditProfile}
-                        className="ms-3"
-                      >
-                        <i className="ri-edit-line me-1"></i>
-                        Edit Profile
-                      </Button>
+                  <div className="profile-info flex-grow-1">
+                    <h2
+                      className="fw-bold mb-1"
+                      style={{ fontSize: "2rem", color: "#222" }}
+                    >
+                      {user.FullName}
+                    </h2>
+                    <div className="d-flex flex-wrap gap-3 align-items-center mb-2">
+                      <span className="text-muted">
+                        <i className="ri-mail-line me-1"></i> {user.Email}
+                      </span>
+                      <span className="text-muted">
+                        <i className="ri-phone-line me-1"></i> {user.PhoneNumber}
+                      </span>
                     </div>
+                    <div className="d-flex flex-wrap gap-3 align-items-center mb-2">
+                      <span className="text-muted">
+                        <i className="ri-id-card-line me-1"></i> {user.NationalID}
+                      </span>
+                      <span className="badge bg-success ms-2">
+                        {user.Availability || "Available"}
+                      </span>
+                    </div>
+                    <Button
+                      color="primary"
+                      size="sm"
+                      onClick={toggleEditProfile}
+                      className="mt-2 px-4 rounded-pill shadow-sm"
+                    >
+                      <i className="ri-edit-line me-1"></i> Edit Profile
+                    </Button>
                   </div>
                 </div>
-                <VehicleManagement />
-              </Col>
-
-              <Col lg="4">
-                <div className="earnings-card">
-                  <h5 className="section-title">
+                <div className="earnings-card shadow-sm p-4 bg-white rounded-4 mb-4">
+                  <h5 className="section-title mb-3">
                     <i className="ri-money-dollar-circle-line me-2 text-warning"></i>
                     Earnings & Payments
                   </h5>
-
-                  <div className="earnings-summary d-flex gap-3 mb-3">
-                    <div className="earn-box">
-                      <h3>
+                  <div className="earnings-summary d-flex gap-4 mb-3 flex-wrap">
+                    <div className="earn-box text-center flex-fill">
+                      <h3
+                        className="fw-bold text-success mb-0"
+                        style={{ fontSize: "1.7rem" }}
+                      >
                         ${earnings?.TotalEarnings?.toLocaleString() || "0"}
                       </h3>
-                      <p>Total Earnings</p>
+                      <div className="text-muted" style={{ fontSize: 14 }}>
+                        Total Earnings
+                      </div>
                     </div>
-                    <div className="earn-box">
-                      <h3>
+                    <div className="earn-box text-center flex-fill">
+                      <h3
+                        className="fw-bold text-primary mb-0"
+                        style={{ fontSize: "1.7rem" }}
+                      >
                         ${earnings?.MonthlyEarnings?.toLocaleString() || "0"}
                       </h3>
-                      <p>This Month</p>
+                      <div className="text-muted" style={{ fontSize: 14 }}>
+                        This Month
+                      </div>
                     </div>
                   </div>
-
-                  <div className="recent-payouts">
-                    <h6 className="text-muted">Recent Payouts</h6>
+                  <div className="recent-payouts mt-3">
+                    <h6 className="text-muted mb-2">Recent Payouts</h6>
                     {earnings?.recentPayouts?.length > 0 ? (
                       earnings.recentPayouts.map((payout, i) => (
-                        <div key={i} className="payout-item mb-3 border-top pt-2">
-                          <div className="d-flex justify-content-between">
-                            <span>{payout.title}</span>
-                            <span className="text-success fw-bold">
-                              +${payout.amount}
-                            </span>
-                          </div>
-                          <small className="text-muted">{payout.date}</small>
+                        <div
+                          key={i}
+                          className="payout-item mb-2 border-top pt-2 d-flex justify-content-between align-items-center"
+                        >
+                          <span className="fw-semibold">{payout.title}</span>
+                          <span className="text-success fw-bold">
+                            +${payout.amount}
+                          </span>
+                          <small className="text-muted ms-2">{payout.date}</small>
                         </div>
                       ))
                     ) : (
-                      <p className="text-muted">No recent payouts</p>
+                      <p className="text-muted mb-0">No recent payouts</p>
                     )}
                   </div>
                 </div>
-                <div className="account-settings-card mt-4">
+              </Col>
+              <Col lg="5">
+                <div className="account-settings-card shadow-sm p-4 bg-white rounded-4 mb-4">
                   <h5 className="section-title mb-3">
                     <i className="ri-user-settings-line me-2 text-primary"></i>
                     Account Settings
                   </h5>
-
                   <div className="row g-3">
-                    <div className="col-6">
-                      <div className="account-box p-3 border rounded text-center h-100">
+                    <div className="col-12">
+                      <div className="account-box p-3 border rounded text-center h-100 bg-light">
                         <div className="mb-2">
                           <i
                             className="ri-lock-line text-warning"
-                            style={{ fontSize: "24px" }}
+                            style={{ fontSize: 24 }}
                           ></i>
                         </div>
                         <h6 className="fw-bold">Security</h6>
-                        <p
-                          className="text-muted mb-2"
-                          style={{ fontSize: "14px" }}
-                        >
+                        <p className="text-muted mb-2" style={{ fontSize: 14 }}>
                           Change password & security settings
                         </p>
-                        <button className="btn btn-primary btn-sm">
+                        <Button
+                          color="primary"
+                          size="sm"
+                          className="rounded-pill px-3"
+                        >
                           Manage Security
-                        </button>
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="col-6">
-                      <div className="account-box p-3 border rounded text-center h-100">
+                    <div className="col-12">
+                      <div className="account-box p-3 border rounded text-center h-100 bg-light">
                         <div className="mb-2">
                           <i
                             className="ri-close-circle-line text-danger"
-                            style={{ fontSize: "24px" }}
+                            style={{ fontSize: 24 }}
                           ></i>
                         </div>
                         <h6 className="fw-bold">Account Actions</h6>
-                        <p
-                          className="text-muted mb-2"
-                          style={{ fontSize: "14px" }}
-                        >
+                        <p className="text-muted mb-2" style={{ fontSize: 14 }}>
                           Delete or deactivate your account
                         </p>
-                        <button className="btn btn-danger btn-sm">
+                        <Button
+                          color="danger"
+                          size="sm"
+                          className="rounded-pill px-3"
+                        >
                           Manage Account
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
