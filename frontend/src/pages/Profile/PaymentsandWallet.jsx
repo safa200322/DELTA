@@ -28,7 +28,7 @@ const PaymentsWallet = () => {
         setPayments(data);
 
         // Calculate total spent
-        const total = data.reduce((sum, payment) => sum + (payment.TotalPrice || payment.Amount || 0), 0);
+        const total = data.reduce((sum, payment) => sum + Number(payment.TotalPrice || payment.Amount || 0), 0);
         setTotalSpent(total);
       } else {
         setError('Failed to fetch payments');

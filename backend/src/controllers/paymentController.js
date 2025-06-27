@@ -90,13 +90,48 @@ exports.getMyPayments = async (req, res) => {
     if (reservationIds.length === 0) {
       return res.json([]); // No reservations, so no payments
     }
-    // Step 2: Get all payments for these reservations
+    // Step 2: Get all payments for these reservations, joined with Reservation, Vehicle, and type-specific tables
     const [payments] = await require('../db').query(
-      `SELECT * FROM Payment WHERE ReservationID IN (${reservationIds.map(() => '?').join(',')})`,
+      `SELECT 
+          Payment.*, 
+          Reservation.StartDate, 
+          Reservation.EndDate, 
+          Reservation.PickupLocation, 
+          Reservation.DropoffLocation, 
+          Vehicle.VehicleID, 
+          Vehicle.Type AS VehicleType, 
+          Vehicle.VehiclePic,
+          Car.Brand AS CarBrand, Car.Model AS CarModel,
+          Motorcycle.Brand AS MotorcycleBrand, Motorcycle.Type AS MotorcycleType,
+          boats.Brand AS BoatBrand, boats.BoatType,
+          Bicycle.Type AS BicycleType
+       FROM Payment
+       JOIN Reservation ON Payment.ReservationID = Reservation.ReservationID
+       JOIN Vehicle ON Reservation.VehicleID = Vehicle.VehicleID
+       LEFT JOIN Car ON Vehicle.VehicleID = Car.VehicleID
+       LEFT JOIN Motorcycle ON Vehicle.VehicleID = Motorcycle.VehicleID
+       LEFT JOIN boats ON Vehicle.VehicleID = boats.VehicleID
+       LEFT JOIN Bicycle ON Vehicle.VehicleID = Bicycle.VehicleID
+       WHERE Payment.ReservationID IN (${reservationIds.map(() => '?').join(',')})`,
       reservationIds
     );
-    res.json(payments);
-    console.log('[PAYMENT][USER] My payments:', payments);
+
+    // Build VehicleDetails for each payment
+    const paymentsWithDetails = payments.map(p => {
+      let VehicleDetails = '';
+      if (p.VehicleType === 'Car') {
+        VehicleDetails = `${p.CarBrand || ''} ${p.CarModel || ''}`.trim();
+      } else if (p.VehicleType === 'Motorcycle') {
+        VehicleDetails = `${p.MotorcycleBrand || ''} ${p.MotorcycleType || ''}`.trim();
+      } else if (p.VehicleType === 'boats') {
+        VehicleDetails = `${p.BoatBrand || ''} ${p.BoatType || ''}`.trim();
+      } else if (p.VehicleType === 'Bicycle') {
+        VehicleDetails = `${p.BicycleType || ''}`.trim();
+      }
+      return { ...p, VehicleDetails };
+    });
+    res.json(paymentsWithDetails);
+    console.log('[PAYMENT][USER] My payments:', paymentsWithDetails);
   } catch (error) {
     console.error('[PAYMENT][USER] Get my payments error:', error);
     res.status(500).json({ message: 'Error fetching your payments', error: error.message });

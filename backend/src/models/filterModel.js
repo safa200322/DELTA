@@ -1,6 +1,9 @@
 const db = require('../db');
 
 async function getFilteredVehicles(filters) {
+  // Log the incoming filters for debugging
+  console.log('getFilteredVehicles called with filters:', JSON.stringify(filters, null, 2));
+
   // Determine the table to join based on type
   let joinTable = 'Car';
   let tableFields = {
@@ -45,6 +48,11 @@ async function getFilteredVehicles(filters) {
   `;
   const values = [];
 
+  // If slug is present but vehicleId is not, treat slug as vehicleId
+  if (filters.slug && !filters.vehicleId) {
+    filters.vehicleId = filters.slug;
+  }
+
   if (filters.vehicleId) {
     query += ` AND Vehicle.VehicleID = ?`;
     values.push(filters.vehicleId);
@@ -67,6 +75,10 @@ async function getFilteredVehicles(filters) {
     query += ` AND Vehicle.Price <= ?`;
     values.push(filters.maxPrice);
   }
+
+  // Log the final query and values for debugging
+  console.log('Executing vehicle filter query:', query);
+  console.log('With values:', JSON.stringify(values));
 
   const [results] = await db.query(query, values);
   return results;
