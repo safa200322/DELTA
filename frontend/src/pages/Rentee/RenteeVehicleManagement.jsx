@@ -21,7 +21,7 @@ import {
 } from "reactstrap";
 import "../../styles/user-profile.css";
 import RenteeSidebar from "../../components/RenteeSidebar";
-import VehicleOwnerProfileEdit from "../../components/VehicleOwnerProfileEdit";
+import AddVehicleModal from "../../components/AddVehicleModal";
 
 const VehicleManagement = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -314,6 +314,15 @@ const VehicleManagement = () => {
       <h5 className="section-title mb-3" style={{ color: '#1976d2', fontWeight: '600' }}>
         <i className="ri-car-line me-2 text-primary"></i>
         My Vehicles ({vehicles.length})
+        <Button
+          color="primary"
+          size="sm"
+          className="ms-3 rounded-pill px-4 shadow-sm"
+          style={{ fontWeight: 500, fontSize: 15 }}
+          onClick={() => setAddVehicleModal(true)}
+        >
+          <i className="ri-add-line me-1"></i> Add Vehicle
+        </Button>
       </h5>
 
       {vehicles.length === 0 ? (
@@ -331,12 +340,6 @@ const VehicleManagement = () => {
           }}>
             Add Your First Vehicle
           </Button>
-          <VehicleOwnerProfileEdit
-            isOpen={addVehicleModal}
-            toggle={() => setAddVehicleModal(false)}
-            currentUser={currentUser}
-            onProfileUpdate={() => { setAddVehicleModal(false); fetchVehicles(); }}
-          />
         </Alert>
       ) : (
         <Row>
@@ -608,6 +611,14 @@ const VehicleManagement = () => {
           </Button>
         </ModalFooter>
       </Modal>
+
+      {/* Add Vehicle Modal */}
+      <AddVehicleModal
+        isOpen={addVehicleModal}
+        toggle={() => setAddVehicleModal(false)}
+        currentUser={currentUser}
+        onVehicleAdded={fetchVehicles}
+      />
     </div>
   );
 };
@@ -617,25 +628,24 @@ const RenteeVehicleManagement = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <section style={{ marginTop: "10px" }}>
+    <section style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e6f0fa 0%, #fafdff 100%)', padding: '0' }}>
       <Container fluid>
         <Row>
           <RenteeSidebar
             sidebarOpen={sidebarOpen}
             toggleSidebar={toggleSidebar}
+            style={{ background: '#185abc', minHeight: '100vh', padding: '32px 0 0 0', boxShadow: '2px 0 16px rgba(24,90,188,0.08)' }}
           />
 
-          <Col xs="12" md="9" lg="10" className="content-area">
-            <Row className="mt-4">
+          <Col xs="12" md="9" lg="10" className="content-area" style={{ padding: '48px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'transparent' }}>
+            <Row className="mt-4 justify-content-center">
               <Col lg="12">
                 <div className="placeholder-text mb-4">
-                  <h3 style={{ color: '#1976d2', fontWeight: '600' }}>Vehicle Management</h3>
-                  {/* <p>
-                    This section will display user profile and payment details
-                    in the future.
-                  </p> */}
+                  <h3 style={{ color: '#185abc', fontWeight: '700', letterSpacing: 1, marginBottom: 24 }}>Vehicle Management</h3>
                 </div>
-                <VehicleManagement />
+                <div style={{ width: '100%', maxWidth: 1200 }}>
+                  <VehicleManagement />
+                </div>
               </Col>
             </Row>
           </Col>

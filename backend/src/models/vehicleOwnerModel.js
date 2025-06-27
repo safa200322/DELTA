@@ -84,24 +84,26 @@ const VehicleOwnerModel = {
   },
 
   async getEarningsByOwner(ownerId) {
+    // 1. Find all vehicles owned by this owner
+    // 2. Find all reservations for those vehicles
+    // 3. Find all payments for those reservations
+    // 4. Sum the OwnerEarning field for all completed payments
     const query = `
       SELECT 
-        vo.TotalEarnings,
+        COALESCE(SUM(CASE WHEN p.Status = 'Paid' THEN p.OwnerEarning ELSE 0 END), 0) as TotalEarnings,
         COALESCE(SUM(CASE 
           WHEN MONTH(r.StartDate) = MONTH(CURRENT_DATE())
           AND YEAR(r.StartDate) = YEAR(CURRENT_DATE())
-          AND p.Status = 'Completed'
-          THEN p.TotalPrice 
+          AND p.Status = 'Paid'
+          THEN p.OwnerEarning 
           ELSE 0 
         END), 0) as MonthlyEarnings,
-        COUNT(CASE WHEN p.Status = 'Completed' THEN r.ReservationID END) as TotalRentals,
-        COALESCE(AVG(CASE WHEN p.Status = 'Completed' THEN p.TotalPrice END), 0) as AverageRental
-      FROM vehicleowner vo
-      LEFT JOIN Vehicle v ON vo.OwnerID = v.ownerID
+        COUNT(CASE WHEN p.Status = 'Paid' THEN r.ReservationID END) as TotalRentals,
+        COALESCE(AVG(CASE WHEN p.Status = 'Paid' THEN p.OwnerEarning END), 0) as AverageRental
+      FROM Vehicle v
       LEFT JOIN Reservation r ON v.VehicleID = r.VehicleID
       LEFT JOIN Payment p ON r.ReservationID = p.ReservationID
-      WHERE vo.OwnerID = ?
-      GROUP BY vo.OwnerID, vo.TotalEarnings
+      WHERE v.ownerID = ?
     `;
     const [rows] = await db.query(query, [ownerId]);
     return rows[0] || { TotalEarnings: 0, MonthlyEarnings: 0, TotalRentals: 0, AverageRental: 0 };
@@ -118,7 +120,7 @@ const VehicleOwnerModel = {
           ELSE 'Vehicle Rental'
         END AS title,
         DATE_FORMAT(r.EndDate, '%b %d, %Y') as date,
-        p.TotalPrice as amount
+        p.OwnerEarning as amount
       FROM Payment p
       JOIN Reservation r ON p.ReservationID = r.ReservationID
       JOIN Vehicle v ON r.VehicleID = v.VehicleID
@@ -126,7 +128,7 @@ const VehicleOwnerModel = {
       LEFT JOIN boats b ON v.VehicleID = b.VehicleID
       LEFT JOIN Bicycle bi ON v.VehicleID = bi.VehicleID
       LEFT JOIN Motorcycle m ON v.VehicleID = m.VehicleID
-      WHERE v.ownerID = ? AND p.Status = 'Completed'
+      WHERE v.ownerID = ? AND p.Status = 'Paid'
       ORDER BY r.EndDate DESC
       LIMIT ?
     `;
