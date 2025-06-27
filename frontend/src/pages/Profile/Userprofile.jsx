@@ -134,44 +134,66 @@ const ProfileOverview = () => {
   }
 
   return (
-    <div className="user-profile-page" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #e6f0fa 0%, #fafdff 100%)' }}>
-      {/* Sidebar */}
-      <div className="sidebar" style={{ background: '#185abc', minHeight: '100vh', padding: '32px 0 0 0', boxShadow: '2px 0 16px rgba(24,90,188,0.08)' }}>
-        <h3 className="sidebar-title" style={{ color: '#fff', fontWeight: 700, marginBottom: 32, textAlign: 'center', letterSpacing: 1, fontSize: 28, textShadow: '0 2px 8px rgba(0,0,0,0.10)' }}>Personal Info</h3>
-        <Nav vertical className="sidebar-nav" style={{ gap: 8 }}>
+    <div className="user-profile-page">
+      <div className="sidebar">
+        <h3 className="sidebar-title">User Profile</h3>
+        <Nav vertical className="sidebar-nav">
           <NavItem>
-            <NavLink to="/profile/ProfileOverview" className="nav-link" activeClassName="active" style={{ color: '#fff', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4, background: '#2563eb' }}>
-              <i className="ri-user-line me-2"></i> Profile Overview
+            <NavLink
+              to="/profile/ProfileOverview"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-user-line"></i> Profile Overview
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink to="/profile/MyRentals" className="nav-link" activeClassName="active" style={{ color: '#e3eafc', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4 }}>
-              <i className="ri-briefcase-line me-2"></i> My Rentals
+            <NavLink
+              to="/profile/MyRentals"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-briefcase-line"></i> My Rentals
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink to="/profile/MyPayments" className="nav-link" activeClassName="active" style={{ color: '#e3eafc', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4 }}>
-              <i className="ri-calendar-line me-2"></i> Payments & Wallet
+            <NavLink
+              to="/profile/MyPayments"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-calendar-line"></i> Payments & Wallet
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink to="/profile/MyReviews" className="nav-link" activeClassName="active" style={{ color: '#e3eafc', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4 }}>
-              <i className="ri-file-text-line me-2"></i> My Reviews
+            <NavLink
+              to="/profile/MyReviews"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-file-text-line"></i> My Reviews
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink to="/profile/NotificationsProfile" className="nav-link" activeClassName="active" style={{ color: '#e3eafc', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4 }}>
-              <i className="ri-settings-3-line me-2"></i> Notifications
+            <NavLink
+              to="/profile/NotificationsProfile"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-settings-3-line"></i> Notifications
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink to="/profile/AccountSettings" className="nav-link" activeClassName="active" style={{ color: '#e3eafc', fontWeight: 500, borderRadius: 8, padding: '10px 20px', marginBottom: 4 }}>
-              <i className="ri-notification-3-fill me-2"></i> Account Settings
+            <NavLink
+              to="/profile/AccountSettings"
+              className="nav-link"
+              activeClassName="active"
+            >
+              <i className="ri-notification-3-fill"></i> Account Settings
             </NavLink>
           </NavItem>
         </Nav>
       </div>
-
       {/* Main Content */}
       <div className="main-content" style={{ padding: '48px 0', display: 'flex', justifyContent: 'center', alignItems: 'flex-start' }}>
         <Container fluid>
